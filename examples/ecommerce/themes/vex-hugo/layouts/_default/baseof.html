@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="{{ with .Site.LanguageCode }}{{ . }}{{ else }}en-US{{ end }}">
+    {{- partial "head.html" . -}}
+    <body id="body">
+        {{- partial "preloader.html" . -}}
+        {{- partial "header.html" . -}}
+        {{- block "main" . }}{{- end }}
+        {{- partial "footer.html" . -}}
+
+
+
+  
+
+        <script>
+            window.flagshipVariables = '{{"{{"}} .flagship.variables {{"}}"}}'
+            var parser = new DOMParser;
+            var dom = parser.parseFromString('<!doctype html><body>' + window.flagshipVariables, 'text/html');
+            window.flagshipVariables = JSON.parse(dom.body.textContent);
+        </script>
+    </body>
+</html>

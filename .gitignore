@@ -1,0 +1,7 @@
+examples/ecommerce/public
+examples/ecommerce/resources/_gen/*
+examples/ecommerce/themes/vex-hugo/_gen
+examples/goals
+
+cover.*
+coverage.out

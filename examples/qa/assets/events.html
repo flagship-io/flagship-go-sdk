@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <base href="/static/" />
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Flagship Go SDK Web demo</a>
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-toggle="collapse"
+        data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="index.html">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="events.html">Events</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container mt-5" id="app">
+      <h2 class="mt-5">
+        Send Hit
+      </h2>
+      <form v-on:submit.prevent="sendHit()">
+        <div class="form-group">
+          <label>Hit type</label>
+          <select class="form-control" v-model="hit.t" @change="changeType">
+            <option v-for="t in hitTypes" :key="t" :value="t">
+              {{t}}
+            </option>
+          </select>
+        </div>
+
+        <div v-if="hit.t == 'EVENT'" class="form-group">
+          <label>Event Action</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Event Action"
+            v-model="hit.ea"
+          />
+        </div>
+
+        <div v-if="hit.t == 'EVENT'" class="form-group">
+          <label>Event Value</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Event Value"
+            v-model.number="hit.ev"
+          />
+        </div>
+
+        <div v-if="['TRANSACTION', 'ITEM'].includes(hit.t)" class="form-group">
+          <label>Transaction ID</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Transaction ID"
+            v-model="hit.tid"
+          />
+        </div>
+
+        <div v-if="['TRANSACTION'].includes(hit.t)" class="form-group">
+          <label>Transaction Affiliation</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Transaction Affiliation"
+            v-model="hit.ta"
+          />
+        </div>
+
+        <div v-if="['TRANSACTION'].includes(hit.t)" class="form-group">
+          <label>Transaction Revenue</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Transaction Revenue"
+            v-model.number="hit.tr"
+          />
+        </div>
+
+        <div v-if="['ITEM'].includes(hit.t)" class="form-group">
+          <label>Item Name</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Item Name"
+            v-model="hit.in"
+          />
+        </div>
+
+        <div v-if="['ITEM'].includes(hit.t)" class="form-group">
+          <label>Item Code</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Item Code"
+            v-model="hit.ic"
+          />
+        </div>
+
+        <div v-if="['ITEM'].includes(hit.t)" class="form-group">
+          <label>Item Quantity</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Item Quantity"
+            v-model.number="hit.iq"
+          />
+        </div>
+
+        <div class="alert alert-danger" v-if="eventError">
+          {{eventError.error}}
+        </div>
+        <div class="alert alert-success" v-if="eventOk">
+          Hit sent OK !
+        </div>
+
+        <button type="submit" class="btn btn-info">Send event</button>
+      </form>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+      integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,36 @@
+FROM golang:1-alpine as build-env
+
+ARG HUGO_VERSION=0.58.1
+ENV HUGO_VERSION=$HUGO_VERSION
+
+RUN wget https://github.com/gohugoio/hugo/releases/download/v${HUGO_VERSION}/hugo_${HUGO_VERSION}_Linux-64bit.tar.gz
+RUN tar -xvzf hugo_${HUGO_VERSION}_Linux-64bit.tar.gz -C /usr/local/bin/ && chmod 755 /usr/local/bin/hugo
+
+WORKDIR /go/src/github.com/abtasty/flagship-go-sdk/
+
+# COPY the source code as the last step
+COPY . .
+
+WORKDIR /go/src/github.com/abtasty/flagship-go-sdk/examples
+
+# Get dependancies - will also be cached if we won't change mod/sum
+RUN go mod download
+# COPY the source code as the last step
+COPY . .
+
+RUN hugo
+
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/app ecommerce/main.go
+
+# Run the binary
+FROM alpine
+
+EXPOSE 8080
+
+COPY --from=build-env /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/app /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/app
+COPY --from=build-env /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/public /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/public
+
+WORKDIR /go/src/github.com/abtasty/flagship-go-sdk/examples/ecommerce/
+
+CMD ["./app"]
