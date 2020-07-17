@@ -23,7 +23,7 @@ func GetRandomAllocation(visitorID string, variationGroup *VariationGroup) (*Var
 	summedAlloc := 0
 	for _, v := range variationGroup.Variations {
 		summedAlloc += v.Allocation
-		if int(z) <= summedAlloc {
+		if int(z) < summedAlloc {
 			return v, nil
 		}
 	}
