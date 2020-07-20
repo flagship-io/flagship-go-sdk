@@ -157,6 +157,6 @@ func TestVisitorVGVariationChange(t *testing.T) {
 
 	t.Logf("Count %d visitor that changed var between vg", visChanged)
 	if visChanged < 100 {
-		t.Errorf("Expecting at least 10 vis that had different var between vg. Got %d", visChanged)
+		t.Errorf("Expecting at least 100 vis that had different var between vg. Got %d", visChanged)
 	}
 }
