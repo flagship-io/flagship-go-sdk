@@ -120,7 +120,7 @@
         Then, get a Flag Value
       </h2>
       <form v-on:submit.prevent="getFlag()">
-        <div class="row" style="align-items:center">
+        <div class="row" style="align-items: center;">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>
@@ -145,6 +145,8 @@
                 <option value="bool">bool</option>
                 <option value="number">number</option>
                 <option value="string">string</option>
+                <option value="object">object</option>
+                <option value="array">array</option>
               </select>
             </div>
           </div>
@@ -190,7 +192,7 @@
         Get modification information
       </h2>
       <form v-on:submit.prevent="getFlagInfo()">
-        <div class="row" style="align-items:center">
+        <div class="row" style="align-items: center;">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>
@@ -203,7 +205,10 @@
             </div>
           </div>
         </div>
-        <div class="alert alert-warning mt-3 mb-3" v-if="flagInfoOk && flagInfoOk.error">
+        <div
+          class="alert alert-warning mt-3 mb-3"
+          v-if="flagInfoOk && flagInfoOk.error"
+        >
           {{flagInfoOk.error}}
         </div>
 
