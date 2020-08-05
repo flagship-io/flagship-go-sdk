@@ -44,7 +44,7 @@
 
     <div class="container mt-5 mb-5" id="app">
       <h2>
-        First, set your Flagship Environment ID
+        First, set your Flagship Environment ID & API Key
       </h2>
 
       <form v-on:submit.prevent="setEnv()">
@@ -58,6 +58,18 @@
           />
           <small id="emailHelp" class="form-text text-muted"
             >Set your Flagship Environment ID first.</small
+          >
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="API Key"
+            v-model="apiKey"
+          />
+          <small class="form-text text-muted"
+            >Set your API Key.</small
           >
         </div>
         <div class="form-check mb-3">
@@ -120,7 +132,7 @@
         Then, get a Flag Value
       </h2>
       <form v-on:submit.prevent="getFlag()">
-        <div class="row" style="align-items:center">
+        <div class="row" style="align-items: center;">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>
@@ -190,7 +202,7 @@
         Get modification information
       </h2>
       <form v-on:submit.prevent="getFlagInfo()">
-        <div class="row" style="align-items:center">
+        <div class="row" style="align-items: center;">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>
@@ -203,7 +215,10 @@
             </div>
           </div>
         </div>
-        <div class="alert alert-warning mt-3 mb-3" v-if="flagInfoOk && flagInfoOk.error">
+        <div
+          class="alert alert-warning mt-3 mb-3"
+          v-if="flagInfoOk && flagInfoOk.error"
+        >
           {{flagInfoOk.error}}
         </div>
 

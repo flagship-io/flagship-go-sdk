@@ -412,7 +412,8 @@ func TestActivateModificationCache(t *testing.T) {
 	}))
 
 	client, _ := Create(&Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	})
 	client.cacheManager = cache
 

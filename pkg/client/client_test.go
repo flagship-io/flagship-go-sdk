@@ -18,15 +18,16 @@ import (
 
 var testEnvID = "test_env_id"
 var vID = "test_visitor_id"
+var realEnvID = "blvo2kijq6pg023l8edg"
+var testAPIKey = "test_api_key"
 
 func createClient() *Client {
 	client, _ := Create(&Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	})
 	return client
 }
-
-var realEnvID = "blvo2kijq6pg023l8edg"
 
 func TestCreate(t *testing.T) {
 	options := &Options{
@@ -34,6 +35,12 @@ func TestCreate(t *testing.T) {
 	}
 
 	client, err := Create(options)
+
+	assert.NotEqual(t, nil, err)
+
+	options.APIKey = testAPIKey
+
+	client, err = Create(options)
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, testEnvID, client.envID)
@@ -45,7 +52,8 @@ func TestCreate(t *testing.T) {
 
 func TestCreateBucketing(t *testing.T) {
 	options := &Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	}
 	options.BuildOptions(WithBucketing())
 	client, err := Create(options)
@@ -91,7 +99,8 @@ func TestCreateBucketing(t *testing.T) {
 
 func TestCreateAPIVersion(t *testing.T) {
 	options := &Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	}
 
 	options.BuildOptions(WithDecisionAPI(decisionapi.APIVersion(2), decisionapi.APIKey("testapi")))
@@ -110,7 +119,8 @@ func TestCreateAPIVersion(t *testing.T) {
 
 func TestCreateCache(t *testing.T) {
 	options := &Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	}
 
 	get := func(visitorID string) (map[string]*cache.CampaignCache, error) {
@@ -143,17 +153,10 @@ func TestCreateCache(t *testing.T) {
 func TestInit(t *testing.T) {
 	client := createClient()
 
-	if client.envID != testEnvID {
-		t.Error("Wrong env id")
-	}
-
-	if client.decisionClient == nil {
-		t.Error("decision API Client has not been initialized")
-	}
-
-	if client.trackingAPIClient == nil {
-		t.Error("tracking api client has not been initialized")
-	}
+	assert.Equal(t, testEnvID, client.envID)
+	assert.Equal(t, testAPIKey, client.apiKey)
+	assert.NotEqual(t, nil, client.decisionClient)
+	assert.NotEqual(t, nil, client.trackingAPIClient)
 }
 
 func TestCreateVisitor(t *testing.T) {

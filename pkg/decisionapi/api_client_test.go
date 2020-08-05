@@ -8,6 +8,7 @@ import (
 
 var testEnvID = "env_id_test"
 var realEnvID = "blvo2kijq6pg023l8edg"
+var testAPIKey = "api_key_test"
 
 func TestNewAPIClient(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID)
@@ -25,7 +26,7 @@ func TestNewAPIClientParams(t *testing.T) {
 	client, _ := NewAPIClient(
 		testEnvID,
 		APIVersion(1),
-		APIKey("api_key"),
+		APIKey(testAPIKey),
 		Timeout(10),
 		Retries(12))
 
@@ -37,8 +38,8 @@ func TestNewAPIClientParams(t *testing.T) {
 		t.Error("Api url should be set to default")
 	}
 
-	if client.apiKey != "api_key" {
-		t.Errorf("Wrong api key. Expected %v, got %v", "api_key", client.apiKey)
+	if client.apiKey != testAPIKey {
+		t.Errorf("Wrong api key. Expected %v, got %v", testAPIKey, client.apiKey)
 	}
 
 	if client.retries != 12 {
@@ -58,7 +59,7 @@ func TestNewAPIClientParams(t *testing.T) {
 	client, _ = NewAPIClient(
 		testEnvID,
 		APIVersion(2),
-		APIKey("api_key"),
+		APIKey(testAPIKey),
 		Timeout(10),
 		Retries(12))
 
