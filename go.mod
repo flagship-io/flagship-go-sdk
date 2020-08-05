@@ -7,6 +7,7 @@ require (
 	github.com/go-redis/redis/v8 v8.0.0-beta.5
 	github.com/golang/protobuf v1.3.4 // indirect
 	github.com/prologic/bitcask v0.3.5
+	github.com/rs/xid v1.2.1
 	github.com/sirupsen/logrus v1.4.2
 	github.com/stretchr/testify v1.5.1
 	github.com/twmb/murmur3 v1.1.3
