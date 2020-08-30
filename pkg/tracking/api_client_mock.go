@@ -12,7 +12,6 @@ import (
 
 // MockAPIClient represents a fake API client informations
 type MockAPIClient struct {
-	envID      string
 	shouldFail bool
 }
 

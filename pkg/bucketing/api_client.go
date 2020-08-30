@@ -73,6 +73,10 @@ func NewAPIClient(envID string, params ...func(*APIClient)) *APIClient {
 		res.url = defaultAPIURL
 	}
 
+	if res.timeout == 0 {
+		res.timeout = defaultTimeout
+	}
+
 	res.httpRequest = utils.NewHTTPClient(res.url, utils.HTTPOptions{
 		Timeout: res.timeout,
 		Headers: headers,
@@ -86,6 +90,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) *APIClient {
 func (r APIClient) GetConfiguration() (*Configuration, error) {
 	path := fmt.Sprintf("/%s/bucketing.json", r.envID)
 
+	apiLogger.Info("Calling bucketing file to get configuration")
 	resp, err := r.httpRequest.Call(path, "GET", nil, nil)
 	if err != nil {
 		return nil, err

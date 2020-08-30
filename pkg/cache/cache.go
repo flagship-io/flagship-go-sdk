@@ -50,6 +50,7 @@ func InitManager(optionsFunc ...OptionBuilder) (manager Manager, err error) {
 		o(options)
 	}
 
+	cacheLogger.Infof("Loading cache manager of type %s", options.cacheType)
 	switch options.cacheType {
 	case Local:
 		manager, err = initLocalDBManager(options.LocalOptions)

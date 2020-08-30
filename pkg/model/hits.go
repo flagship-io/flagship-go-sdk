@@ -100,7 +100,7 @@ func (b *BaseHit) validateBase() []error {
 
 // ComputeQueueTime computes hit queue time
 func (b *BaseHit) ComputeQueueTime() {
-	b.QueueTime = int64((time.Now().Sub(b.CreatedAt)).Milliseconds())
+	b.QueueTime = int64((time.Since(b.CreatedAt)).Milliseconds())
 }
 
 // PageHit represents a screenview hit for the datacollect
@@ -229,12 +229,6 @@ func (b *ActivationHit) SetBaseInfos(envID string, visitorID string) {
 	b.VisitorID = visitorID
 }
 
-func (b *ActivationHit) getBaseHit() BaseHit {
-	return BaseHit{
-		Type: ACTIVATION,
-	}
-}
-
 // Validate checks that the hit is well formed
 func (b *ActivationHit) Validate() []error {
 	errorsList := []error{}
@@ -255,7 +249,7 @@ func (b *ActivationHit) Validate() []error {
 
 // ComputeQueueTime computes hit queue time
 func (b *ActivationHit) ComputeQueueTime() {
-	b.QueueTime = int64((time.Now().Sub(b.CreatedAt)).Seconds())
+	b.QueueTime = int64((time.Since(b.CreatedAt)).Seconds())
 }
 
 // Event represents a context event hit for Flagship
@@ -283,15 +277,13 @@ func (b *Event) Validate() []error {
 	}
 
 	contextErrs := b.Data.Validate()
-	for _, e := range contextErrs {
-		errorsList = append(errorsList, e)
-	}
+	errorsList = append(errorsList, contextErrs...)
 	return errorsList
 }
 
 // ComputeQueueTime computes hit queue time
 func (b *Event) ComputeQueueTime() {
-	b.QueueTime = int64((time.Now().Sub(b.CreatedAt)).Seconds())
+	b.QueueTime = int64((time.Since(b.CreatedAt)).Seconds())
 }
 
 // BatchHit represents a batch of hits for the datacollect

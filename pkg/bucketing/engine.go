@@ -69,12 +69,11 @@ func (b *Engine) startTicker() {
 	}
 	b.ticker = time.NewTicker(b.pollingInterval)
 
-	for {
-		select {
-		case <-b.ticker.C:
-			logger.Info("Bucketing engine ticked, loading configuration")
-			b.Load()
-			return
+	for range b.ticker.C {
+		logger.Info("Bucketing engine ticked, loading configuration")
+		err := b.Load()
+		if err != nil {
+			logger.Warnf("Bucketing engine load failed: %v", err)
 		}
 	}
 }

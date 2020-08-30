@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
 
@@ -15,7 +14,6 @@ import (
 	"github.com/abtasty/flagship-go-sdk/pkg/utils"
 )
 
-const defaultTimeout = 2 * time.Second
 const defaultAPIURLTracking = "https://ariane.abtasty.com"
 
 var apiLogger = logging.CreateLogger("DataCollect API")
@@ -23,10 +21,7 @@ var apiLogger = logging.CreateLogger("DataCollect API")
 // APIClient represents the API client informations
 type APIClient struct {
 	urlTracking        string
-	urlDecision        string
 	envID              string
-	decisionTimeout    time.Duration
-	apiKey             string
 	httpClientTracking *utils.HTTPClient
 	decisionAPIClient  *decisionapi.APIClient
 }
@@ -67,10 +62,8 @@ func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 
 	errs := hit.Validate()
 	if len(errs) > 0 {
-		errorStrings := []string{}
 		for _, e := range errs {
 			apiLogger.Errorf("Hit validation error : %v", e)
-			errorStrings = append(errorStrings, e.Error())
 		}
 		return errors.New("Hit validation failed")
 	}

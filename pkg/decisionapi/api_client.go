@@ -97,6 +97,10 @@ func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) 
 		res.url = defaultV1APIURL
 	}
 
+	if res.timeout == 0 {
+		res.timeout = defaultTimeout
+	}
+
 	res.httpClient = utils.NewHTTPClient(res.url, utils.HTTPOptions{
 		Timeout: res.timeout,
 		Headers: headers,

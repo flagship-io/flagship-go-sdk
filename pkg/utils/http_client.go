@@ -86,10 +86,8 @@ func (r *HTTPClient) Call(path, method string, body io.Reader, headers map[strin
 		req.Header.Add(k, v)
 	}
 
-	if headers != nil {
-		for k, v := range headers {
-			req.Header.Add(k, v)
-		}
+	for k, v := range headers {
+		req.Header.Add(k, v)
 	}
 
 	var resp *http.Response

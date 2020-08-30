@@ -37,6 +37,7 @@ func WithRedisOptions(redisOptions RedisOptions) func(options *Options) {
 }
 
 func initRedisManager(options RedisOptions) (Manager, error) {
+	redisLogger.Info("Connecting to server...")
 	rdb = redis.NewClient(&redis.Options{
 		Addr:      options.Host,
 		Username:  options.Username,
@@ -66,6 +67,7 @@ func (m *RedisManager) Set(visitorID string, campaignCache map[string]*CampaignC
 		return err
 	}
 
+	redisLogger.Info("Setting visitor cache")
 	cmd := m.client.Set(ctx, visitorID, string(data), 0)
 	_, err = cmd.Result()
 
@@ -78,6 +80,7 @@ func (m *RedisManager) Get(visitorID string) (cache map[string]*CampaignCache, e
 		return nil, errors.New("Redis cache manager not initialized")
 	}
 
+	redisLogger.Info("Getting visitor cache")
 	cmd := m.client.Get(ctx, visitorID)
 	data, err := cmd.Bytes()
 

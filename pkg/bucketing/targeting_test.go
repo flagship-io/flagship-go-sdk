@@ -24,7 +24,7 @@ func testTargetingString(operator TargetingOperator, targetingValue string, valu
 	match, err := targetingMatchOperatorString(operator, targetingValue, value)
 
 	if ((err != nil && !shouldRaiseError) || (shouldRaiseError && err == nil)) || (match != shouldMatch) {
-		t.Errorf("Targeting number %v not working - tv : %v, v: %v, match : %v, err: %v", operator, targetingValue, value, match, err)
+		t.Errorf("Targeting string %v not working - tv : %v, v: %v, match : %v, err: %v", operator, targetingValue, value, match, err)
 	}
 }
 

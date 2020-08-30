@@ -47,7 +47,7 @@ func (m *LocalDBManager) Set(visitorID string, campaignCache map[string]*Campaig
 	cache, err := json.Marshal(campaignCache)
 
 	if err == nil {
-		m.db.Put([]byte(visitorID), cache)
+		err = m.db.Put([]byte(visitorID), cache)
 	}
 
 	return err

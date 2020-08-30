@@ -53,12 +53,10 @@ func targetingMatchOperator(operator TargetingOperator, targetingValue interface
 		targetingValueCasted := targetingValue.(string)
 		contextValueCasted := contextValue.(string)
 		match, err = targetingMatchOperatorString(operator, targetingValueCasted, contextValueCasted)
-		break
 	case bool:
 		targetingValueCasted := targetingValue.(bool)
 		contextValueCasted := contextValue.(bool)
 		match, err = targetingMatchOperatorBool(operator, targetingValueCasted, contextValueCasted)
-		break
 	case int:
 		targetingValueCasted := targetingValue.(int)
 		contextValueCasted := contextValue.(int)
@@ -104,9 +102,9 @@ func targetingMatchOperatorString(operator TargetingOperator, targetingValue str
 	case GREATER_THAN_OR_EQUALS:
 		return strings.ToLower(contextValue) >= strings.ToLower(targetingValue), nil
 	case EQUALS:
-		return strings.ToLower(contextValue) == strings.ToLower(targetingValue), nil
+		return strings.EqualFold(strings.ToLower(contextValue), strings.ToLower(targetingValue)), nil
 	case NOT_EQUALS:
-		return strings.ToLower(contextValue) != strings.ToLower(targetingValue), nil
+		return !strings.EqualFold(strings.ToLower(contextValue), strings.ToLower(targetingValue)), nil
 	case STARTS_WITH:
 		return strings.HasPrefix(strings.ToLower(contextValue), strings.ToLower(targetingValue)), nil
 	case ENDS_WITH:

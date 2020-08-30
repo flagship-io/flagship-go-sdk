@@ -328,18 +328,16 @@ func (v *Visitor) ActivateCacheModification(key string) (err error) {
 			return err
 		}
 
-		if cacheCampaigns != nil {
-			for _, c := range cacheCampaigns {
-				for _, k := range c.FlagKeys {
-					if k == key {
-						// Key found in cache. Activating it now
-						v.trackingAPIClient.ActivateCampaign(model.ActivationHit{
-							VariationGroupID: c.VariationGroupID,
-							VariationID:      c.VariationID,
-							VisitorID:        v.ID,
-						})
-						return nil
-					}
+		for _, c := range cacheCampaigns {
+			for _, k := range c.FlagKeys {
+				if k == key {
+					// Key found in cache. Activating it now
+					err = v.trackingAPIClient.ActivateCampaign(model.ActivationHit{
+						VariationGroupID: c.VariationGroupID,
+						VariationID:      c.VariationID,
+						VisitorID:        v.ID,
+					})
+					return err
 				}
 			}
 		}

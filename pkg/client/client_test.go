@@ -48,7 +48,7 @@ func TestCreateBucketing(t *testing.T) {
 		EnvID: testEnvID,
 	}
 	options.BuildOptions(WithBucketing())
-	client, err := Create(options)
+	_, err := Create(options)
 
 	assert.NotNil(t, err)
 
@@ -62,7 +62,7 @@ func TestCreateBucketing(t *testing.T) {
 	options.EnvID = realEnvID
 	options.BuildOptions(WithBucketing(bucketing.PollingInterval(2 * time.Second)))
 
-	client, err = Create(options)
+	client, err := Create(options)
 	assert.Nil(t, err)
 	assert.Equal(t, realEnvID, client.envID)
 
