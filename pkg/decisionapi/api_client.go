@@ -106,7 +106,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) 
 }
 
 // GetModifications gets modifications from Decision API
-func (r APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
 	b, err := json.Marshal(model.APIClientRequest{
 		VisitorID:  visitorID,
 		Context:    context,
@@ -140,7 +140,7 @@ func (r APIClient) GetModifications(visitorID string, context map[string]interfa
 }
 
 // ActivateCampaign activate a campaign / variation id to the Decision API
-func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
+func (r *APIClient) ActivateCampaign(request model.ActivationHit) error {
 	request.EnvironmentID = r.envID
 
 	errs := request.Validate()
@@ -174,7 +174,7 @@ func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
 }
 
 // SendEvent sends an event to flagship Event endpoint
-func (r APIClient) SendEvent(request model.Event) error {
+func (r *APIClient) SendEvent(request model.Event) error {
 	errs := request.Validate()
 
 	if len(errs) > 0 {

@@ -56,7 +56,7 @@ func NewAPIClient(envID string, params ...func(r *decisionapi.APIClient)) (*APIC
 }
 
 // SendHit sends a tracking hit to the Data Collect API
-func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
+func (r *APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 	if hit == nil {
 		err := errors.New("Hit should not be empty")
 		apiLogger.Error(err.Error(), err)
@@ -97,11 +97,11 @@ func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 }
 
 // ActivateCampaign activate a campaign / variation id to the Decision API
-func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
+func (r *APIClient) ActivateCampaign(request model.ActivationHit) error {
 	return r.decisionAPIClient.ActivateCampaign(request)
 }
 
 // SendEvent sends an event to the Flagship event collection
-func (r APIClient) SendEvent(request model.Event) error {
+func (r *APIClient) SendEvent(request model.Event) error {
 	return r.decisionAPIClient.SendEvent(request)
 }

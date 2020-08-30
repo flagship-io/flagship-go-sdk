@@ -19,6 +19,6 @@ func NewAPIClientMock(envID string, responseMock *Configuration, statusCode int)
 }
 
 // GetConfiguration mocks a configuration
-func (r APIClientMock) GetConfiguration() (*Configuration, error) {
+func (r *APIClientMock) GetConfiguration() (*Configuration, error) {
 	return r.responseMock, nil
 }

@@ -20,7 +20,7 @@ type Engine struct {
 	apiClientOptions []func(*APIClient)
 	cacheManager     cache.Manager
 	envID            string
-	configMux        sync.Mutex
+	configMux        sync.RWMutex
 	ticker           *time.Ticker
 }
 
@@ -51,7 +51,9 @@ func NewEngine(envID string, cacheManager cache.Manager, params ...func(*Engine)
 		param(engine)
 	}
 
+	engine.configMux.Lock()
 	engine.apiClient = NewAPIClient(envID, engine.apiClientOptions...)
+	engine.configMux.Unlock()
 
 	err := engine.Load()
 
@@ -79,9 +81,17 @@ func (b *Engine) startTicker() {
 	}
 }
 
+func (b *Engine) getConfig() *Configuration {
+	b.configMux.Lock()
+	defer b.configMux.Unlock()
+	return b.config
+}
+
 // Load loads the env configuration in cache
 func (b *Engine) Load() error {
+	b.configMux.Lock()
 	newConfig, err := b.apiClient.GetConfiguration()
+	b.configMux.Unlock()
 
 	if err != nil {
 		logger.Error("Error when loading environment configuration", err)
@@ -97,7 +107,7 @@ func (b *Engine) Load() error {
 
 // GetModifications gets modifications from Decision API
 func (b *Engine) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
-	if b.config == nil {
+	if b.getConfig() == nil {
 		logger.Info("Configuration not loaded. Loading it now")
 		err := b.Load()
 		if err != nil {
@@ -111,7 +121,7 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 		Campaigns: []model.Campaign{},
 	}
 
-	if b.config.Panic {
+	if b.getConfig().Panic {
 		logger.Info("Environment is in panic mode. Skipping all campaigns")
 		return resp, nil
 	}
@@ -124,7 +134,7 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 		}
 	}
 
-	for _, c := range b.config.Campaigns {
+	for _, c := range b.getConfig().Campaigns {
 		var matchedVg *VariationGroup
 		for _, vg := range c.VariationGroups {
 			matched, err := TargetingMatch(vg, visitorID, context)

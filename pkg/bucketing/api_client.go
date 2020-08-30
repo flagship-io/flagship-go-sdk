@@ -83,7 +83,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) *APIClient {
 }
 
 // GetConfiguration gets an environment configuration from bucketing file
-func (r APIClient) GetConfiguration() (*Configuration, error) {
+func (r *APIClient) GetConfiguration() (*Configuration, error) {
 	path := fmt.Sprintf("/%s/bucketing.json", r.envID)
 
 	resp, err := r.httpRequest.Call(path, "GET", nil, nil)

@@ -157,14 +157,17 @@ func TestPollingPanic(t *testing.T) {
 		}},
 	}
 
+	engine.configMux.Lock()
 	engine.apiClient = NewAPIClientMock(testEnvID, config, 200)
+	engine.configMux.Unlock()
+
 	time.Sleep(1100 * time.Millisecond)
 
-	assert.Equal(t, 1, len(engine.config.Campaigns))
-	assert.Equal(t, false, engine.config.Panic)
+	assert.Equal(t, 1, len(engine.getConfig().Campaigns))
+	assert.Equal(t, false, engine.getConfig().Panic)
 
 	// Setting panic
-	config.Panic = true
+	engine.getConfig().Panic = true
 
 	time.Sleep(1100 * time.Millisecond)
 
