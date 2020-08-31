@@ -68,8 +68,9 @@ func Create(f *Options) (*Client, error) {
 		client.cacheManager = cacheManager
 	}
 
+	optionsWithKey := append(f.decisionAPIOptions, decisionapi.APIKey(f.APIKey))
 	if client.trackingAPIClient == nil {
-		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, f.decisionAPIOptions...)
+		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, optionsWithKey...)
 	}
 
 	if client.decisionClient == nil {
@@ -80,7 +81,6 @@ func Create(f *Options) (*Client, error) {
 				clientLogger.Error("Got error when creating bucketing engine", err)
 			}
 		} else {
-			optionsWithKey := append(f.decisionAPIOptions, decisionapi.APIKey(client.apiKey))
 			client.decisionClient, err = decision.NewAPIClient(client.envID, optionsWithKey...)
 			if err != nil {
 				clientLogger.Error("Got error when creating Decision API engine", err)
