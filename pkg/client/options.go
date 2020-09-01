@@ -9,6 +9,7 @@ import (
 // Options represent the options passed to the Flagship SDK client
 type Options struct {
 	EnvID               string
+	APIKey              string
 	decisionMode        DecisionMode
 	bucketingOptions    []func(*bucketing.Engine)
 	decisionAPIOptions  []func(*decisionapi.APIClient)

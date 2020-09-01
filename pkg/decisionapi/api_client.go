@@ -35,7 +35,7 @@ type APIVersionNumber int
 const (
 	// V1 is Decision API V1
 	V1 = iota + 1
-	// V2 is Decision API V1
+	// V2 is Decision API V2
 	V2
 )
 
@@ -85,16 +85,16 @@ func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) 
 		param(&res)
 	}
 
+	if res.url == "" {
+		res.url = defaultV2APIURL
+	}
+
 	if res.url == defaultV2APIURL && res.apiKey == "" {
 		return nil, errors.New("API Key missing for Decision API V2")
 	}
 
 	if res.apiKey != "" {
 		headers["x-api-key"] = res.apiKey
-	}
-
-	if res.url == "" {
-		res.url = defaultV1APIURL
 	}
 
 	res.httpClient = utils.NewHTTPClient(res.url, utils.HTTPOptions{

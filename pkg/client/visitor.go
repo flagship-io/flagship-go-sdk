@@ -3,7 +3,6 @@ package client
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/abtasty/flagship-go-sdk/pkg/cache"
@@ -45,7 +44,6 @@ func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 	}()
 
 	errs := newContext.Validate()
-	log.Println(v)
 	if len(errs) > 0 {
 		errorStrings := []string{}
 		for _, e := range errs {
@@ -55,7 +53,6 @@ func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 		return fmt.Errorf("Invalid context : %s", strings.Join(errorStrings, ", "))
 	}
 
-	log.Println(v)
 	v.Context = newContext
 	return nil
 }
@@ -271,6 +268,66 @@ func (v *Visitor) GetModificationNumber(key string, defaultValue float64, activa
 	if !ok {
 		visitorLogger.Debug(fmt.Sprintf("Key %s value %v is not of type float. Fallback to default value", key, val))
 		return defaultValue, fmt.Errorf("Key value cast error : expected float64, got %v", val)
+	}
+
+	return castVal, nil
+}
+
+// GetModificationObject get a modification object as map[string]interface{} by its key
+func (v *Visitor) GetModificationObject(key string, defaultValue map[string]interface{}, activate bool) (castVal map[string]interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = utils.HandleRecovered(r, visitorLogger)
+		}
+	}()
+
+	val, err := v.getModification(key, activate)
+
+	if err != nil {
+		visitorLogger.Debug(fmt.Sprintf("Error occurred when getting flag value : %v. Fallback to default value", err))
+		return defaultValue, err
+	}
+
+	if val == nil {
+		visitorLogger.Info("Flag value is null in Flagship. Fallback to default value")
+		return defaultValue, nil
+	}
+
+	castVal, ok := val.(map[string]interface{})
+
+	if !ok {
+		visitorLogger.Debug(fmt.Sprintf("Key %s value %v is not of type map[string]interface{}. Fallback to default value", key, val))
+		return defaultValue, fmt.Errorf("Key value cast error : expected map[string]interface{}, got %v", val)
+	}
+
+	return castVal, nil
+}
+
+// GetModificationArray get a modification array as []interface{} by its key
+func (v *Visitor) GetModificationArray(key string, defaultValue []interface{}, activate bool) (castVal []interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			err = utils.HandleRecovered(r, visitorLogger)
+		}
+	}()
+
+	val, err := v.getModification(key, activate)
+
+	if err != nil {
+		visitorLogger.Debug(fmt.Sprintf("Error occurred when getting flag value : %v. Fallback to default value", err))
+		return defaultValue, err
+	}
+
+	if val == nil {
+		visitorLogger.Info("Flag value is null in Flagship. Fallback to default value")
+		return defaultValue, nil
+	}
+
+	castVal, ok := val.([]interface{})
+
+	if !ok {
+		visitorLogger.Debug(fmt.Sprintf("Key %s value %v is not of type []interface{}. Fallback to default value", key, val))
+		return defaultValue, fmt.Errorf("Key value cast error : expected []interface{}, got %v", val)
 	}
 
 	return castVal, nil
