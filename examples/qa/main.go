@@ -12,6 +12,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+
+	"github.com/abtasty/flagship-go-sdk/pkg/bucketing"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/abtasty/flagship-go-sdk"
@@ -28,10 +32,12 @@ var fsVisitors = make(map[string]*client.Visitor)
 
 // FsSession express infos saved in session
 type FsSession struct {
-	EnvID        string //"blvo2kijq6pg023l8edg"
-	APIKey       string
-	UseBucketing bool //true
-	VisitorID    string
+	EnvID           string //"blvo2kijq6pg023l8edg"
+	APIKey          string
+	UseBucketing    bool //true
+	VisitorID       string
+	Timeout         int
+	PollingInterval int
 }
 
 func (s *FsSession) getClient() *client.Client {
@@ -46,9 +52,11 @@ func (s *FsSession) getVisitor() *client.Visitor {
 
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
-	EnvironmentID string `json:"environment_id" binding:"required"`
-	APIKey        string `json:"api_key" binding:"required"`
-	Bucketing     *bool  `json:"bucketing" binding:"required"`
+	EnvironmentID   string `json:"environment_id" binding:"required"`
+	APIKey          string `json:"api_key" binding:"required"`
+	Bucketing       *bool  `json:"bucketing" binding:"required"`
+	Timeout         int    `json:"timeout" binding:"required"`
+	PollingInterval int    `json:"polling_interval" binding:"required"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
@@ -130,10 +138,20 @@ func main() {
 	router.GET("/currentEnv", func(c *gin.Context) {
 		fsSession := getFsSession(c)
 		if fsSession != nil {
+			timeout := 2000
+			if fsSession.Timeout > 0 {
+				timeout = fsSession.Timeout
+			}
+			pollingInterval := 60000
+			if fsSession.Timeout > 0 {
+				pollingInterval = fsSession.PollingInterval
+			}
 			c.JSON(http.StatusOK, gin.H{
-				"env_id":    fsSession.EnvID,
-				"api_key":   fsSession.APIKey,
-				"bucketing": fsSession.UseBucketing,
+				"env_id":          fsSession.EnvID,
+				"api_key":         fsSession.APIKey,
+				"bucketing":       fsSession.UseBucketing,
+				"timeout":         timeout,
+				"pollingInterval": pollingInterval,
 			})
 		}
 	})
@@ -147,10 +165,15 @@ func main() {
 
 		var fsClient *client.Client
 		var err error
+
 		if *json.Bucketing {
-			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing())
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing(
+				bucketing.PollingInterval(
+					time.Duration(json.PollingInterval)*time.Millisecond)))
 		} else {
-			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey)
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithDecisionAPI(
+				decisionapi.Timeout(
+					time.Duration(json.Timeout)*time.Millisecond)))
 		}
 
 		if err != nil {
@@ -198,11 +221,6 @@ func main() {
 		}
 
 		err = fsVisitor.SynchronizeModifications()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
 		fsVisitors[fsSession.EnvID+"-"+json.VisitorID] = fsVisitor
 		setFsSession(c, &FsSession{
 			EnvID:        fsSession.EnvID,
@@ -213,7 +231,7 @@ func main() {
 
 		flagInfos := fsVisitor.GetAllModifications()
 
-		c.JSON(http.StatusOK, gin.H{"flags": flagInfos})
+		c.JSON(http.StatusOK, gin.H{"flags": flagInfos, "error": err.Error()})
 	})
 
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
