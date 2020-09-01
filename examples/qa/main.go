@@ -29,7 +29,8 @@ var fsVisitors = make(map[string]*client.Visitor)
 // FsSession express infos saved in session
 type FsSession struct {
 	EnvID        string //"blvo2kijq6pg023l8edg"
-	UseBucketing bool   //true
+	APIKey       string
+	UseBucketing bool //true
 	VisitorID    string
 }
 
@@ -46,6 +47,7 @@ func (s *FsSession) getVisitor() *client.Visitor {
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
 	EnvironmentID string `json:"environment_id" binding:"required"`
+	APIKey        string `json:"api_key" binding:"required"`
 	Bucketing     *bool  `json:"bucketing" binding:"required"`
 }
 
@@ -85,20 +87,6 @@ func bToMb(b uint64) uint64 {
 func initSession() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		fsSessInt := session.Get("fs_session")
-
-		if fsSessInt == nil {
-			envID := "blvo2kijq6pg023l8edg"
-			fsClient, _ := flagship.Start(envID, client.WithBucketing())
-			fsClients[envID] = fsClient
-			fsSess := FsSession{
-				EnvID:        envID,
-				UseBucketing: true,
-			}
-			setFsSession(c, &fsSess)
-		}
-
 		printMemUsage()
 	}
 }
@@ -106,6 +94,9 @@ func initSession() gin.HandlerFunc {
 func getFsSession(c *gin.Context) *FsSession {
 	session := sessions.Default(c)
 	fsSessInt := session.Get("fs_session")
+	if fsSessInt == nil {
+		return nil
+	}
 	fsSess := fsSessInt.(*FsSession)
 	return fsSess
 }
@@ -138,10 +129,13 @@ func main() {
 
 	router.GET("/currentEnv", func(c *gin.Context) {
 		fsSession := getFsSession(c)
-		c.JSON(http.StatusOK, gin.H{
-			"env_id":    fsSession.EnvID,
-			"bucketing": fsSession.UseBucketing,
-		})
+		if fsSession != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"env_id":    fsSession.EnvID,
+				"api_key":   fsSession.APIKey,
+				"bucketing": fsSession.UseBucketing,
+			})
+		}
 	})
 
 	router.POST("/setEnv", func(c *gin.Context) {
@@ -154,9 +148,9 @@ func main() {
 		var fsClient *client.Client
 		var err error
 		if *json.Bucketing {
-			fsClient, err = flagship.Start(json.EnvironmentID, client.WithBucketing())
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing())
 		} else {
-			fsClient, err = flagship.Start(json.EnvironmentID)
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey)
 		}
 
 		if err != nil {
@@ -165,14 +159,17 @@ func main() {
 		}
 
 		fsSession := getFsSession(c)
-		fsClientExisting, _ := fsClients[fsSession.EnvID]
-		if fsClientExisting != nil {
-			fsClientExisting.Dispose()
-			fsClientExisting = nil
+		if fsSession != nil {
+			fsClientExisting, _ := fsClients[fsSession.EnvID]
+			if fsClientExisting != nil {
+				fsClientExisting.Dispose()
+				fsClientExisting = nil
+			}
 		}
 		fsClients[json.EnvironmentID] = fsClient
 		setFsSession(c, &FsSession{
 			EnvID:        json.EnvironmentID,
+			APIKey:       json.APIKey,
 			UseBucketing: *json.Bucketing,
 		})
 
@@ -209,6 +206,7 @@ func main() {
 		fsVisitors[fsSession.EnvID+"-"+json.VisitorID] = fsVisitor
 		setFsSession(c, &FsSession{
 			EnvID:        fsSession.EnvID,
+			APIKey:       fsSession.APIKey,
 			UseBucketing: fsSession.UseBucketing,
 			VisitorID:    json.VisitorID,
 		})
@@ -384,5 +382,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "hitType": hitType})
 	})
 
-	router.Run(":8080")
+	router.Run(":8082")
 }

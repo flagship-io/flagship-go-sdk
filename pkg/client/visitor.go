@@ -3,7 +3,6 @@ package client
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/abtasty/flagship-go-sdk/pkg/cache"
@@ -45,7 +44,6 @@ func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 	}()
 
 	errs := newContext.Validate()
-	log.Println(v)
 	if len(errs) > 0 {
 		errorStrings := []string{}
 		for _, e := range errs {
@@ -55,7 +53,6 @@ func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 		return fmt.Errorf("Invalid context : %s", strings.Join(errorStrings, ", "))
 	}
 
-	log.Println(v)
 	v.Context = newContext
 	return nil
 }
