@@ -242,7 +242,12 @@ func main() {
 
 		flagInfos := fsVisitor.GetAllModifications()
 
-		c.JSON(http.StatusOK, gin.H{"flags": flagInfos, "error": err.Error()})
+		resp := gin.H{"flags": flagInfos}
+		if err != nil {
+			resp["error"] = err.Error()
+		}
+
+		c.JSON(http.StatusOK, resp)
 	})
 
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
