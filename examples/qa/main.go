@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -268,6 +269,28 @@ func main() {
 				break
 			case "string":
 				value, err = fsVisitor.GetModificationString(flag, defaultValue, shouldActivate)
+				break
+			case "object":
+				defVal := map[string]interface{}{}
+				if defaultValue != "" {
+					castErr := json.Unmarshal([]byte(defaultValue), &defVal)
+					if castErr != nil {
+						err = castErr
+						break
+					}
+				}
+				value, err = fsVisitor.GetModificationObject(flag, defVal, shouldActivate)
+				break
+			case "array":
+				defVal := []interface{}{}
+				if defaultValue != "" {
+					castErr := json.Unmarshal([]byte(defaultValue), &defVal)
+					if castErr != nil {
+						err = castErr
+						break
+					}
+				}
+				value, err = fsVisitor.GetModificationArray(flag, defVal, shouldActivate)
 				break
 			default:
 				err = fmt.Errorf("Flag type %v not handled", flagType)
