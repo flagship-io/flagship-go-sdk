@@ -3,6 +3,8 @@ package tracking
 import (
 	"testing"
 
+	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+
 	"github.com/abtasty/flagship-go-sdk/pkg/model"
 )
 
@@ -11,7 +13,13 @@ var testEnvID = "test_env_id"
 var realEnvID = "blvo2kijq6pg023l8edg"
 
 func TestNewAPIClient(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	_, err := NewAPIClient(testEnvID)
+
+	if err == nil {
+		t.Error("Api client V2 without API Key should fail")
+	}
+
+	client, err := NewAPIClient(testEnvID, decisionapi.APIKey("test_api_key"))
 
 	if client == nil {
 		t.Error("Api client tracking should not be nil")
@@ -23,7 +31,7 @@ func TestNewAPIClient(t *testing.T) {
 }
 
 func TestSendInternalHit(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, decisionapi.APIKey("test_api_key"))
 	err := client.SendHit(testVisitorID, nil)
 
 	if err == nil {
@@ -48,7 +56,7 @@ func TestSendInternalHit(t *testing.T) {
 }
 
 func TestActivate(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, decisionapi.APIKey("test_api_key"))
 	err := client.ActivateCampaign(model.ActivationHit{})
 
 	if err == nil {
@@ -68,7 +76,7 @@ func TestActivate(t *testing.T) {
 }
 
 func TestSendEvent(t *testing.T) {
-	client, _ := NewAPIClient(realEnvID)
+	client, _ := NewAPIClient(realEnvID, decisionapi.APIKey("test_api_key"))
 	err := client.SendEvent(model.Event{})
 
 	if err == nil {

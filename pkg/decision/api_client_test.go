@@ -10,13 +10,19 @@ var testEnvID = "env_id_test"
 var realEnvID = "blvo2kijq6pg023l8edg"
 
 func TestNewAPIClient(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	_, err := NewAPIClient(testEnvID)
 
-	if client == nil {
-		t.Error("Api client tracking should not be nil")
+	if err == nil {
+		t.Error("Api client V2 without API Key should fail")
 	}
 
-	_, err := NewAPIClient(testEnvID, decisionapi.APIVersion(2))
+	client, _ := NewAPIClient(testEnvID, decisionapi.APIKey("test_api_key"))
+
+	if client == nil {
+		t.Error("Api client V2 with API Key should not fail")
+	}
+
+	_, err = NewAPIClient(testEnvID, decisionapi.APIVersion(2))
 
 	if err == nil {
 		t.Error("Api client V2 without API Key should fail")
@@ -24,7 +30,7 @@ func TestNewAPIClient(t *testing.T) {
 }
 
 func TestGetModifications(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, decisionapi.APIKey("test_api_key"))
 
 	if client == nil {
 		t.Error("Api client tracking should not be nil")
