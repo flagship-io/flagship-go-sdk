@@ -55,8 +55,8 @@ type FSEnvInfo struct {
 	EnvironmentID   string `json:"environment_id" binding:"required"`
 	APIKey          string `json:"api_key" binding:"required"`
 	Bucketing       *bool  `json:"bucketing" binding:"required"`
-	Timeout         int    `json:"timeout" binding:"required"`
-	PollingInterval int    `json:"polling_interval" binding:"required"`
+	Timeout         int    `json:"timeout"`
+	PollingInterval int    `json:"polling_interval"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
@@ -143,7 +143,7 @@ func main() {
 				timeout = fsSession.Timeout
 			}
 			pollingInterval := 60000
-			if fsSession.Timeout > 0 {
+			if fsSession.PollingInterval > 0 {
 				pollingInterval = fsSession.PollingInterval
 			}
 			c.JSON(http.StatusOK, gin.H{
@@ -166,14 +166,23 @@ func main() {
 		var fsClient *client.Client
 		var err error
 
+		timeout := 2000
+		if json.Timeout > 0 {
+			timeout = json.Timeout
+		}
+		pollingInterval := 60000
+		if json.PollingInterval > 0 {
+			pollingInterval = json.PollingInterval
+		}
+
 		if *json.Bucketing {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing(
 				bucketing.PollingInterval(
-					time.Duration(json.PollingInterval)*time.Millisecond)))
+					time.Duration(pollingInterval)*time.Millisecond)))
 		} else {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithDecisionAPI(
 				decisionapi.Timeout(
-					time.Duration(json.Timeout)*time.Millisecond)))
+					time.Duration(timeout)*time.Millisecond)))
 		}
 
 		if err != nil {
@@ -191,9 +200,11 @@ func main() {
 		}
 		fsClients[json.EnvironmentID] = fsClient
 		setFsSession(c, &FsSession{
-			EnvID:        json.EnvironmentID,
-			APIKey:       json.APIKey,
-			UseBucketing: *json.Bucketing,
+			EnvID:           json.EnvironmentID,
+			APIKey:          json.APIKey,
+			UseBucketing:    *json.Bucketing,
+			Timeout:         timeout,
+			PollingInterval: pollingInterval,
 		})
 
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})

@@ -42,8 +42,8 @@ var app = new Vue({
           environment_id: this.envId,
           api_key: this.apiKey,
           bucketing: this.bucketing,
-          timeout: this.timeout,
-          polling_interval: this.pollingInterval,
+          timeout: this.timeout || 0,
+          polling_interval: this.pollingInterval || 0,
         })
         .then(
           (response) => {
