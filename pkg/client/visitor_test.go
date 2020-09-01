@@ -32,6 +32,10 @@ func createMockClient() decision.ClientInterface {
 			"test_bool":   true,
 			"test_number": 35.6,
 			"test_nil":    nil,
+			"test_object": map[string]interface{}{
+				"test_key": true,
+			},
+			"test_array": []interface{}{true},
 		},
 	}
 	variation := model.ClientVariation{
@@ -154,55 +158,31 @@ func TestGetModification(t *testing.T) {
 
 	// Test before sync
 	_, err := visitor.getModification("not_exists", true)
-
-	if err == nil {
-		t.Errorf("getModification should raise an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should raise an error as modifications are not synced")
 
 	// Test infos before sync
 	_, err = visitor.GetModificationInfo("not_exists")
-
-	if err == nil {
-		t.Errorf("GetModificationInfo Should raise an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should raise an error as modifications are not synced")
 
 	visitor.SynchronizeModifications()
 
 	// Test default value
 	val, err := visitor.getModification("not_exists", true)
-
-	if err == nil {
-		t.Errorf("Should have an error as modifications are not synced")
-	}
-
-	if val != nil {
-		t.Errorf("Expected default value, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as key does not exist")
+	assert.Equal(t, nil, val, "Expected nil value")
 
 	// Test infos of missing key
 	_, err = visitor.GetModificationInfo("not_exists")
-
-	if err == nil {
-		t.Errorf("GetModificationInfo should raise an error as modification key does not exist")
-	}
+	assert.NotEqual(t, nil, err, "Should raise an error as modification key does not exist")
 
 	// Test response value
 	val, err = visitor.getModification("test_string", true)
-
-	if err != nil {
-		t.Errorf("Should have an error as flag exists. Got %v", err)
-	}
-
-	if val != "string" {
-		t.Errorf("Expected string value, got %v", val)
-	}
+	assert.Equal(t, nil, err, "Should not have an error as flag exists")
+	assert.Equal(t, "string", val, "Expected string value")
 
 	// Test modification info response value
 	infos, err := visitor.GetModificationInfo("test_string")
-
-	if err != nil {
-		t.Errorf("Should have an error as flag exists. Got %v", err)
-	}
+	assert.Equal(t, nil, err, "Should not have an error as flag exists")
 
 	assert.Equal(t, caID, infos.CampaignID)
 	assert.Equal(t, vgID, infos.VariationGroupID)
@@ -215,51 +195,29 @@ func TestGetModificationBool(t *testing.T) {
 
 	// Test before sync
 	_, err := visitor.GetModificationBool("not_exists", false, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as modifications are not synced")
 
 	visitor.SynchronizeModifications()
 
 	// Test default value
 	val, err := visitor.GetModificationBool("not_exists", false, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag does not exists")
-	}
-
-	if val != false {
-		t.Errorf("Expected default value, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, false, val, "Expected default value getting nil flag")
 
 	// Test wrong type value
-	val, err = visitor.GetModificationBool("test_string", true, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag test_string is not of type bool")
-	}
-
-	if val != true {
-		t.Errorf("Expected default value true, got %v", val)
-	}
+	val, err = visitor.GetModificationBool("test_string", false, true)
+	assert.NotEqual(t, nil, err, "Should have an error as flag test_string is not of type bool")
+	assert.Equal(t, false, val, "Expected default value getting nil flag")
 
 	// Test nil value
-	val, err = visitor.GetModificationBool("test_nil", true, true)
-
+	val, err = visitor.GetModificationBool("test_nil", false, true)
 	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
-	assert.Equal(t, true, val, "Expected default value getting nil flag")
+	assert.Equal(t, false, val, "Expected default value getting nil flag")
 
 	// Test response value
 	val, err = visitor.GetModificationBool("test_bool", false, true)
-
-	if err != nil {
-		t.Errorf("Should have an error as flag does exists. Got %v", err)
-	}
-
-	if val != true {
-		t.Errorf("Expected value true, got %v", val)
-	}
+	assert.Equal(t, nil, err, "Should not have an error as flag does exists")
+	assert.Equal(t, true, val, "Expected value true")
 }
 
 func TestGetModificationNumber(t *testing.T) {
@@ -267,51 +225,29 @@ func TestGetModificationNumber(t *testing.T) {
 
 	// Test before sync
 	_, err := visitor.GetModificationNumber("not_exists", 10, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as modifications are not synced")
 
 	visitor.SynchronizeModifications()
 
 	// Test default value
 	val, err := visitor.GetModificationNumber("not_exists", 10, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag does not exists")
-	}
-
-	if val != 10 {
-		t.Errorf("Expected value 10, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, 10., val, "Expected default value getting nil flag")
 
 	// Test wrong type value
 	val, err = visitor.GetModificationNumber("test_string", 10, true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag test_string is not of type float")
-	}
-
-	if val != 10 {
-		t.Errorf("Expected default value 10, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag test_string is not of type float")
+	assert.Equal(t, 10., val, "Expected default value getting nil flag")
 
 	// Test nil value
 	val, err = visitor.GetModificationNumber("test_nil", 10, true)
-
 	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
 	assert.Equal(t, 10., val, "Expected default value getting nil flag")
 
 	// Test response value
 	val, err = visitor.GetModificationNumber("test_number", 10, true)
-
-	if err != nil {
-		t.Errorf("Should not have an error as flag does exists. Got %v", err)
-	}
-
-	if val != 35.6 {
-		t.Errorf("Expected value 36.5, got %v", val)
-	}
+	assert.Equal(t, nil, err, "Should not have an error as flag does exists")
+	assert.Equal(t, 35.6, val, "Expected value 36.5")
 }
 
 func TestGetModificationString(t *testing.T) {
@@ -319,51 +255,93 @@ func TestGetModificationString(t *testing.T) {
 
 	// Test before sync
 	_, err := visitor.GetModificationString("not_exists", "default", true)
-
-	if err == nil {
-		t.Errorf("Should have an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as modifications are not synced")
 
 	visitor.SynchronizeModifications()
 
 	// Test default value
 	val, err := visitor.GetModificationString("not_exists", "default", true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag does not exists")
-	}
-
-	if val != "default" {
-		t.Errorf("Expected value default, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, "default", val, "Expected default value getting nil flag")
 
 	// Test wrong type value
 	val, err = visitor.GetModificationString("test_bool", "default", true)
-
-	if err == nil {
-		t.Errorf("Should have an error as flag test_string is not of type float")
-	}
-
-	if val != "default" {
-		t.Errorf("Expected default value default, got %v", val)
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag test_string is not of type float")
+	assert.Equal(t, "default", val, "Expected default value getting nil flag")
 
 	// Test nil value
 	val, err = visitor.GetModificationString("test_nil", "default", true)
-
 	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
 	assert.Equal(t, "default", val, "Expected default value getting nil flag")
 
 	// Test response value
 	val, err = visitor.GetModificationString("test_string", "default", true)
+	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
+	assert.Equal(t, "string", val, "Expected value string")
+}
 
-	if err != nil {
-		t.Errorf("Should have an error as flag does exists. Got %v", err)
-	}
+func TestGetModificationObject(t *testing.T) {
+	visitor := createVisitor("test", nil)
 
-	if val != "string" {
-		t.Errorf("Expected value string, got %v", val)
+	// Test before sync
+	_, err := visitor.GetModificationObject("not_exists", nil, true)
+	assert.NotEqual(t, nil, err, "Should have an error as modifications are not synced")
+
+	visitor.SynchronizeModifications()
+
+	defaultValue := map[string]interface{}{
+		"default_key": false,
 	}
+	// Test default value
+	val, err := visitor.GetModificationObject("not_exists", defaultValue, true)
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, defaultValue["default_key"], val["default_key"])
+
+	// Test wrong type value
+	val, err = visitor.GetModificationObject("test_bool", defaultValue, true)
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, defaultValue["default_key"], val["default_key"])
+
+	// Test nil value
+	val, err = visitor.GetModificationObject("test_nil", defaultValue, true)
+	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
+	assert.Equal(t, defaultValue["default_key"], val["default_key"])
+
+	// Test response value
+	val, err = visitor.GetModificationObject("test_object", defaultValue, true)
+	assert.Equal(t, nil, err, "Should not have an error as flag exists")
+	assert.Equal(t, true, val["test_key"])
+}
+
+func TestGetModificationArray(t *testing.T) {
+	visitor := createVisitor("test", nil)
+
+	// Test before sync
+	_, err := visitor.GetModificationArray("not_exists", nil, true)
+	assert.NotEqual(t, nil, err, "Should have an error as modifications are not synced")
+
+	visitor.SynchronizeModifications()
+
+	defaultValue := []interface{}{true}
+	// Test default value
+	val, err := visitor.GetModificationArray("not_exists", defaultValue, true)
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, defaultValue[0], val[0])
+
+	// Test wrong type value
+	val, err = visitor.GetModificationArray("test_bool", defaultValue, true)
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Equal(t, defaultValue[0], val[0])
+
+	// Test nil value
+	val, err = visitor.GetModificationArray("test_nil", defaultValue, true)
+	assert.Equal(t, nil, err, "Did not expect error when getting nil flag")
+	assert.Equal(t, defaultValue[0], val[0])
+
+	// Test response value
+	val, err = visitor.GetModificationArray("test_array", defaultValue, true)
+	assert.Equal(t, nil, err, "Should not have an error as flag exists")
+	assert.Equal(t, true, val[0])
 }
 
 func TestActivateModification(t *testing.T) {
@@ -371,26 +349,17 @@ func TestActivateModification(t *testing.T) {
 
 	// Test before sync
 	err := visitor.ActivateModification("not_exists")
-
-	if err == nil {
-		t.Errorf("Should have an error as modifications are not synced")
-	}
+	assert.NotEqual(t, nil, err, "Should raise an error as modifications are not synced")
 
 	visitor.SynchronizeModifications()
 
 	// Test default value
 	err = visitor.ActivateModification("not_exists")
-
-	if err == nil {
-		t.Errorf("Should have an error as flag does not exists")
-	}
+	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
 
 	// Test response value
 	err = visitor.ActivateModification("test_string")
-
-	if err != nil {
-		t.Errorf("Should have an error as flag does exists. Got %v", err)
-	}
+	assert.Equal(t, nil, err, "Should not have an error as flag exists")
 }
 
 func TestActivateModificationCache(t *testing.T) {
@@ -412,7 +381,8 @@ func TestActivateModificationCache(t *testing.T) {
 	}))
 
 	client, _ := Create(&Options{
-		EnvID: testEnvID,
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	})
 	client.cacheManager = cache
 

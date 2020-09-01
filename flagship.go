@@ -5,9 +5,10 @@ import (
 )
 
 // Start creates and returns a Client with the given environment ID and functional options
-func Start(envID string, clientOptions ...client.OptionBuilder) (*client.Client, error) {
+func Start(envID string, APIKey string, clientOptions ...client.OptionBuilder) (*client.Client, error) {
 	flagshipOptions := &client.Options{
-		EnvID: envID,
+		EnvID:  envID,
+		APIKey: APIKey,
 	}
 
 	flagshipOptions.BuildOptions(clientOptions...)

@@ -18,7 +18,9 @@ FROM alpine
 
 EXPOSE 8080
 
-COPY --from=build-env /go/bin/example /go/bin/example
-COPY --from=build-env /go/src/github.com/abtasty/flagship-go-sdk/examples/qa/assets /examples/qa/assets
+WORKDIR /go/bin
 
-CMD ["/go/bin/example"]
+COPY --from=build-env /go/bin/example example
+COPY --from=build-env /go/src/github.com/abtasty/flagship-go-sdk/examples/qa/assets qa/assets
+
+CMD ["./example"]

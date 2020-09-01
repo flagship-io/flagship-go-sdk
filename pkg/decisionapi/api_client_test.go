@@ -8,15 +8,16 @@ import (
 
 var testEnvID = "env_id_test"
 var realEnvID = "blvo2kijq6pg023l8edg"
+var testAPIKey = "api_key_test"
 
 func TestNewAPIClient(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, APIKey("test_api_key"))
 
 	if client == nil {
 		t.Error("Api client tracking should not be nil")
 	}
 
-	if client.url != defaultV1APIURL {
+	if client.url != defaultV2APIURL {
 		t.Error("Api url should be set to default")
 	}
 }
@@ -25,7 +26,7 @@ func TestNewAPIClientParams(t *testing.T) {
 	client, _ := NewAPIClient(
 		testEnvID,
 		APIVersion(1),
-		APIKey("api_key"),
+		APIKey(testAPIKey),
 		Timeout(10),
 		Retries(12))
 
@@ -37,8 +38,8 @@ func TestNewAPIClientParams(t *testing.T) {
 		t.Error("Api url should be set to default")
 	}
 
-	if client.apiKey != "api_key" {
-		t.Errorf("Wrong api key. Expected %v, got %v", "api_key", client.apiKey)
+	if client.apiKey != testAPIKey {
+		t.Errorf("Wrong api key. Expected %v, got %v", testAPIKey, client.apiKey)
 	}
 
 	if client.retries != 12 {
@@ -58,7 +59,7 @@ func TestNewAPIClientParams(t *testing.T) {
 	client, _ = NewAPIClient(
 		testEnvID,
 		APIVersion(2),
-		APIKey("api_key"),
+		APIKey(testAPIKey),
 		Timeout(10),
 		Retries(12))
 
@@ -68,27 +69,23 @@ func TestNewAPIClientParams(t *testing.T) {
 }
 
 func TestGetModifications(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, APIKey("test_api_key"))
 	_, err := client.GetModifications("test_vid", nil)
 
 	if err == nil {
 		t.Error("Expected error for unknown env id")
 	}
 
-	client, _ = NewAPIClient(realEnvID)
-	resp, err := client.GetModifications("test_vid", nil)
+	client, _ = NewAPIClient(realEnvID, APIKey("test_api_key"))
+	_, err = client.GetModifications("test_vid", nil)
 
-	if err != nil {
-		t.Errorf("Unexpected error for correct env id : %v", err)
-	}
-
-	if resp == nil {
-		t.Errorf("Expected not nil response for correct env id")
+	if err == nil {
+		t.Errorf("Expected error for wrong api key : %v", err)
 	}
 }
 
 func TestActivate(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, APIKey("test_api_key"))
 	err := client.ActivateCampaign(model.ActivationHit{})
 
 	if err == nil {
@@ -108,7 +105,7 @@ func TestActivate(t *testing.T) {
 }
 
 func TestSendEvent(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, APIKey("test_api_key"))
 	err := client.SendEvent(model.Event{})
 
 	if err == nil {
@@ -127,7 +124,7 @@ func TestSendEvent(t *testing.T) {
 		t.Errorf("Expected error for not existing envID. Got nil")
 	}
 
-	client, _ = NewAPIClient(realEnvID)
+	client, _ = NewAPIClient(realEnvID, APIKey("test_api_key"))
 	err = client.SendEvent(model.Event{
 		VisitorID: "test_vid",
 		Type:      "CONTEXT",

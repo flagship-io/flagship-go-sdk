@@ -2,6 +2,7 @@ var app = new Vue({
   el: "#app",
   data: {
     envId: "",
+    apiKey: "",
     bucketing: true,
     visitorId: "test-visitor",
     context: "{\n}",
@@ -26,6 +27,7 @@ var app = new Vue({
         this.currentEnv = response.body;
         this.bucketing = response.body.bucketing;
         this.envId = response.body.env_id;
+        this.apiKey = response.body.api_key;
       });
     },
     setEnv() {
@@ -34,6 +36,7 @@ var app = new Vue({
       this.$http
         .post("/setEnv", {
           environment_id: this.envId,
+          api_key: this.apiKey,
           bucketing: this.bucketing,
         })
         .then(
