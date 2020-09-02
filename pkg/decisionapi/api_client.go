@@ -1,7 +1,6 @@
 package decisionapi
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -119,8 +118,8 @@ func (r APIClient) GetModifications(visitorID string, context map[string]interfa
 	}
 
 	path := fmt.Sprintf("/%s/campaigns?exposeAllKeys=true", r.envID)
-	apiLogger.Debugf("Sending hit to DataCollect: %s", string(b))
-	response, err := r.httpClient.Call(path, "POST", bytes.NewBuffer(b), nil)
+	apiLogger.Infof("Sending call decision API: %s", string(b))
+	response, err := r.httpClient.Call(path, "POST", b, nil)
 
 	if err != nil {
 		return nil, err
@@ -161,7 +160,7 @@ func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
 		return err
 	}
 	apiLogger.Debugf("Sending activate to API: %s", string(b))
-	resp, err := r.httpClient.Call("/activate", "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClient.Call("/activate", "POST", b, nil)
 
 	if err != nil {
 		return err
@@ -194,7 +193,7 @@ func (r APIClient) SendEvent(request model.Event) error {
 	}
 
 	apiLogger.Debugf("Sending event to API: %s", string(b))
-	resp, err := r.httpClient.Call(fmt.Sprintf("/%s/events", r.envID), "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClient.Call(fmt.Sprintf("/%s/events", r.envID), "POST", b, nil)
 
 	if err != nil {
 		return err

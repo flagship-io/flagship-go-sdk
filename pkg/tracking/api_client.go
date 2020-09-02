@@ -1,7 +1,6 @@
 package tracking
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -83,7 +82,7 @@ func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 	}
 
 	apiLogger.Info(fmt.Sprintf("Sending hit : %v", string(b)))
-	resp, err := r.httpClientTracking.Call("", "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClientTracking.Call("", "POST", b, nil)
 
 	if err != nil {
 		return err
