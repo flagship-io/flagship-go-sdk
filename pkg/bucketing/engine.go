@@ -74,7 +74,6 @@ func (b *Engine) startTicker() {
 		case <-b.ticker.C:
 			logger.Info("Bucketing engine ticked, loading configuration")
 			b.Load()
-			return
 		}
 	}
 }
