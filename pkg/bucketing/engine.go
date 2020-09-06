@@ -133,7 +133,8 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 		}
 	}
 
-	for _, c := range b.getConfig().Campaigns {
+	config := b.getConfig()
+	for _, c := range config.Campaigns {
 		var matchedVg *VariationGroup
 		for _, vg := range c.VariationGroups {
 			matched, err := TargetingMatch(vg, visitorID, context)
