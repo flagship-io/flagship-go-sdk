@@ -6,8 +6,9 @@
 
 <h3 align="center">Bring your features to life</h3>
 
-<a  href='https://github.com/jpoles1/gopherbadger'  target='_blank'><a href='https://github.com/jpoles1/gopherbadger' target='_blank'>![gopherbadger-tag-do-not-edit](https://img.shields.io/badge/Go%20Coverage-88%25-brightgreen.svg?longCache=true&style=flat)</a> 
-![goreport](https://goreportcard.com/badge/github.com/abtasty/flagship-go-sdk)
+<a  href='https://github.com/jpoles1/gopherbadger'  target='_blank'><a href='https://github.com/jpoles1/gopherbadger' target='_blank'>[![codecov](https://codecov.io/gh/abtasty/flagship-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/abtasty/flagship-go-sdk)
+</a>
+[![goreport](https://goreportcard.com/badge/github.com/abtasty/flagship-go-sdk)](https://goreportcard.com/report/github.com/abtasty/flagship-go-sdk)
 [![GoDoc](https://godoc.org/github.com/abtasty/flagship-go-sdk?status.svg)](https://godoc.org/github.com/abtasty/flagship-go-sdk)
 [![license](https://badgen.now.sh/badge/license/Apache)](./LICENSE)
 

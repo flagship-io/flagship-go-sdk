@@ -1,7 +1,6 @@
 package tracking
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -32,12 +31,12 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a tracking API Client with environment ID and option builders
-func NewAPIClient(envID string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
+func NewAPIClient(envID string, apiKey string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
 	res := APIClient{
 		envID: envID,
 	}
 
-	decisionAPIClient, err := decisionapi.NewAPIClient(envID, params...)
+	decisionAPIClient, err := decisionapi.NewAPIClient(envID, apiKey, params...)
 
 	if err != nil {
 		return nil, err
@@ -83,7 +82,7 @@ func (r *APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 	}
 
 	apiLogger.Info(fmt.Sprintf("Sending hit : %v", string(b)))
-	resp, err := r.httpClientTracking.Call("", "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClientTracking.Call("", "POST", b, nil)
 
 	if err != nil {
 		return err

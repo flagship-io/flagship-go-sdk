@@ -3,6 +3,8 @@ var app = new Vue({
   data: {
     envId: "",
     apiKey: "",
+    timeout: 2000,
+    pollingInterval: 60000,
     bucketing: true,
     visitorId: "test-visitor",
     context: "{\n}",
@@ -28,6 +30,8 @@ var app = new Vue({
         this.bucketing = response.body.bucketing;
         this.envId = response.body.env_id;
         this.apiKey = response.body.api_key;
+        this.timeout = response.body.timeout;
+        this.pollingInterval = response.body.pollingInterval;
       });
     },
     setEnv() {
@@ -38,6 +42,8 @@ var app = new Vue({
           environment_id: this.envId,
           api_key: this.apiKey,
           bucketing: this.bucketing,
+          timeout: this.timeout || 0,
+          polling_interval: this.pollingInterval || 0,
         })
         .then(
           (response) => {

@@ -43,9 +43,7 @@
     </nav>
 
     <div class="container mt-5 mb-5" id="app">
-      <h2>
-        First, set your Flagship Environment ID & API Key
-      </h2>
+      <h2>First, set your Flagship Environment ID & API Key</h2>
 
       <form v-on:submit.prevent="setEnv()">
         <div class="form-group">
@@ -68,15 +66,31 @@
             placeholder="API Key"
             v-model="apiKey"
           />
-          <small class="form-text text-muted"
-            >Set your API Key.</small
-          >
+          <small class="form-text text-muted">Set your API Key.</small>
+        </div>
+        <div class="form-group">
+          <label>Timeout (milliseconds)</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Timeout"
+            v-model.number="timeout"
+          />
+          <small class="form-text text-muted">Set your timeout.</small>
+        </div>
+        <div class="form-group">
+          <label>Polling interval (milliseconds)</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Polling interval"
+            v-model.number="pollingInterval"
+          />
+          <small class="form-text text-muted">Set your polling interval.</small>
         </div>
         <div class="form-check mb-3">
           <input class="form-check-input" type="checkbox" v-model="bucketing" />
-          <label class="form-check-label">
-            Use bucketing
-          </label>
+          <label class="form-check-label"> Use bucketing </label>
         </div>
 
         <div class="alert alert-danger" v-if="envError">{{envError.error}}</div>
@@ -87,9 +101,7 @@
         <button type="submit" class="btn btn-success">Submit</button>
       </form>
 
-      <h2 class="mt-5">
-        Then, set your Visitor ID and context
-      </h2>
+      <h2 class="mt-5">Then, set your Visitor ID and context</h2>
       <form v-on:submit.prevent="setVisitor()">
         <div class="form-group">
           <label>Visitor ID</label>
@@ -128,11 +140,9 @@
         <pre class="mt-3" v-if="data">{{JSON.stringify(data, null, 4)}}</pre>
       </form>
 
-      <h2 class="mt-5">
-        Then, get a Flag Value
-      </h2>
+      <h2 class="mt-5">Then, get a Flag Value</h2>
       <form v-on:submit.prevent="getFlag()">
-        <div class="row" style="align-items: center;">
+        <div class="row" style="align-items: center">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>
@@ -182,9 +192,7 @@
             type="checkbox"
             v-model="flag.activate"
           />
-          <label class="form-check-label">
-            Activate
-          </label>
+          <label class="form-check-label"> Activate </label>
         </div>
         <div class="alert alert-warning mt-3 mb-3" v-if="flagOk && flagOk.err">
           {{flagOk.err}}
@@ -200,11 +208,9 @@
         </div>
       </form>
 
-      <h2 class="mt-5">
-        Get modification information
-      </h2>
+      <h2 class="mt-5">Get modification information</h2>
       <form v-on:submit.prevent="getFlagInfo()">
-        <div class="row" style="align-items: center;">
+        <div class="row" style="align-items: center">
           <div class="col-sm-3">
             <div class="form-group">
               <label>Flag key</label>

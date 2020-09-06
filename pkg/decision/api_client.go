@@ -14,8 +14,8 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a decision API client with API options
-func NewAPIClient(envID string, params ...func(*decisionapi.APIClient)) (*APIClient, error) {
-	dAPIClient, err := decisionapi.NewAPIClient(envID, params...)
+func NewAPIClient(envID string, apiKey string, params ...func(*decisionapi.APIClient)) (*APIClient, error) {
+	dAPIClient, err := decisionapi.NewAPIClient(envID, apiKey, params...)
 	if err != nil {
 		return nil, err
 	}
