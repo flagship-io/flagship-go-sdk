@@ -6,11 +6,9 @@ import (
 	"github.com/twmb/murmur3"
 )
 
-var hash = murmur3.New32()
-
 // GetRandomAllocation returns a random allocation for a variationGroup
 func GetRandomAllocation(visitorID string, variationGroup *VariationGroup) (*Variation, error) {
-	hash.Reset()
+	hash := murmur3.New32()
 	_, err := hash.Write([]byte(variationGroup.ID + visitorID))
 
 	if err != nil {
