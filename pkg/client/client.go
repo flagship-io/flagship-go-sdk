@@ -1,6 +1,7 @@
 package client
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -27,6 +28,7 @@ const (
 // Client represent the Flagship SDK client object
 type Client struct {
 	envID             string
+	apiKey            string
 	decisionMode      DecisionMode
 	decisionClient    decision.ClientInterface
 	trackingAPIClient tracking.APIClientInterface
@@ -38,11 +40,23 @@ var clientLogger = logging.CreateLogger("FS Client")
 // Create creates a Client from options
 func Create(f *Options) (*Client, error) {
 	clientLogger.Info(fmt.Sprintf("Creating FS Client with Decision Mode : %s", f.decisionMode))
-	client := &Client{
-		envID: f.EnvID,
-	}
 
 	var err error
+
+	if f.APIKey == "" {
+		err = errors.New("APIKey is required")
+		return nil, err
+	}
+
+	if f.EnvID == "" {
+		err = errors.New("EnvID is required")
+		return nil, err
+	}
+
+	client := &Client{
+		envID:  f.EnvID,
+		apiKey: f.APIKey,
+	}
 
 	if len(f.cacheManagerOptions) > 0 {
 		cacheManager, err := cache.InitManager(f.cacheManagerOptions...)
@@ -53,17 +67,18 @@ func Create(f *Options) (*Client, error) {
 	}
 
 	if client.trackingAPIClient == nil {
-		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, f.decisionAPIOptions...)
+		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, f.APIKey, f.decisionAPIOptions...)
 	}
 
 	if client.decisionClient == nil {
+		client.decisionMode = f.decisionMode
 		if f.decisionMode == Bucketing {
 			client.decisionClient, err = bucketing.NewEngine(client.envID, client.cacheManager, f.bucketingOptions...)
 			if err != nil {
 				clientLogger.Error("Got error when creating bucketing engine", err)
 			}
 		} else {
-			client.decisionClient, err = decision.NewAPIClient(client.envID, f.decisionAPIOptions...)
+			client.decisionClient, err = decision.NewAPIClient(client.envID, f.APIKey, f.decisionAPIOptions...)
 			if err != nil {
 				clientLogger.Error("Got error when creating Decision API engine", err)
 			}

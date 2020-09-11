@@ -1,8 +1,8 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -72,26 +72,31 @@ func NewHTTPClient(baseURL string, options HTTPOptions) *HTTPClient {
 }
 
 // Call executes request with retries and returns response body, headers, status code and error
-func (r *HTTPClient) Call(path, method string, body io.Reader, headers map[string]string) (*HTTPResponse, error) {
+func (r *HTTPClient) Call(path, method string, body []byte, headers map[string]string) (*HTTPResponse, error) {
 	url := fmt.Sprintf("%s%s", r.baseURL, path)
-	httpLogger.Debug(fmt.Sprintf("Requesting %s", url))
-
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		httpLogger.Error(fmt.Sprintf("failed to create new http request %s", url), err)
-		return nil, err
-	}
-
-	for k, v := range r.baseHeaders {
-		req.Header.Add(k, v)
-	}
-
-	for k, v := range headers {
-		req.Header.Add(k, v)
-	}
+	httpLogger.Debugf("Requesting %s", url)
 
 	var resp *http.Response
+	var req *http.Request
+	var err error
+
 	for i := r.retries; i >= 0; i-- {
+		reader := bytes.NewBuffer(body)
+		req, err = http.NewRequest(method, url, reader)
+		if err != nil {
+			httpLogger.Error(fmt.Sprintf("failed to create new http request %s", url), err)
+			return nil, err
+		}
+
+		for k, v := range r.baseHeaders {
+			req.Header.Add(k, v)
+		}
+
+		if headers != nil {
+			for k, v := range headers {
+				req.Header.Add(k, v)
+			}
+		}
 		resp, err = r.client.Do(req)
 
 		if resp != nil && resp.StatusCode < http.StatusBadRequest {

@@ -9,9 +9,16 @@ import (
 var testVisitorID = "test_visitor_id"
 var testEnvID = "test_env_id"
 var realEnvID = "blvo2kijq6pg023l8edg"
+var testAPIKey = "api_key_test"
 
 func TestNewAPIClient(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	_, err := NewAPIClient(testEnvID, testAPIKey)
+
+	if err != nil {
+		t.Error("Api client V2 with API Key should not fail")
+	}
+
+	client, err := NewAPIClient(testEnvID, testAPIKey)
 
 	if client == nil {
 		t.Error("Api client tracking should not be nil")
@@ -23,7 +30,7 @@ func TestNewAPIClient(t *testing.T) {
 }
 
 func TestSendInternalHit(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, testAPIKey)
 	err := client.SendHit(testVisitorID, nil)
 
 	if err == nil {
@@ -48,7 +55,7 @@ func TestSendInternalHit(t *testing.T) {
 }
 
 func TestActivate(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID)
+	client, _ := NewAPIClient(testEnvID, testAPIKey)
 	err := client.ActivateCampaign(model.ActivationHit{})
 
 	if err == nil {
@@ -68,7 +75,7 @@ func TestActivate(t *testing.T) {
 }
 
 func TestSendEvent(t *testing.T) {
-	client, _ := NewAPIClient(realEnvID)
+	client, _ := NewAPIClient(realEnvID, testAPIKey)
 	err := client.SendEvent(model.Event{})
 
 	if err == nil {

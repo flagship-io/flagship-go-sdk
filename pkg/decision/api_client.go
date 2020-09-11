@@ -14,8 +14,8 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a decision API client with API options
-func NewAPIClient(envID string, params ...func(*decisionapi.APIClient)) (*APIClient, error) {
-	dAPIClient, err := decisionapi.NewAPIClient(envID, params...)
+func NewAPIClient(envID string, apiKey string, params ...func(*decisionapi.APIClient)) (*APIClient, error) {
+	dAPIClient, err := decisionapi.NewAPIClient(envID, apiKey, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewAPIClient(envID string, params ...func(*decisionapi.APIClient)) (*APICli
 }
 
 // GetModifications gets modifications from Decision API
-func (r APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
 	apiLogger.Info("Getting modifications from API")
 	return r.decisionAPIClient.GetModifications(visitorID, context)
 }

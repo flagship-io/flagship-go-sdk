@@ -1,7 +1,6 @@
 package decisionapi
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -35,7 +34,7 @@ type APIVersionNumber int
 const (
 	// V1 is Decision API V1
 	V1 = iota + 1
-	// V2 is Decision API V1
+	// V2 is Decision API V2
 	V2
 )
 
@@ -73,9 +72,10 @@ func Retries(retries int) func(r *APIClient) {
 }
 
 // NewAPIClient creates a Decision API client from the environment ID and option builders
-func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) {
+func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*APIClient, error) {
 	res := APIClient{
 		envID:   envID,
+		apiKey:  apiKey,
 		retries: 1,
 	}
 
@@ -85,16 +85,16 @@ func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) 
 		param(&res)
 	}
 
+	if res.url == "" {
+		res.url = defaultV2APIURL
+	}
+
 	if res.url == defaultV2APIURL && res.apiKey == "" {
 		return nil, errors.New("API Key missing for Decision API V2")
 	}
 
 	if res.apiKey != "" {
 		headers["x-api-key"] = res.apiKey
-	}
-
-	if res.url == "" {
-		res.url = defaultV1APIURL
 	}
 
 	if res.timeout == 0 {
@@ -110,7 +110,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) 
 }
 
 // GetModifications gets modifications from Decision API
-func (r APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
 	b, err := json.Marshal(model.APIClientRequest{
 		VisitorID:  visitorID,
 		Context:    context,
@@ -122,8 +122,8 @@ func (r APIClient) GetModifications(visitorID string, context map[string]interfa
 	}
 
 	path := fmt.Sprintf("/%s/campaigns?exposeAllKeys=true", r.envID)
-	apiLogger.Debugf("Sending hit to DataCollect: %s", string(b))
-	response, err := r.httpClient.Call(path, "POST", bytes.NewBuffer(b), nil)
+	apiLogger.Infof("Sending call decision API: %s", string(b))
+	response, err := r.httpClient.Call(path, "POST", b, nil)
 
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func (r APIClient) GetModifications(visitorID string, context map[string]interfa
 }
 
 // ActivateCampaign activate a campaign / variation id to the Decision API
-func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
+func (r *APIClient) ActivateCampaign(request model.ActivationHit) error {
 	request.EnvironmentID = r.envID
 
 	errs := request.Validate()
@@ -164,7 +164,7 @@ func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
 		return err
 	}
 	apiLogger.Debugf("Sending activate to API: %s", string(b))
-	resp, err := r.httpClient.Call("/activate", "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClient.Call("/activate", "POST", b, nil)
 
 	if err != nil {
 		return err
@@ -178,7 +178,7 @@ func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
 }
 
 // SendEvent sends an event to flagship Event endpoint
-func (r APIClient) SendEvent(request model.Event) error {
+func (r *APIClient) SendEvent(request model.Event) error {
 	errs := request.Validate()
 
 	if len(errs) > 0 {
@@ -197,7 +197,7 @@ func (r APIClient) SendEvent(request model.Event) error {
 	}
 
 	apiLogger.Debugf("Sending event to API: %s", string(b))
-	resp, err := r.httpClient.Call(fmt.Sprintf("/%s/events", r.envID), "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClient.Call(fmt.Sprintf("/%s/events", r.envID), "POST", b, nil)
 
 	if err != nil {
 		return err

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -10,6 +11,10 @@ import (
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+
+	"github.com/abtasty/flagship-go-sdk/pkg/bucketing"
 
 	"github.com/sirupsen/logrus"
 
@@ -27,9 +32,12 @@ var fsVisitors = make(map[string]*client.Visitor)
 
 // FsSession express infos saved in session
 type FsSession struct {
-	EnvID        string //"blvo2kijq6pg023l8edg"
-	UseBucketing bool   //true
-	VisitorID    string
+	EnvID           string //"blvo2kijq6pg023l8edg"
+	APIKey          string
+	UseBucketing    bool //true
+	VisitorID       string
+	Timeout         int
+	PollingInterval int
 }
 
 func (s *FsSession) getClient() *client.Client {
@@ -44,8 +52,11 @@ func (s *FsSession) getVisitor() *client.Visitor {
 
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
-	EnvironmentID string `json:"environment_id" binding:"required"`
-	Bucketing     *bool  `json:"bucketing" binding:"required"`
+	EnvironmentID   string `json:"environment_id" binding:"required"`
+	APIKey          string `json:"api_key" binding:"required"`
+	Bucketing       *bool  `json:"bucketing" binding:"required"`
+	Timeout         int    `json:"timeout"`
+	PollingInterval int    `json:"polling_interval"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
@@ -84,20 +95,6 @@ func bToMb(b uint64) uint64 {
 func initSession() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
-		session := sessions.Default(c)
-		fsSessInt := session.Get("fs_session")
-
-		if fsSessInt == nil {
-			envID := "blvo2kijq6pg023l8edg"
-			fsClient, _ := flagship.Start(envID, client.WithBucketing())
-			fsClients[envID] = fsClient
-			fsSess := FsSession{
-				EnvID:        envID,
-				UseBucketing: true,
-			}
-			setFsSession(c, &fsSess)
-		}
-
 		printMemUsage()
 	}
 }
@@ -105,6 +102,9 @@ func initSession() gin.HandlerFunc {
 func getFsSession(c *gin.Context) *FsSession {
 	session := sessions.Default(c)
 	fsSessInt := session.Get("fs_session")
+	if fsSessInt == nil {
+		return nil
+	}
 	fsSess := fsSessInt.(*FsSession)
 	return fsSess
 }
@@ -137,10 +137,23 @@ func main() {
 
 	router.GET("/currentEnv", func(c *gin.Context) {
 		fsSession := getFsSession(c)
-		c.JSON(http.StatusOK, gin.H{
-			"env_id":    fsSession.EnvID,
-			"bucketing": fsSession.UseBucketing,
-		})
+		if fsSession != nil {
+			timeout := 2000
+			if fsSession.Timeout > 0 {
+				timeout = fsSession.Timeout
+			}
+			pollingInterval := 60000
+			if fsSession.PollingInterval > 0 {
+				pollingInterval = fsSession.PollingInterval
+			}
+			c.JSON(http.StatusOK, gin.H{
+				"env_id":          fsSession.EnvID,
+				"api_key":         fsSession.APIKey,
+				"bucketing":       fsSession.UseBucketing,
+				"timeout":         timeout,
+				"pollingInterval": pollingInterval,
+			})
+		}
 	})
 
 	router.POST("/setEnv", func(c *gin.Context) {
@@ -152,10 +165,24 @@ func main() {
 
 		var fsClient *client.Client
 		var err error
+
+		timeout := 2000
+		if json.Timeout > 0 {
+			timeout = json.Timeout
+		}
+		pollingInterval := 60000
+		if json.PollingInterval > 0 {
+			pollingInterval = json.PollingInterval
+		}
+
 		if *json.Bucketing {
-			fsClient, err = flagship.Start(json.EnvironmentID, client.WithBucketing())
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing(
+				bucketing.PollingInterval(
+					time.Duration(pollingInterval)*time.Millisecond)))
 		} else {
-			fsClient, err = flagship.Start(json.EnvironmentID)
+			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithDecisionAPI(
+				decisionapi.Timeout(
+					time.Duration(timeout)*time.Millisecond)))
 		}
 
 		if err != nil {
@@ -164,15 +191,20 @@ func main() {
 		}
 
 		fsSession := getFsSession(c)
-		fsClientExisting, _ := fsClients[fsSession.EnvID]
-		if fsClientExisting != nil {
-			fsClientExisting.Dispose()
-			fsClientExisting = nil
+		if fsSession != nil {
+			fsClientExisting, _ := fsClients[fsSession.EnvID]
+			if fsClientExisting != nil {
+				fsClientExisting.Dispose()
+				fsClientExisting = nil
+			}
 		}
 		fsClients[json.EnvironmentID] = fsClient
 		setFsSession(c, &FsSession{
-			EnvID:        json.EnvironmentID,
-			UseBucketing: *json.Bucketing,
+			EnvID:           json.EnvironmentID,
+			APIKey:          json.APIKey,
+			UseBucketing:    *json.Bucketing,
+			Timeout:         timeout,
+			PollingInterval: pollingInterval,
 		})
 
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
@@ -200,21 +232,22 @@ func main() {
 		}
 
 		err = fsVisitor.SynchronizeModifications()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-
 		fsVisitors[fsSession.EnvID+"-"+json.VisitorID] = fsVisitor
 		setFsSession(c, &FsSession{
 			EnvID:        fsSession.EnvID,
+			APIKey:       fsSession.APIKey,
 			UseBucketing: fsSession.UseBucketing,
 			VisitorID:    json.VisitorID,
 		})
 
 		flagInfos := fsVisitor.GetAllModifications()
 
-		c.JSON(http.StatusOK, gin.H{"flags": flagInfos})
+		resp := gin.H{"flags": flagInfos}
+		if err != nil {
+			resp["error"] = err.Error()
+		}
+
+		c.JSON(http.StatusOK, resp)
 	})
 
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
@@ -268,6 +301,28 @@ func main() {
 				break
 			case "string":
 				value, err = fsVisitor.GetModificationString(flag, defaultValue, shouldActivate)
+				break
+			case "object":
+				defVal := map[string]interface{}{}
+				if defaultValue != "" {
+					castErr := json.Unmarshal([]byte(defaultValue), &defVal)
+					if castErr != nil {
+						err = castErr
+						break
+					}
+				}
+				value, err = fsVisitor.GetModificationObject(flag, defVal, shouldActivate)
+				break
+			case "array":
+				defVal := []interface{}{}
+				if defaultValue != "" {
+					castErr := json.Unmarshal([]byte(defaultValue), &defVal)
+					if castErr != nil {
+						err = castErr
+						break
+					}
+				}
+				value, err = fsVisitor.GetModificationArray(flag, defVal, shouldActivate)
 				break
 			default:
 				err = fmt.Errorf("Flag type %v not handled", flagType)

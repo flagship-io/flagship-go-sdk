@@ -1,7 +1,6 @@
 package tracking
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,12 +26,12 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a tracking API Client with environment ID and option builders
-func NewAPIClient(envID string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
+func NewAPIClient(envID string, apiKey string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
 	res := APIClient{
 		envID: envID,
 	}
 
-	decisionAPIClient, err := decisionapi.NewAPIClient(envID, params...)
+	decisionAPIClient, err := decisionapi.NewAPIClient(envID, apiKey, params...)
 
 	if err != nil {
 		return nil, err
@@ -51,7 +50,7 @@ func NewAPIClient(envID string, params ...func(r *decisionapi.APIClient)) (*APIC
 }
 
 // SendHit sends a tracking hit to the Data Collect API
-func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
+func (r *APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 	if hit == nil {
 		err := errors.New("Hit should not be empty")
 		apiLogger.Error(err.Error(), err)
@@ -76,7 +75,7 @@ func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 	}
 
 	apiLogger.Info(fmt.Sprintf("Sending hit : %v", string(b)))
-	resp, err := r.httpClientTracking.Call("", "POST", bytes.NewBuffer(b), nil)
+	resp, err := r.httpClientTracking.Call("", "POST", b, nil)
 
 	if err != nil {
 		return err
@@ -90,11 +89,11 @@ func (r APIClient) SendHit(visitorID string, hit model.HitInterface) error {
 }
 
 // ActivateCampaign activate a campaign / variation id to the Decision API
-func (r APIClient) ActivateCampaign(request model.ActivationHit) error {
+func (r *APIClient) ActivateCampaign(request model.ActivationHit) error {
 	return r.decisionAPIClient.ActivateCampaign(request)
 }
 
 // SendEvent sends an event to the Flagship event collection
-func (r APIClient) SendEvent(request model.Event) error {
+func (r *APIClient) SendEvent(request model.Event) error {
 	return r.decisionAPIClient.SendEvent(request)
 }
