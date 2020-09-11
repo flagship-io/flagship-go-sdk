@@ -92,11 +92,10 @@ func (r *HTTPClient) Call(path, method string, body []byte, headers map[string]s
 			req.Header.Add(k, v)
 		}
 
-		if headers != nil {
-			for k, v := range headers {
-				req.Header.Add(k, v)
-			}
+		for k, v := range headers {
+			req.Header.Add(k, v)
 		}
+
 		resp, err = r.client.Do(req)
 
 		if resp != nil && resp.StatusCode < http.StatusBadRequest {
