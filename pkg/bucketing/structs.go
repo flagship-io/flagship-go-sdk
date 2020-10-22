@@ -3,7 +3,7 @@ package bucketing
 import (
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
 
 // TargetingOperator express a targeting operator

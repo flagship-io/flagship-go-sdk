@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/logging"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
 	"github.com/go-redis/redis/v8"
 )
 

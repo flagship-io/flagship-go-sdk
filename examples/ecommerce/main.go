@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/abtasty/flagship-go-sdk"
-	"github.com/abtasty/flagship-go-sdk/pkg/client"
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/client"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 	"github.com/gin-gonic/gin"
 )
 

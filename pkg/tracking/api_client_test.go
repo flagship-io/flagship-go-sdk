@@ -3,7 +3,7 @@ package tracking
 import (
 	"testing"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
 
 var testVisitorID = "test_visitor_id"
