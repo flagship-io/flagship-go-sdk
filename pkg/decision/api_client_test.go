@@ -3,7 +3,7 @@ package decision
 import (
 	"testing"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
 )
 
 var testEnvID = "env_id_test"

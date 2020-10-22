@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/cache"
-	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/bucketing"
-	"github.com/abtasty/flagship-go-sdk/pkg/decision"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/decision"
 )
 
 var testEnvID = "test_env_id"

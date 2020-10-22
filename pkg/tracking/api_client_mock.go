@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
 
 // MockAPIClient represents a fake API client informations

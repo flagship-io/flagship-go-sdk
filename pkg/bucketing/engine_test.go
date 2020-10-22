@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/cache"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
 	"github.com/stretchr/testify/assert"
 )
 

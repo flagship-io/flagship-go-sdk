@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
 
 // APIClientMock represents the API client mock informations

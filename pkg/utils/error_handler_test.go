@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/logging"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
 )
 
 var testLogger = logging.CreateLogger("FS Test")

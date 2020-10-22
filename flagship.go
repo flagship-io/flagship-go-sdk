@@ -1,7 +1,7 @@
 package flagship
 
 import (
-	"github.com/abtasty/flagship-go-sdk/pkg/client"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/client"
 )
 
 // Start creates and returns a Client with the given environment ID and functional options
