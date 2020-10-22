@@ -32,12 +32,12 @@ type APIClient struct {
 }
 
 // NewAPIClient creates a tracking API Client with environment ID and option builders
-func NewAPIClient(envID string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
+func NewAPIClient(envID string, apiKey string, params ...func(r *decisionapi.APIClient)) (*APIClient, error) {
 	res := APIClient{
 		envID: envID,
 	}
 
-	decisionAPIClient, err := decisionapi.NewAPIClient(envID, params...)
+	decisionAPIClient, err := decisionapi.NewAPIClient(envID, apiKey, params...)
 
 	if err != nil {
 		return nil, err

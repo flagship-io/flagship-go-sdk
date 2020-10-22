@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
-
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 
@@ -68,9 +66,8 @@ func Create(f *Options) (*Client, error) {
 		client.cacheManager = cacheManager
 	}
 
-	optionsWithKey := append(f.decisionAPIOptions, decisionapi.APIKey(f.APIKey))
 	if client.trackingAPIClient == nil {
-		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, optionsWithKey...)
+		client.trackingAPIClient, err = tracking.NewAPIClient(client.envID, f.APIKey, f.decisionAPIOptions...)
 	}
 
 	if client.decisionClient == nil {
@@ -81,7 +78,7 @@ func Create(f *Options) (*Client, error) {
 				clientLogger.Error("Got error when creating bucketing engine", err)
 			}
 		} else {
-			client.decisionClient, err = decision.NewAPIClient(client.envID, optionsWithKey...)
+			client.decisionClient, err = decision.NewAPIClient(client.envID, f.APIKey, f.decisionAPIOptions...)
 			if err != nil {
 				clientLogger.Error("Got error when creating Decision API engine", err)
 			}

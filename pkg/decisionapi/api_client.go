@@ -73,9 +73,10 @@ func Retries(retries int) func(r *APIClient) {
 }
 
 // NewAPIClient creates a Decision API client from the environment ID and option builders
-func NewAPIClient(envID string, params ...func(*APIClient)) (*APIClient, error) {
+func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*APIClient, error) {
 	res := APIClient{
 		envID:   envID,
+		apiKey:  apiKey,
 		retries: 1,
 	}
 
