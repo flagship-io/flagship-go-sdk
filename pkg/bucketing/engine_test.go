@@ -171,6 +171,6 @@ func TestPollingPanic(t *testing.T) {
 
 	time.Sleep(1100 * time.Millisecond)
 
-	assert.Equal(t, 1, len(engine.config.Campaigns))
-	assert.Equal(t, true, engine.config.Panic)
+	assert.Equal(t, 1, len(engine.getConfig().Campaigns))
+	assert.Equal(t, true, engine.getConfig().Panic)
 }

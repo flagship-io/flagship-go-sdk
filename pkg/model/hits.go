@@ -235,6 +235,11 @@ func (b *ActivationHit) getBaseHit() BaseHit {
 	}
 }
 
+func (b *ActivationHit) resetBaseHit() {
+	b.EnvironmentID = ""
+	b.VisitorID = ""
+}
+
 // Validate checks that the hit is well formed
 func (b *ActivationHit) Validate() []error {
 	errorsList := []error{}

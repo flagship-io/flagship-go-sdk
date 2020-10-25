@@ -4,18 +4,19 @@ import (
 	"log"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk"
+	"github.com/abtasty/flagship-go-sdk/v2"
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/client"
 )
 
 var testEnvId = "blvo2kijq6pg023l8edg"
+var testApiKey = "api-key"
 var modifKey = "testCache"
 var modifDefaultValue = "default"
 
 func main() {
 
-	fsClient, err := flagship.Start(testEnvId)
+	fsClient, err := flagship.Start(testEnvId, testApiKey)
 
 	if err != nil {
 		log.Printf("Flagship client error %v", err)
@@ -23,7 +24,7 @@ func main() {
 
 	testGetValue(fsClient)
 
-	fsClient, err = flagship.Start(testEnvId, client.WithBucketing(bucketing.PollingInterval(2*time.Second)))
+	fsClient, err = flagship.Start(testEnvId, testApiKey, client.WithBucketing(bucketing.PollingInterval(2*time.Second)))
 
 	if err != nil {
 		log.Printf("Flagship client error %v", err)
