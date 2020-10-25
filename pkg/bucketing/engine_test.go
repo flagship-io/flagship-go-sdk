@@ -131,7 +131,7 @@ func TestGetModificationsMock(t *testing.T) {
 	assert.Equal(t, "test", campaignCacheCheck.FlagKeys[0])
 
 	// Check new GetModifications return cache
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, _ = engine.GetModifications(testVID, map[string]interface{}{"test": true})
 	assert.Equal(t, 1, len(modifs.Campaigns))
 	assert.Equal(t, campaignCacheCheck.VariationID, modifs.Campaigns[0].Variation.ID)
 

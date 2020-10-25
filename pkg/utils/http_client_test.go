@@ -96,12 +96,12 @@ func TestCall(t *testing.T) {
 	defer ts.server.Close()
 
 	httpreq := NewHTTPClient(ts.server.URL, HTTPOptions{})
-	resp, err := httpreq.Call("/ok-endpoint", "GET", nil, nil)
+	resp, _ := httpreq.Call("/ok-endpoint", "GET", nil, nil)
 	if string(resp.Body) != "ok" {
 		t.Errorf("Expected response %v, got %v", "ok\n", resp)
 	}
 
-	resp, err = httpreq.Call("/ok-headers", "GET", nil, map[string]string{
+	resp, err := httpreq.Call("/ok-headers", "GET", nil, map[string]string{
 		"Test": "value",
 	})
 
@@ -134,7 +134,7 @@ func TestRetry(t *testing.T) {
 		Retries: 10,
 	})
 
-	resp, err := httpreq.Call("/retry", "GET", nil, nil)
+	resp, _ := httpreq.Call("/retry", "GET", nil, nil)
 	if "ok" != string(resp.Body) {
 		t.Errorf("Expected response %v, got %v", "ok", string(resp.Body))
 	}
@@ -147,7 +147,7 @@ func TestRetry(t *testing.T) {
 	})
 
 	*ts.nbCalls = 0
-	resp, err = httpreq.Call("/retry", "GET", nil, nil)
+	resp, err := httpreq.Call("/retry", "GET", nil, nil)
 	if err == nil {
 		t.Error("Expected error for error request, got nil")
 	}

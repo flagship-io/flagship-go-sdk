@@ -104,6 +104,32 @@ func (b *Engine) Load() error {
 	return nil
 }
 
+func (b *Engine) getCampaignCache(visitorID string) map[string]*cache.CampaignCache {
+	var campaignsCache = make(map[string]*cache.CampaignCache)
+	if b.cacheManager != nil {
+		campaignsCache, _ = b.cacheManager.Get(visitorID)
+		if campaignsCache == nil {
+			campaignsCache = make(map[string]*cache.CampaignCache)
+		}
+	}
+	return campaignsCache
+}
+
+func getMatchedVG(c *Campaign, visitorID string, context map[string]interface{}) *VariationGroup {
+	for _, vg := range c.VariationGroups {
+		matched, err := TargetingMatch(vg, visitorID, context)
+		if err != nil {
+			logger.Warning(fmt.Sprintf("Error occurred when checking targeting : %v", err))
+			continue
+		}
+
+		if matched {
+			return vg
+		}
+	}
+	return nil
+}
+
 // GetModifications gets modifications from Decision API
 func (b *Engine) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
 	if b.getConfig() == nil {
@@ -125,29 +151,11 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 		return resp, nil
 	}
 
-	var campaignsCache = make(map[string]*cache.CampaignCache)
-	if b.cacheManager != nil {
-		campaignsCache, _ = b.cacheManager.Get(visitorID)
-		if campaignsCache == nil {
-			campaignsCache = make(map[string]*cache.CampaignCache)
-		}
-	}
+	campaignsCache := b.getCampaignCache(visitorID)
 
 	config := b.getConfig()
 	for _, c := range config.Campaigns {
-		var matchedVg *VariationGroup
-		for _, vg := range c.VariationGroups {
-			matched, err := TargetingMatch(vg, visitorID, context)
-			if err != nil {
-				logger.Warning(fmt.Sprintf("Error occurred when checking targeting : %v", err))
-				continue
-			}
-
-			if matched {
-				matchedVg = vg
-				break
-			}
-		}
+		matchedVg := getMatchedVG(c, visitorID, context)
 
 		if matchedVg != nil {
 			var variation *Variation

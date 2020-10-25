@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+func isANDListOperator(operator TargetingOperator) bool {
+	return operator == NOT_EQUALS || operator == NOT_CONTAINS
+}
+
+func isORListOperator(operator TargetingOperator) bool {
+	return operator == EQUALS || operator == CONTAINS
+}
+
 // TargetingMatch returns true if a visitor ID and context match the variationGroup targeting
 func TargetingMatch(variationGroup *VariationGroup, visitorID string, context map[string]interface{}) (bool, error) {
 	globalMatch := false
@@ -43,8 +51,13 @@ func targetingMatchOperator(operator TargetingOperator, targetingValue interface
 	var err error
 
 	isList := strings.Contains(reflect.TypeOf(targetingValue).String(), "[]")
+
+	if isList {
+		return targetingMatchOperatorList(operator, targetingValue, contextValue)
+	}
+
 	// Except for targeting value of type list, check that context and targeting types are equals
-	if !isList && reflect.TypeOf(targetingValue) != reflect.TypeOf(contextValue) {
+	if reflect.TypeOf(targetingValue) != reflect.TypeOf(contextValue) {
 		return false, errors.New("Targeting and Context value kinds mismatch")
 	}
 
@@ -69,28 +82,30 @@ func targetingMatchOperator(operator TargetingOperator, targetingValue interface
 		match, err = targetingMatchOperatorNumber(operator, targetingValueCasted, contextValueCasted)
 	}
 
-	if isList {
-		targetingList, convOk := takeSliceArg(targetingValue)
-		if !convOk {
-			err = errors.New("Could not convert list targeting")
-			return match, err
+	return match, err
+}
+
+func targetingMatchOperatorList(operator TargetingOperator, targetingValue interface{}, contextValue interface{}) (bool, error) {
+	targetingList, convOk := takeSliceArg(targetingValue)
+	if !convOk {
+		return false, errors.New("Could not convert list targeting")
+	}
+	match := isANDListOperator(operator)
+	for _, v := range targetingList {
+		subValueMatch, err := targetingMatchOperator(operator, v, contextValue)
+		if err != nil {
+			return false, err
 		}
-		if operator == NOT_EQUALS {
-			match = true
-			for _, v := range targetingList {
-				subValueMatch, err := targetingMatchOperator(operator, v, contextValue)
-				match = match && err == nil && subValueMatch
-			}
+
+		if isANDListOperator(operator) {
+			match = match && subValueMatch
 		}
-		if operator == EQUALS {
-			for _, v := range targetingList {
-				subValueMatch, err := targetingMatchOperator(operator, v, contextValue)
-				match = match || (err == nil && subValueMatch)
-			}
+		if isORListOperator(operator) {
+			match = match || subValueMatch
 		}
 	}
 
-	return match, err
+	return match, nil
 }
 
 func targetingMatchOperatorString(operator TargetingOperator, targetingValue string, contextValue string) (bool, error) {

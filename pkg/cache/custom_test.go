@@ -42,7 +42,7 @@ func TestCustomCache(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 
-	r, err := m.Get("test")
+	_, err = m.Get("test")
 
 	assert.NotEqual(t, nil, err)
 
@@ -52,7 +52,7 @@ func TestCustomCache(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 
-	r, err = m.Get("test")
+	r, err := m.Get("test")
 	assert.Equal(t, nil, err)
 	assert.NotEqual(t, nil, r["testC"])
 }
