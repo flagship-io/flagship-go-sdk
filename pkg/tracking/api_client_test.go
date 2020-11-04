@@ -3,7 +3,7 @@ package tracking
 import (
 	"testing"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
 
 var testVisitorID = "test_visitor_id"
@@ -18,7 +18,7 @@ func TestNewAPIClient(t *testing.T) {
 		t.Error("Api client V2 with API Key should not fail")
 	}
 
-	client, err := NewAPIClient(testEnvID, testAPIKey)
+	client, _ := NewAPIClient(testEnvID, testAPIKey)
 
 	if client == nil {
 		t.Error("Api client tracking should not be nil")

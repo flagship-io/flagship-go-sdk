@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/logging"
-	"github.com/abtasty/flagship-go-sdk/pkg/utils"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/utils"
 )
 
 const defaultAPIURLTracking = "https://ariane.abtasty.com"

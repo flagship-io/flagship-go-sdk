@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/cache"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -131,7 +131,7 @@ func TestGetModificationsMock(t *testing.T) {
 	assert.Equal(t, "test", campaignCacheCheck.FlagKeys[0])
 
 	// Check new GetModifications return cache
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, _ = engine.GetModifications(testVID, map[string]interface{}{"test": true})
 	assert.Equal(t, 1, len(modifs.Campaigns))
 	assert.Equal(t, campaignCacheCheck.VariationID, modifs.Campaigns[0].Variation.ID)
 
@@ -171,6 +171,6 @@ func TestPollingPanic(t *testing.T) {
 
 	time.Sleep(1100 * time.Millisecond)
 
-	assert.Equal(t, 1, len(engine.config.Campaigns))
-	assert.Equal(t, true, engine.config.Panic)
+	assert.Equal(t, 1, len(engine.getConfig().Campaigns))
+	assert.Equal(t, true, engine.getConfig().Panic)
 }

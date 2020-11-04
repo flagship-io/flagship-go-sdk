@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"github.com/abtasty/flagship-go-sdk/pkg/logging"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
 )
 
 // ManagerType represents infrastructure types of cache manager

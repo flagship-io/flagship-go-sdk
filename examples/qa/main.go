@@ -12,16 +12,16 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/decisionapi"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
 
-	"github.com/abtasty/flagship-go-sdk/pkg/bucketing"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/abtasty/flagship-go-sdk"
-	"github.com/abtasty/flagship-go-sdk/pkg/client"
-	"github.com/abtasty/flagship-go-sdk/pkg/logging"
-	"github.com/abtasty/flagship-go-sdk/pkg/model"
+	"github.com/abtasty/flagship-go-sdk/v2"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/client"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
