@@ -14,7 +14,7 @@ import (
 
 const defaultTimeout = 2 * time.Second
 const defaultV1APIURL = "https://decision-api.flagship.io/v1"
-const defaultV2APIURL = "https://decision-staging.flagship.io/v2"
+const defaultV2APIURL = "https://decision.flagship.io/v2"
 
 var apiLogger = logging.CreateLogger("Decision API")
 
