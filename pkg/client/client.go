@@ -43,13 +43,13 @@ func Create(f *Options) (*Client, error) {
 
 	var err error
 
-	if f.APIKey == "" {
-		err = errors.New("APIKey is required")
+	if f.EnvID == "" {
+		err = errors.New("EnvID is required")
 		return nil, err
 	}
 
-	if f.EnvID == "" {
-		err = errors.New("EnvID is required")
+	if f.APIKey == "" {
+		err = errors.New("APIKey is required")
 		return nil, err
 	}
 

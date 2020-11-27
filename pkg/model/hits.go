@@ -216,6 +216,7 @@ func (b *ItemHit) Validate() []error {
 // ActivationHit represents an item hit for the datacollect
 type ActivationHit struct {
 	VisitorID        string    `json:"vid"`
+	AnonymousID      *string   `json:"aid"`
 	EnvironmentID    string    `json:"cid"`
 	VariationGroupID string    `json:"caid"`
 	VariationID      string    `json:"vaid"`

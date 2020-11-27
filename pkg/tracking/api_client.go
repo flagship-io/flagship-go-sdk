@@ -21,7 +21,7 @@ var apiLogger = logging.CreateLogger("DataCollect API")
 type APIClient struct {
 	urlTracking        string
 	envID              string
-	httpClientTracking *utils.HTTPClient
+	httpClientTracking utils.HTTPClientInterface
 	decisionAPIClient  *decisionapi.APIClient
 }
 

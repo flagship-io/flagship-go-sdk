@@ -1,7 +1,11 @@
 package decisionapi
 
 import (
+	"encoding/json"
 	"testing"
+
+	"github.com/abtasty/flagship-go-sdk/v2/pkg/utils"
+	"github.com/stretchr/testify/assert"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
 )
@@ -68,18 +72,29 @@ func TestNewAPIClientParams(t *testing.T) {
 
 func TestGetModifications(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
-	_, err := client.GetModifications("test_vid", nil)
+	_, err := client.GetModifications("test_vid", nil, nil)
 
 	if err == nil {
 		t.Error("Expected error for unknown env id")
 	}
 
 	client, _ = NewAPIClient(realEnvID, testAPIKey)
-	_, err = client.GetModifications("test_vid", nil)
+	_, err = client.GetModifications("test_vid", nil, nil)
 
 	if err == nil {
 		t.Errorf("Expected error for wrong api key : %v", err)
 	}
+
+	response := &model.APIClientResponse{
+		VisitorID: "vis_id",
+		Panic:     false,
+		Campaigns: []model.Campaign{},
+	}
+	responseJSON, _ := json.Marshal(response)
+	client.httpClient = utils.NewHTTPClientMock(200, responseJSON, nil)
+
+	_, err = client.GetModifications("test_vid", nil, nil)
+	assert.Nil(t, err)
 }
 
 func TestActivate(t *testing.T) {

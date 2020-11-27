@@ -18,6 +18,7 @@ var visitorLogger = logging.CreateLogger("FS Visitor")
 // Visitor represents a visitor instance of the Flagship SDK
 type Visitor struct {
 	ID                string
+	AnonymousID       *string
 	Context           map[string]interface{}
 	decisionClient    decision.ClientInterface
 	decisionMode      DecisionMode
@@ -86,6 +87,23 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 	return nil
 }
 
+// Authenticate set the authenticated ID for the visitor
+func (v *Visitor) Authenticate(newID string) {
+	if v.AnonymousID == nil {
+		anonID := v.ID
+		v.AnonymousID = &anonID
+	}
+	v.ID = newID
+}
+
+// Unauthenticate unset the authenticated ID for the visitor
+func (v *Visitor) Unauthenticate() {
+	if v.AnonymousID != nil {
+		v.ID = *v.AnonymousID
+		v.AnonymousID = nil
+	}
+}
+
 // SynchronizeModifications updates the latest campaigns and modifications for the visitor
 func (v *Visitor) SynchronizeModifications() (err error) {
 	defer func() {
@@ -101,7 +119,7 @@ func (v *Visitor) SynchronizeModifications() (err error) {
 	}
 
 	visitorLogger.Info(fmt.Sprintf("Getting modifications for visitor with id : %s", v.ID))
-	resp, err := v.decisionClient.GetModifications(v.ID, v.Context)
+	resp, err := v.decisionClient.GetModifications(v.ID, v.AnonymousID, v.Context)
 
 	if err != nil {
 		visitorLogger.Error("Error when calling Decision engine: ", err)
@@ -168,6 +186,7 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 			VariationGroupID: flagInfos.Campaign.VariationGroupID,
 			VariationID:      flagInfos.Campaign.Variation.ID,
 			VisitorID:        v.ID,
+			AnonymousID:      v.AnonymousID,
 		})
 
 		if err != nil {
@@ -393,6 +412,7 @@ func (v *Visitor) ActivateCacheModification(key string) (err error) {
 						VariationGroupID: c.VariationGroupID,
 						VariationID:      c.VariationID,
 						VisitorID:        v.ID,
+						AnonymousID:      v.AnonymousID,
 					})
 					return err
 				}

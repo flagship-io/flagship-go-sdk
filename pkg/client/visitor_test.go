@@ -117,6 +117,22 @@ func TestUpdateContextKey(t *testing.T) {
 	}
 }
 
+func TestAuthenticate(t *testing.T) {
+	context := map[string]interface{}{}
+	visitor := createVisitor("firstID", context)
+	visitor.Authenticate("newID")
+	assert.Equal(t, "newID", visitor.ID)
+	assert.Equal(t, "firstID", *visitor.AnonymousID)
+
+	visitor.Authenticate("newerID")
+	assert.Equal(t, "newerID", visitor.ID)
+	assert.Equal(t, "firstID", *visitor.AnonymousID)
+
+	visitor.Unauthenticate()
+	assert.Equal(t, "firstID", visitor.ID)
+	assert.Nil(t, visitor.AnonymousID)
+}
+
 func TestSynchronizeModifications(t *testing.T) {
 	visitor := &Visitor{}
 	err := visitor.SynchronizeModifications()
