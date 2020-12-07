@@ -505,5 +505,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "hitType": hitType})
 	})
 
-	router.Run(":8081")
+	router.Run(":8080")
 }
