@@ -32,6 +32,7 @@ type ModificationInfo struct {
 	CampaignID       string
 	VariationGroupID string
 	VariationID      string
+	IsReference      bool
 	Value            interface{}
 }
 
@@ -360,6 +361,7 @@ func (v *Visitor) GetModificationInfo(key string) (modifInfo *ModificationInfo, 
 		CampaignID:       flagInfos.Campaign.ID,
 		VariationGroupID: flagInfos.Campaign.VariationGroupID,
 		VariationID:      flagInfos.Campaign.Variation.ID,
+		IsReference:      flagInfos.Campaign.Variation.Reference,
 		Value:            flagInfos.Value,
 	}, nil
 }
