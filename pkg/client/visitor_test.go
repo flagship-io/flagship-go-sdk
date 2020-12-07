@@ -55,6 +55,11 @@ func createMockClient() decision.ClientInterface {
 	}, 200)
 }
 
+func TestGenerateID(t *testing.T) {
+	visitor := createVisitor("", nil)
+	assert.NotEqual(t, "", visitor.ID)
+}
+
 func TestUpdateContext(t *testing.T) {
 	visitor := createVisitor("test", nil)
 
@@ -120,17 +125,42 @@ func TestUpdateContextKey(t *testing.T) {
 func TestAuthenticate(t *testing.T) {
 	context := map[string]interface{}{}
 	visitor := createVisitor("firstID", context)
-	visitor.Authenticate("newID")
+	err := visitor.Authenticate("newID", nil, false)
+	assert.NotNil(t, err)
+
+	visitor.decisionMode = API
+	err = visitor.Authenticate("newID", nil, false)
+	assert.Nil(t, err)
 	assert.Equal(t, "newID", visitor.ID)
 	assert.Equal(t, "firstID", *visitor.AnonymousID)
 
-	visitor.Authenticate("newerID")
+	newContext := map[string]interface{}{
+		"test": "string",
+	}
+	visitor.Authenticate("newerID", newContext, false)
 	assert.Equal(t, "newerID", visitor.ID)
+	assert.Equal(t, newContext, visitor.Context)
 	assert.Equal(t, "firstID", *visitor.AnonymousID)
 
-	visitor.Unauthenticate()
+	visitor.decisionMode = Bucketing
+	err = visitor.Unauthenticate(newContext, false)
+	assert.NotNil(t, err)
+
+	visitor.decisionMode = API
+	newContext = map[string]interface{}{
+		"test2": "string",
+	}
+	err = visitor.Unauthenticate(newContext, false)
+	assert.Nil(t, err)
 	assert.Equal(t, "firstID", visitor.ID)
+	assert.Equal(t, newContext, visitor.Context)
 	assert.Nil(t, visitor.AnonymousID)
+
+	visitor = createVisitor("firstID", context).WithAuthenticated(false)
+	assert.Nil(t, visitor.AnonymousID)
+
+	visitor = createVisitor("firstID", context).WithAuthenticated(true)
+	assert.NotNil(t, visitor.AnonymousID)
 }
 
 func TestSynchronizeModifications(t *testing.T) {

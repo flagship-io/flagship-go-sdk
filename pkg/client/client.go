@@ -108,8 +108,13 @@ func (c *Client) NewVisitor(visitorID string, context model.Context) (visitor *V
 		return nil, fmt.Errorf("Invalid context : %s", strings.Join(errorStrings, ", "))
 	}
 
+	id := visitorID
+	if id == "" {
+		id = generateAnonymousID()
+	}
+
 	return &Visitor{
-		ID:                visitorID,
+		ID:                id,
 		Context:           context,
 		decisionClient:    c.decisionClient,
 		decisionMode:      c.decisionMode,

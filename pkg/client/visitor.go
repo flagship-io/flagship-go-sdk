@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/decision"
@@ -34,6 +35,20 @@ type ModificationInfo struct {
 	VariationGroupID string
 	VariationID      string
 	Value            interface{}
+}
+
+func generateAnonymousID() string {
+	newID := time.Now().Format("20060102030405.000000")
+	return newID[:len(newID)-1]
+}
+
+// WithAuthenticated auto generates the visitor anonymous ID
+func (v *Visitor) WithAuthenticated(isAuthenticated bool) *Visitor {
+	if isAuthenticated && v.AnonymousID == nil {
+		anonymousID := generateAnonymousID()
+		v.AnonymousID = &anonymousID
+	}
+	return v
 }
 
 // UpdateContext updates the Visitor context with new value
@@ -87,21 +102,50 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 	return nil
 }
 
-// Authenticate set the authenticated ID for the visitor
-func (v *Visitor) Authenticate(newID string) {
+// Authenticate set the authenticated ID for the visitor, along with optional new context and re-synchronize flag
+func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, sync bool) (err error) {
+	if v.decisionMode != API {
+		err = errors.New("authenticate() is ignored in BUCKETING mode")
+		return err
+	}
 	if v.AnonymousID == nil {
 		anonID := v.ID
 		v.AnonymousID = &anonID
 	}
 	v.ID = newID
+	if newContext != nil {
+		err = v.UpdateContext(newContext)
+		if err != nil {
+			return err
+		}
+	}
+	if sync {
+		err = v.SynchronizeModifications()
+	}
+	return err
 }
 
 // Unauthenticate unset the authenticated ID for the visitor
-func (v *Visitor) Unauthenticate() {
+func (v *Visitor) Unauthenticate(newContext map[string]interface{}, sync bool) (err error) {
+	if v.decisionMode != API {
+		err = errors.New("unauthenticate() is ignored in BUCKETING mode")
+		return err
+	}
 	if v.AnonymousID != nil {
 		v.ID = *v.AnonymousID
 		v.AnonymousID = nil
 	}
+
+	if newContext != nil {
+		err = v.UpdateContext(newContext)
+		if err != nil {
+			return err
+		}
+	}
+	if sync {
+		err = v.SynchronizeModifications()
+	}
+	return err
 }
 
 // SynchronizeModifications updates the latest campaigns and modifications for the visitor
