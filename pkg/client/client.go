@@ -144,3 +144,8 @@ func (c *Client) Dispose() (err error) {
 func (c *Client) GetEnvID() string {
 	return c.envID
 }
+
+// GetCacheManager returns the current cache manager
+func (c *Client) GetCacheManager() cache.Manager {
+	return c.cacheManager
+}
