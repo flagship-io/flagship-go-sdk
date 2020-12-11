@@ -145,6 +145,11 @@ func (c *Client) GetEnvID() string {
 	return c.envID
 }
 
+// GetDecisionMode returns the current decision mode
+func (c *Client) GetDecisionMode() DecisionMode {
+	return c.decisionMode
+}
+
 // GetCacheManager returns the current cache manager
 func (c *Client) GetCacheManager() cache.Manager {
 	return c.cacheManager
