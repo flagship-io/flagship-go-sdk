@@ -180,8 +180,9 @@ func TestEvent(t *testing.T) {
 }
 
 func TestBatch(t *testing.T) {
-	b := createBatchHit(&EventHit{Action: "test_event_action"})
+	b := createBatchHit(BaseHit{})
 	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.AddHit(&EventHit{Action: "event Action"})
 
 	errs := b.Validate()
 	if len(errs) != 0 {

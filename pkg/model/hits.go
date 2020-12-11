@@ -60,16 +60,6 @@ func (b *BaseHit) SetBaseInfos(envID string, visitorID string) {
 	b.CreatedAt = time.Now()
 }
 
-func (b *BaseHit) getBaseHit() BaseHit {
-	return *b
-}
-
-func (b *BaseHit) resetBaseHit() {
-	b.EnvironmentID = ""
-	b.VisitorID = ""
-	b.DataSource = ""
-}
-
 func (b *BaseHit) validateBase() []error {
 	errorsList := []error{}
 	if b.VisitorID == "" {
@@ -112,10 +102,6 @@ type PageHit struct {
 func (b *PageHit) SetBaseInfos(envID string, visitorID string) {
 	b.BaseHit.SetBaseInfos(envID, visitorID)
 	b.Type = PAGE
-}
-
-func (b *PageHit) getBaseHit() BaseHit {
-	return b.BaseHit
 }
 
 // Validate checks that the hit is well formed
@@ -229,17 +215,6 @@ func (b *ActivationHit) SetBaseInfos(envID string, visitorID string) {
 	b.VisitorID = visitorID
 }
 
-func (b *ActivationHit) getBaseHit() BaseHit {
-	return BaseHit{
-		Type: ACTIVATION,
-	}
-}
-
-func (b *ActivationHit) resetBaseHit() {
-	b.EnvironmentID = ""
-	b.VisitorID = ""
-}
-
 // Validate checks that the hit is well formed
 func (b *ActivationHit) Validate() []error {
 	errorsList := []error{}
@@ -315,14 +290,16 @@ func (b *BatchHit) Validate() []error {
 	return errorsList
 }
 
-func createBatchHit(hit HitInterface) BatchHit {
+// AddHit adds a hit to the batch
+func (b *BatchHit) AddHit(hit HitInterface) {
+	b.Hits = append(b.Hits, hit)
+}
+
+func createBatchHit(baseHit BaseHit) BatchHit {
 	bHit := BatchHit{
-		BaseHit: hit.getBaseHit(),
+		BaseHit: baseHit,
 		Hits:    []HitInterface{},
 	}
-	hit.resetBaseHit()
-	bHit.Hits = append(bHit.Hits, hit)
-
 	bHit.SetBaseInfos(bHit.EnvironmentID, bHit.VisitorID)
 	return bHit
 }
