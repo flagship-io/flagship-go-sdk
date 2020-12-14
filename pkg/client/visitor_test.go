@@ -16,11 +16,11 @@ var caID = "cid"
 var vgID = "vgid"
 var testVID = "vid"
 
-func createVisitor(vID string, context map[string]interface{}) *Visitor {
+func createVisitor(vID string, context map[string]interface{}, options ...VisitorOptionBuilder) *Visitor {
 	client := createClient()
 	client.decisionClient = createMockClient()
 
-	visitor, _ := client.NewVisitor(vID, context)
+	visitor, _ := client.NewVisitor(vID, context, options...)
 	return visitor
 }
 
@@ -156,10 +156,10 @@ func TestAuthenticate(t *testing.T) {
 	assert.Equal(t, newContext, visitor.Context)
 	assert.Nil(t, visitor.AnonymousID)
 
-	visitor = createVisitor("firstID", context).WithAuthenticated(false)
+	visitor = createVisitor("firstID", context, WithAuthenticated(false))
 	assert.Nil(t, visitor.AnonymousID)
 
-	visitor = createVisitor("firstID", context).WithAuthenticated(true)
+	visitor = createVisitor("firstID", context, WithAuthenticated(true))
 	assert.NotNil(t, visitor.AnonymousID)
 }
 

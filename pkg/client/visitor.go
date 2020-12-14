@@ -42,15 +42,6 @@ func generateAnonymousID() string {
 	return newID[:len(newID)-1]
 }
 
-// WithAuthenticated auto generates the visitor anonymous ID
-func (v *Visitor) WithAuthenticated(isAuthenticated bool) *Visitor {
-	if isAuthenticated && v.AnonymousID == nil {
-		anonymousID := generateAnonymousID()
-		v.AnonymousID = &anonymousID
-	}
-	return v
-}
-
 // UpdateContext updates the Visitor context with new value
 func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 	defer func() {

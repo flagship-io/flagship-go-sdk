@@ -250,12 +250,11 @@ func main() {
 			return
 		}
 
-		fsVisitor, err := fsClient.NewVisitor(json.VisitorID, json.Context)
+		fsVisitor, err := fsClient.NewVisitor(json.VisitorID, json.Context, client.WithAuthenticated(json.IsAuthenticated))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		fsVisitor.WithAuthenticated(json.IsAuthenticated)
 
 		err = fsVisitor.SynchronizeModifications()
 		fsVisitors[fsSession.EnvID+"-"+json.VisitorID] = fsVisitor
