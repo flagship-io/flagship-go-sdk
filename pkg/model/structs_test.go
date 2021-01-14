@@ -74,7 +74,7 @@ func TestValidateScreen(t *testing.T) {
 	errs := b.Validate()
 	assert.Equal(t, 1, len(errs))
 
-	b.PageTitle = "page title"
+	b.Title = "page title"
 
 	errs = b.Validate()
 	assert.Equal(t, 0, len(errs))
