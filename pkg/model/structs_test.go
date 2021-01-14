@@ -57,9 +57,27 @@ func TestValidatePage(t *testing.T) {
 	b.SetBaseInfos(testEnvID, testVisitorID)
 
 	errs := b.Validate()
-	if len(errs) != 0 {
-		t.Errorf("Page hit should not raise any errors. %d raised", len(errs))
+	assert.Equal(t, 1, len(errs))
+
+	b.DocumentLocation = "location"
+
+	errs = b.Validate()
+	assert.Equal(t, 0, len(errs))
+}
+
+func TestValidateScreen(t *testing.T) {
+	b := ScreenHit{
+		BaseHit: BaseHit{},
 	}
+	b.SetBaseInfos(testEnvID, testVisitorID)
+
+	errs := b.Validate()
+	assert.Equal(t, 1, len(errs))
+
+	b.PageTitle = "page title"
+
+	errs = b.Validate()
+	assert.Equal(t, 0, len(errs))
 }
 
 func TestValidateEvent(t *testing.T) {

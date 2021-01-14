@@ -16,7 +16,7 @@ var app = new Vue({
     eventError: null,
     data: null,
     hit: { t: "EVENT" },
-    hitTypes: ["EVENT", "TRANSACTION", "ITEM", "PAGE"],
+    hitTypes: ["EVENT", "TRANSACTION", "ITEM", "PAGE", "SCREEN"],
     flag: { name: "", type: "bool", defaultValue: "", activate: true },
     flagOk: false,
     flagInfo: { name: "" },

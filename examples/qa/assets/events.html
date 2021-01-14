@@ -56,6 +56,16 @@
           </select>
         </div>
 
+        <div v-if="hit.t == 'SCREEN'" class="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Screen title"
+            v-model="hit.pt"
+          />
+        </div>
+
         <div v-if="hit.t == 'EVENT'" class="form-group">
           <label>Event Action</label>
           <input

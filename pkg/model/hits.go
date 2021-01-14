@@ -13,7 +13,8 @@ type HitType string
 const (
 	ACTIVATION  HitType = "ACTIVATION"
 	CAMPAIGN    HitType = "CAMPAIGN"
-	PAGE        HitType = "SCREENVIEW"
+	SCREEN      HitType = "SCREENVIEW"
+	PAGE        HitType = "PAGEVIEW"
 	EVENT       HitType = "EVENT"
 	ITEM        HitType = "ITEM"
 	TRANSACTION HitType = "TRANSACTION"
@@ -39,7 +40,7 @@ type BaseHit struct {
 	DocumentReferrer        string    `json:"dr,omitempty"`
 	ViewportSize            string    `json:"vp,omitempty"`
 	ScreenResolution        string    `json:"sr,omitempty"`
-	PageTitle               string    `json:"pt,omitempty"`
+	Title                   string    `json:"pt,omitempty"`
 	DocumentEncoding        string    `json:"de,omitempty"`
 	ScreenColorDepth        string    `json:"sd,omitempty"`
 	UserLanguage            string    `json:"ul,omitempty"`
@@ -77,6 +78,7 @@ func (b *BaseHit) validateBase() []error {
 		TRANSACTION,
 		EVENT,
 		PAGE,
+		SCREEN,
 		ITEM,
 		CAMPAIGN,
 		BATCH:
@@ -93,7 +95,7 @@ func (b *BaseHit) ComputeQueueTime() {
 	b.QueueTime = int64((time.Since(b.CreatedAt)).Milliseconds())
 }
 
-// PageHit represents a screenview hit for the datacollect
+// PageHit represents a pageview hit for the datacollect
 type PageHit struct {
 	BaseHit
 }
@@ -107,6 +109,29 @@ func (b *PageHit) SetBaseInfos(envID string, visitorID string) {
 // Validate checks that the hit is well formed
 func (b *PageHit) Validate() []error {
 	errorsList := b.validateBase()
+	if b.DocumentLocation == "" {
+		errorsList = append(errorsList, errors.New("Document location should not by empty for a page hit"))
+	}
+	return errorsList
+}
+
+// ScreenHit represents a screenview hit for the datacollect
+type ScreenHit struct {
+	BaseHit
+}
+
+// SetBaseInfos sets the mandatory information for the hit
+func (b *ScreenHit) SetBaseInfos(envID string, visitorID string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID)
+	b.Type = PAGE
+}
+
+// Validate checks that the hit is well formed
+func (b *ScreenHit) Validate() []error {
+	errorsList := b.validateBase()
+	if b.Title == "" {
+		errorsList = append(errorsList, errors.New("Page Title should not by empty for a screen hit"))
+	}
 	return errorsList
 }
 
