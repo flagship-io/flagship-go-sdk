@@ -2,7 +2,7 @@ module github.com/abtasty/flagship-go-sdk/examples
 
 go 1.12
 
-replace github.com/abtasty/flagship-go-sdk/v2 => /home/guillaume/go/src/github.com/abtasty/flagship-go-sdk
+replace github.com/abtasty/flagship-go-sdk/v2 => ../
 
 require (
 	github.com/abtasty/flagship-go-sdk/v2 v2.0.0
