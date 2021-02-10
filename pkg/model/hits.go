@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -87,6 +88,13 @@ func (b *BaseHit) validateBase() []error {
 		errorsList = append(errorsList, errors.New("Type is not handled"))
 	}
 
+	isScreenOrPageHit := b.Type == PAGE || b.Type == SCREEN
+	if isScreenOrPageHit && b.DocumentLocation == "" {
+		errorsList = append(errorsList, errors.New("Document location must not by empty for this hit PAGE or SCREEN"))
+	} else if !isScreenOrPageHit && b.DocumentLocation != "" {
+		errorsList = append(errorsList, errors.New("Document location must be empty for this type of hit"))
+	}
+
 	return errorsList
 }
 
@@ -109,9 +117,13 @@ func (b *PageHit) SetBaseInfos(envID string, visitorID string) {
 // Validate checks that the hit is well formed
 func (b *PageHit) Validate() []error {
 	errorsList := b.validateBase()
-	if b.DocumentLocation == "" {
-		errorsList = append(errorsList, errors.New("Document location should not by empty for a page hit"))
+
+	// Check url format
+	_, err := url.ParseRequestURI(b.DocumentLocation)
+	if err != nil {
+		errorsList = append(errorsList, errors.New("Document location should be a real url for hit page"))
 	}
+
 	return errorsList
 }
 
@@ -123,16 +135,12 @@ type ScreenHit struct {
 // SetBaseInfos sets the mandatory information for the hit
 func (b *ScreenHit) SetBaseInfos(envID string, visitorID string) {
 	b.BaseHit.SetBaseInfos(envID, visitorID)
-	b.Type = PAGE
+	b.Type = SCREEN
 }
 
 // Validate checks that the hit is well formed
 func (b *ScreenHit) Validate() []error {
-	errorsList := b.validateBase()
-	if b.Title == "" {
-		errorsList = append(errorsList, errors.New("Page Title should not by empty for a screen hit"))
-	}
-	return errorsList
+	return b.validateBase()
 }
 
 // EventHit represents an event hit for the datacollect
@@ -311,8 +319,7 @@ func (b *BatchHit) SetBaseInfos(envID string, visitorID string) {
 
 // Validate checks that the hit is well formed
 func (b *BatchHit) Validate() []error {
-	errorsList := b.validateBase()
-	return errorsList
+	return b.validateBase()
 }
 
 // AddHit adds a hit to the batch

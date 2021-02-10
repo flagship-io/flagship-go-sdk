@@ -57,9 +57,14 @@ func TestValidatePage(t *testing.T) {
 	b.SetBaseInfos(testEnvID, testVisitorID)
 
 	errs := b.Validate()
-	assert.Equal(t, 1, len(errs))
+	assert.Equal(t, 2, len(errs))
 
 	b.DocumentLocation = "location"
+
+	errs = b.Validate()
+	assert.Equal(t, 1, len(errs))
+
+	b.DocumentLocation = "https://google.com"
 
 	errs = b.Validate()
 	assert.Equal(t, 0, len(errs))
@@ -74,7 +79,7 @@ func TestValidateScreen(t *testing.T) {
 	errs := b.Validate()
 	assert.Equal(t, 1, len(errs))
 
-	b.Title = "page title"
+	b.DocumentLocation = "Name"
 
 	errs = b.Validate()
 	assert.Equal(t, 0, len(errs))
