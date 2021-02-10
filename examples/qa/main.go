@@ -68,7 +68,6 @@ type FSVisitorInfo struct {
 // FSHitInfo Binding visitor from JSON
 type FSHitInfo struct {
 	HitType                string  `json:"t" binding:"required"`
-	PageTitle              string  `json:"pt"`
 	Action                 string  `json:"ea"`
 	Value                  int64   `json:"ev"`
 	TransactionID          string  `json:"tid"`
@@ -402,7 +401,7 @@ func main() {
 		case "PAGE":
 			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: c.Request.URL.String()}}
 		case "SCREEN":
-			hit = &model.ScreenHit{BaseHit: model.BaseHit{Title: json.PageTitle}}
+			hit = &model.ScreenHit{BaseHit: model.BaseHit{Title: json.DocumentLocation}}
 		case "TRANSACTION":
 			rand.Seed(time.Now().UnixNano())
 			hit = &model.TransactionHit{TransactionID: json.TransactionID, Affiliation: json.TransactionAffiliation, Revenue: json.TransactionRevenue}

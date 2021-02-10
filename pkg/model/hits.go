@@ -41,7 +41,7 @@ type BaseHit struct {
 	DocumentReferrer        string    `json:"dr,omitempty"`
 	ViewportSize            string    `json:"vp,omitempty"`
 	ScreenResolution        string    `json:"sr,omitempty"`
-	Title                   string    `json:"pt,omitempty"`
+	PageTitle               string    `json:"pt,omitempty"`
 	DocumentEncoding        string    `json:"de,omitempty"`
 	ScreenColorDepth        string    `json:"sd,omitempty"`
 	UserLanguage            string    `json:"ul,omitempty"`
