@@ -76,6 +76,7 @@ type FSHitInfo struct {
 	ItemCode               string  `json:"ic"`
 	ItemName               string  `json:"in"`
 	ItemQuantity           int     `json:"iq"`
+	DocumentLocation       string  `json:"dl"`
 }
 
 func printMemUsage() {
@@ -379,6 +380,11 @@ func main() {
 		}
 
 		fsSession := getFsSession(c)
+		if fsSession == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Session not initialized"})
+			return
+		}
+
 		fsClient, _ := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
@@ -399,9 +405,9 @@ func main() {
 		case "EVENT":
 			hit = &model.EventHit{Action: json.Action, Value: json.Value}
 		case "PAGE":
-			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: c.Request.URL.String()}}
+			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: json.DocumentLocation}}
 		case "SCREEN":
-			hit = &model.ScreenHit{BaseHit: model.BaseHit{Title: json.DocumentLocation}}
+			hit = &model.ScreenHit{BaseHit: model.BaseHit{DocumentLocation: json.DocumentLocation}}
 		case "TRANSACTION":
 			rand.Seed(time.Now().UnixNano())
 			hit = &model.TransactionHit{TransactionID: json.TransactionID, Affiliation: json.TransactionAffiliation, Revenue: json.TransactionRevenue}

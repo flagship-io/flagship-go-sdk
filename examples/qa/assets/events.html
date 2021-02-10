@@ -62,7 +62,17 @@
             type="text"
             class="form-control"
             placeholder="Screen title"
-            v-model="hit.pt"
+            v-model="hit.dl"
+          />
+        </div>
+
+        <div v-if="hit.t == 'PAGE'" class="form-group">
+          <label>URL</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Url"
+            v-model="hit.dl"
           />
         </div>
 
