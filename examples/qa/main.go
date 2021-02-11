@@ -337,19 +337,6 @@ func main() {
 			}
 		}
 
-		if shouldActivate {
-			// Track segment
-			data := analytics.Track{
-				UserId: fsVisitor.ID,
-				Event:  "Flagship_Source_Go",
-				Properties: analytics.NewProperties().
-					Set("key", flag).
-					Set("value", value),
-			}
-			fmt.Println("Track to segment", data)
-			segmentClient.Enqueue(data)
-		}
-
 		errString := ""
 		status := http.StatusOK
 		if err != nil {
@@ -386,6 +373,20 @@ func main() {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
+
+		// Track segment
+		data := analytics.Track{
+			UserId: fsVisitor.ID,
+			Event:  "Flagship_Source_Go",
+			Properties: analytics.NewProperties().
+				Set("cid", modifInfos.CampaignID).
+				Set("vgid", modifInfos.VariationGroupID).
+				Set("vid", modifInfos.VariationID).
+				Set("isref", modifInfos.IsReference).
+				Set("val", modifInfos.Value),
+		}
+		fmt.Println("Track to segment", data)
+		segmentClient.Enqueue(data)
 
 		c.JSON(http.StatusOK, gin.H{"value": modifInfos})
 	})
