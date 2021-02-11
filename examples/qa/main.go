@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
+	"gopkg.in/segmentio/analytics-go.v3"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
 
@@ -29,6 +30,7 @@ import (
 
 var fsClients = make(map[string]*client.Client)
 var fsVisitors = make(map[string]*client.Visitor)
+var segmentClient analytics.Client
 
 // FsSession express infos saved in session
 type FsSession struct {
@@ -127,6 +129,10 @@ func main() {
 	store := cookie.NewStore([]byte("fs-go-sdk-demo-secret"))
 	router.Use(sessions.Sessions("fs-go-sdk-demo", store))
 	gob.Register(&FsSession{})
+
+	// Init segment
+	segmentClient = analytics.New("UO0tjiwLZHHuD3DOFf4QoFLX18rWOfSw")
+	defer segmentClient.Close()
 
 	router.Use(initSession())
 
@@ -329,6 +335,19 @@ func main() {
 				err = fmt.Errorf("Flag type %v not handled", flagType)
 				break
 			}
+		}
+
+		if shouldActivate {
+			// Track segment
+			data := analytics.Track{
+				UserId: fsVisitor.ID,
+				Event:  "Flagship_Source_Go",
+				Properties: analytics.NewProperties().
+					Set("key", flag).
+					Set("value", value),
+			}
+			fmt.Println("Track to segment", data)
+			segmentClient.Enqueue(data)
 		}
 
 		errString := ""
