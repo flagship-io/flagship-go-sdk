@@ -3,6 +3,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -13,7 +14,8 @@ type HitType string
 const (
 	ACTIVATION  HitType = "ACTIVATION"
 	CAMPAIGN    HitType = "CAMPAIGN"
-	PAGE        HitType = "SCREENVIEW"
+	SCREEN      HitType = "SCREENVIEW"
+	PAGE        HitType = "PAGEVIEW"
 	EVENT       HitType = "EVENT"
 	ITEM        HitType = "ITEM"
 	TRANSACTION HitType = "TRANSACTION"
@@ -77,12 +79,20 @@ func (b *BaseHit) validateBase() []error {
 		TRANSACTION,
 		EVENT,
 		PAGE,
+		SCREEN,
 		ITEM,
 		CAMPAIGN,
 		BATCH:
 		break
 	default:
 		errorsList = append(errorsList, errors.New("Type is not handled"))
+	}
+
+	isScreenOrPageHit := b.Type == PAGE || b.Type == SCREEN
+	if isScreenOrPageHit && b.DocumentLocation == "" {
+		errorsList = append(errorsList, errors.New("Document location must not by empty for this hit PAGE or SCREEN"))
+	} else if !isScreenOrPageHit && b.DocumentLocation != "" {
+		errorsList = append(errorsList, errors.New("Document location must be empty for this type of hit"))
 	}
 
 	return errorsList
@@ -93,7 +103,7 @@ func (b *BaseHit) ComputeQueueTime() {
 	b.QueueTime = int64((time.Since(b.CreatedAt)).Milliseconds())
 }
 
-// PageHit represents a screenview hit for the datacollect
+// PageHit represents a pageview hit for the datacollect
 type PageHit struct {
 	BaseHit
 }
@@ -107,7 +117,30 @@ func (b *PageHit) SetBaseInfos(envID string, visitorID string) {
 // Validate checks that the hit is well formed
 func (b *PageHit) Validate() []error {
 	errorsList := b.validateBase()
+
+	// Check url format
+	_, err := url.ParseRequestURI(b.DocumentLocation)
+	if err != nil {
+		errorsList = append(errorsList, errors.New("Document location should be a real url for hit page"))
+	}
+
 	return errorsList
+}
+
+// ScreenHit represents a screenview hit for the datacollect
+type ScreenHit struct {
+	BaseHit
+}
+
+// SetBaseInfos sets the mandatory information for the hit
+func (b *ScreenHit) SetBaseInfos(envID string, visitorID string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID)
+	b.Type = SCREEN
+}
+
+// Validate checks that the hit is well formed
+func (b *ScreenHit) Validate() []error {
+	return b.validateBase()
 }
 
 // EventHit represents an event hit for the datacollect
@@ -286,8 +319,7 @@ func (b *BatchHit) SetBaseInfos(envID string, visitorID string) {
 
 // Validate checks that the hit is well formed
 func (b *BatchHit) Validate() []error {
-	errorsList := b.validateBase()
-	return errorsList
+	return b.validateBase()
 }
 
 // AddHit adds a hit to the batch

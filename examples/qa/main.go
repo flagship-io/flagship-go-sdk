@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/decisionapi"
+	"gopkg.in/segmentio/analytics-go.v3"
 
 	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
 
@@ -29,6 +30,7 @@ import (
 
 var fsClients = make(map[string]*client.Client)
 var fsVisitors = make(map[string]*client.Visitor)
+var segmentClient analytics.Client
 
 // FsSession express infos saved in session
 type FsSession struct {
@@ -76,6 +78,7 @@ type FSHitInfo struct {
 	ItemCode               string  `json:"ic"`
 	ItemName               string  `json:"in"`
 	ItemQuantity           int     `json:"iq"`
+	DocumentLocation       string  `json:"dl"`
 }
 
 func printMemUsage() {
@@ -126,6 +129,10 @@ func main() {
 	store := cookie.NewStore([]byte("fs-go-sdk-demo-secret"))
 	router.Use(sessions.Sessions("fs-go-sdk-demo", store))
 	gob.Register(&FsSession{})
+
+	// Init segment
+	segmentClient = analytics.New("UO0tjiwLZHHuD3DOFf4QoFLX18rWOfSw")
+	defer segmentClient.Close()
 
 	router.Use(initSession())
 
@@ -367,6 +374,20 @@ func main() {
 			return
 		}
 
+		// Track segment
+		data := analytics.Track{
+			UserId: fsVisitor.ID,
+			Event:  "Flagship_Source_Go",
+			Properties: analytics.NewProperties().
+				Set("cid", modifInfos.CampaignID).
+				Set("vgid", modifInfos.VariationGroupID).
+				Set("vid", modifInfos.VariationID).
+				Set("isref", modifInfos.IsReference).
+				Set("val", modifInfos.Value),
+		}
+		fmt.Println("Track to segment", data)
+		segmentClient.Enqueue(data)
+
 		c.JSON(http.StatusOK, gin.H{"value": modifInfos})
 	})
 
@@ -379,6 +400,11 @@ func main() {
 		}
 
 		fsSession := getFsSession(c)
+		if fsSession == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Session not initialized"})
+			return
+		}
+
 		fsClient, _ := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
@@ -399,7 +425,9 @@ func main() {
 		case "EVENT":
 			hit = &model.EventHit{Action: json.Action, Value: json.Value}
 		case "PAGE":
-			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: c.Request.URL.String()}}
+			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: json.DocumentLocation}}
+		case "SCREEN":
+			hit = &model.ScreenHit{BaseHit: model.BaseHit{DocumentLocation: json.DocumentLocation}}
 		case "TRANSACTION":
 			rand.Seed(time.Now().UnixNano())
 			hit = &model.TransactionHit{TransactionID: json.TransactionID, Affiliation: json.TransactionAffiliation, Revenue: json.TransactionRevenue}
