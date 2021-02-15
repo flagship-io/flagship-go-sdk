@@ -40,6 +40,7 @@ type FsSession struct {
 	VisitorID       string
 	Timeout         int
 	PollingInterval int
+	SegmentAPIKey   string
 }
 
 func (s *FsSession) getClient() *client.Client {
@@ -59,6 +60,7 @@ type FSEnvInfo struct {
 	Bucketing       *bool  `json:"bucketing" binding:"required"`
 	Timeout         int    `json:"timeout"`
 	PollingInterval int    `json:"polling_interval"`
+	SegmentAPIKey   string `json:"segment_api_key" binding:"required"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
@@ -130,10 +132,6 @@ func main() {
 	router.Use(sessions.Sessions("fs-go-sdk-demo", store))
 	gob.Register(&FsSession{})
 
-	// Init segment
-	segmentClient = analytics.New("UO0tjiwLZHHuD3DOFf4QoFLX18rWOfSw")
-	defer segmentClient.Close()
-
 	router.Use(initSession())
 
 	router.Static("/static", "qa/assets")
@@ -159,6 +157,7 @@ func main() {
 				"bucketing":       fsSession.UseBucketing,
 				"timeout":         timeout,
 				"pollingInterval": pollingInterval,
+				"segment_api_key": fsSession.SegmentAPIKey,
 			})
 		}
 	})
@@ -212,6 +211,7 @@ func main() {
 			UseBucketing:    *json.Bucketing,
 			Timeout:         timeout,
 			PollingInterval: pollingInterval,
+			SegmentAPIKey:   json.SegmentAPIKey,
 		})
 
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
@@ -241,10 +241,11 @@ func main() {
 		err = fsVisitor.SynchronizeModifications()
 		fsVisitors[fsSession.EnvID+"-"+json.VisitorID] = fsVisitor
 		setFsSession(c, &FsSession{
-			EnvID:        fsSession.EnvID,
-			APIKey:       fsSession.APIKey,
-			UseBucketing: fsSession.UseBucketing,
-			VisitorID:    json.VisitorID,
+			EnvID:         fsSession.EnvID,
+			APIKey:        fsSession.APIKey,
+			UseBucketing:  fsSession.UseBucketing,
+			VisitorID:     json.VisitorID,
+			SegmentAPIKey: fsSession.SegmentAPIKey,
 		})
 
 		flagInfos := fsVisitor.GetAllModifications()
@@ -375,18 +376,23 @@ func main() {
 		}
 
 		// Track segment
-		data := analytics.Track{
-			UserId: fsVisitor.ID,
-			Event:  "Flagship_Source_Go",
-			Properties: analytics.NewProperties().
-				Set("cid", modifInfos.CampaignID).
-				Set("vgid", modifInfos.VariationGroupID).
-				Set("vid", modifInfos.VariationID).
-				Set("isref", modifInfos.IsReference).
-				Set("val", modifInfos.Value),
+		if fsSession.SegmentAPIKey != "" {
+			segmentClient = analytics.New(fsSession.SegmentAPIKey)
+			defer segmentClient.Close()
+
+			data := analytics.Track{
+				UserId: fsVisitor.ID,
+				Event:  "Flagship_Source_Go",
+				Properties: analytics.NewProperties().
+					Set("cid", modifInfos.CampaignID).
+					Set("vgid", modifInfos.VariationGroupID).
+					Set("vid", modifInfos.VariationID).
+					Set("isref", modifInfos.IsReference).
+					Set("val", modifInfos.Value),
+			}
+			fmt.Println("Track to segment", data)
+			segmentClient.Enqueue(data)
 		}
-		fmt.Println("Track to segment", data)
-		segmentClient.Enqueue(data)
 
 		c.JSON(http.StatusOK, gin.H{"value": modifInfos})
 	})

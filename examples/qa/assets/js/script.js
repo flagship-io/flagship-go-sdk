@@ -5,6 +5,7 @@ var app = new Vue({
     apiKey: "",
     timeout: 2000,
     pollingInterval: 60000,
+    segmentApiKey: "",
     bucketing: true,
     visitorId: "test-visitor",
     context: "{\n}",
@@ -32,6 +33,7 @@ var app = new Vue({
         this.apiKey = response.body.api_key;
         this.timeout = response.body.timeout;
         this.pollingInterval = response.body.pollingInterval;
+        this.segmentApiKey = response.body.segment_api_key;
       });
     },
     setEnv() {
@@ -44,6 +46,7 @@ var app = new Vue({
           bucketing: this.bucketing,
           timeout: this.timeout || 0,
           polling_interval: this.pollingInterval || 0,
+          segment_api_key: this.segmentApiKey,
         })
         .then(
           (response) => {
