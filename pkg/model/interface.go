@@ -4,7 +4,5 @@ package model
 type HitInterface interface {
 	Validate() []error
 	SetBaseInfos(envID string, visitorID string)
-	getBaseHit() BaseHit
-	resetBaseHit()
 	ComputeQueueTime()
 }

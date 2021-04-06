@@ -93,10 +93,6 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 		return nil, errors.New("API Key missing for Decision API V2")
 	}
 
-	if res.apiKey != "" {
-		headers["x-api-key"] = res.apiKey
-	}
-
 	if res.timeout == 0 {
 		res.timeout = defaultTimeout
 	}
@@ -124,7 +120,9 @@ func (r *APIClient) GetModifications(visitorID string, anonymousID *string, cont
 
 	path := fmt.Sprintf("/%s/campaigns?exposeAllKeys=true", r.envID)
 	apiLogger.Infof("Sending call decision API: %s", string(b))
-	response, err := r.httpClient.Call(path, "POST", b, nil)
+	response, err := r.httpClient.Call(path, "POST", b, map[string]string{
+		"x-api-key": r.apiKey,
+	})
 
 	if err != nil {
 		return nil, err

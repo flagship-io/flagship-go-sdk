@@ -40,7 +40,7 @@ func createMockClient() decision.ClientInterface {
 	}
 	variation := model.ClientVariation{
 		ID:            testVID,
-		Reference:     false,
+		Reference:     true,
 		Modifications: modification,
 	}
 	return decision.NewAPIClientMock(testEnvID, &model.APIClientResponse{
@@ -233,6 +233,7 @@ func TestGetModification(t *testing.T) {
 	assert.Equal(t, caID, infos.CampaignID)
 	assert.Equal(t, vgID, infos.VariationGroupID)
 	assert.Equal(t, testVID, infos.VariationID)
+	assert.Equal(t, true, infos.IsReference)
 	assert.Equal(t, "string", infos.Value)
 }
 

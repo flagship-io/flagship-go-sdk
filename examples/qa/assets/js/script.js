@@ -5,6 +5,7 @@ var app = new Vue({
     apiKey: "",
     timeout: 2000,
     pollingInterval: 60000,
+    segmentApiKey: "",
     bucketing: true,
     visitorId: "test-visitor",
     anonymousId: false,
@@ -21,7 +22,7 @@ var app = new Vue({
     eventError: null,
     data: null,
     hit: { t: "EVENT" },
-    hitTypes: ["EVENT", "TRANSACTION", "ITEM", "PAGE"],
+    hitTypes: ["EVENT", "TRANSACTION", "ITEM", "PAGE", "SCREEN"],
     flag: { name: "", type: "bool", defaultValue: "", activate: true },
     flagOk: false,
     flagInfo: { name: "" },
@@ -37,6 +38,7 @@ var app = new Vue({
         this.apiKey = response.body.api_key;
         this.timeout = response.body.timeout;
         this.pollingInterval = response.body.pollingInterval;
+        this.segmentApiKey = response.body.segment_api_key;
       });
     },
     setEnv() {
@@ -49,6 +51,7 @@ var app = new Vue({
           bucketing: this.bucketing,
           timeout: this.timeout || 0,
           polling_interval: this.pollingInterval || 0,
+          segment_api_key: this.segmentApiKey,
         })
         .then(
           (response) => {

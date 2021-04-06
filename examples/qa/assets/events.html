@@ -56,6 +56,26 @@
           </select>
         </div>
 
+        <div v-if="hit.t == 'SCREEN'" class="form-group">
+          <label>Screen name</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="My super page"
+            v-model="hit.dl"
+          />
+        </div>
+
+        <div v-if="hit.t == 'PAGE'" class="form-group">
+          <label>URL</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="https://app.flagship.io/"
+            v-model="hit.dl"
+          />
+        </div>
+
         <div v-if="hit.t == 'EVENT'" class="form-group">
           <label>Event Action</label>
           <input
