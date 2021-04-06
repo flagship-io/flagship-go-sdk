@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -57,10 +58,10 @@ func (s *FsSession) getVisitor() *client.Visitor {
 type FSEnvInfo struct {
 	EnvironmentID   string `json:"environment_id" binding:"required"`
 	APIKey          string `json:"api_key" binding:"required"`
-	Bucketing       *bool  `json:"bucketing" binding:"required"`
+	Bucketing       bool   `json:"bucketing"`
 	Timeout         int    `json:"timeout"`
 	PollingInterval int    `json:"polling_interval"`
-	SegmentAPIKey   string `json:"segment_api_key" binding:"required"`
+	SegmentAPIKey   string `json:"segment_api_key"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
@@ -206,14 +207,14 @@ func main() {
 			pollingInterval = json.PollingInterval
 		}
 
-		if *json.Bucketing {
+		if json.Bucketing {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing(
 				bucketing.PollingInterval(
 					time.Duration(pollingInterval)*time.Millisecond)))
 		} else {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithDecisionAPI(
 				decisionapi.Timeout(
-					time.Duration(timeout)*time.Millisecond)))
+					time.Duration(timeout)*time.Millisecond), decisionapi.APIUrl(os.Getenv("DECISION_API_URL"))))
 		}
 
 		if err != nil {
@@ -233,7 +234,7 @@ func main() {
 		setFsSession(c, &FsSession{
 			EnvID:           json.EnvironmentID,
 			APIKey:          json.APIKey,
-			UseBucketing:    *json.Bucketing,
+			UseBucketing:    json.Bucketing,
 			Timeout:         timeout,
 			PollingInterval: pollingInterval,
 			SegmentAPIKey:   json.SegmentAPIKey,

@@ -57,6 +57,13 @@ func APIKey(apiKey string) func(r *APIClient) {
 	}
 }
 
+// APIUrl sets http client URL
+func APIUrl(apiURL string) func(r *APIClient) {
+	return func(r *APIClient) {
+		r.url = apiURL
+	}
+}
+
 // Timeout sets http client timeout
 func Timeout(timeout time.Duration) func(r *APIClient) {
 	return func(r *APIClient) {
