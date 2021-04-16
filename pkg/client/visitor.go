@@ -184,6 +184,11 @@ func (v *Visitor) GetAllModifications() (flagInfos map[string]model.FlagInfos) {
 	return v.flagInfos
 }
 
+// GetDecisionResponse return the decision response
+func (v *Visitor) GetDecisionResponse() *model.APIClientResponse {
+	return v.decisionResponse
+}
+
 // GetModificationBool get a modification bool by its key
 func (v *Visitor) GetModificationBool(key string, defaultValue bool, activate bool) (castVal bool, err error) {
 	defer func() {
