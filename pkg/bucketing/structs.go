@@ -39,6 +39,7 @@ type Configuration struct {
 // Campaign represents a bucketing campaign
 type Campaign struct {
 	ID              string            `json:"id"`
+	CustomID        string            `json:"custom_id"`
 	Type            string            `json:"type"`
 	VariationGroups []*VariationGroup `json:"variationGroups"`
 }

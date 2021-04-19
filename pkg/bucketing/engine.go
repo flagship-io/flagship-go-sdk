@@ -181,6 +181,7 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 			}
 			campaign := model.Campaign{
 				ID:               c.ID,
+				CustomID:         c.CustomID,
 				VariationGroupID: matchedVg.ID,
 				Variation: model.ClientVariation{
 					ID:        variation.ID,
