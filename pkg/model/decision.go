@@ -28,8 +28,8 @@ type APIClientResponse struct {
 
 // Campaign represents a decision campaign
 type Campaign struct {
-	ID               string `json:"id"`
-	CustomID         string
+	ID               string          `json:"id"`
+	CustomID         string          `json:"-"`
 	VariationGroupID string          `json:"variationGroupId"`
 	Variation        ClientVariation `json:"variation"`
 }
