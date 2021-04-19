@@ -6,10 +6,10 @@
 
 <h3 align="center">Bring your features to life</h3>
 
-<a  href='https://github.com/jpoles1/gopherbadger'  target='_blank'><a href='https://github.com/jpoles1/gopherbadger' target='_blank'>[![codecov](https://codecov.io/gh/abtasty/flagship-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/abtasty/flagship-go-sdk)
+<a  href='https://github.com/jpoles1/gopherbadger'  target='_blank'><a href='https://github.com/jpoles1/gopherbadger' target='_blank'>[![codecov](https://codecov.io/gh/flagship-io/flagship-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/flagship-io/flagship-go-sdk)
 </a>
-[![goreport](https://goreportcard.com/badge/github.com/abtasty/flagship-go-sdk)](https://goreportcard.com/report/github.com/abtasty/flagship-go-sdk)
-[![GoDoc](https://godoc.org/github.com/abtasty/flagship-go-sdk?status.svg)](https://godoc.org/github.com/abtasty/flagship-go-sdk)
+[![goreport](https://goreportcard.com/badge/github.com/flagship-io/flagship-go-sdk)](https://goreportcard.com/report/github.com/flagship-io/flagship-go-sdk)
+[![GoDoc](https://godoc.org/github.com/flagship-io/flagship-go-sdk?status.svg)](https://godoc.org/github.com/flagship-io/flagship-go-sdk)
 [![license](https://badgen.now.sh/badge/license/Apache)](./LICENSE)
 
 **Visit [https://developers.flagship.io/](https://developers.flagship.io/) to get started with Flagship.**
@@ -33,4 +33,4 @@
 
 ## Licence
 
-[Apache License.](https://github.com/abtasty/flagship-go-sdk/blob/master/LICENSE)
+[Apache License.](https://github.com/flagship-io/flagship-go-sdk/blob/master/LICENSE)

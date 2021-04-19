@@ -1,11 +1,11 @@
-module github.com/abtasty/flagship-go-sdk/examples
+module github.com/flagship-io/flagship-go-sdk/examples
 
 go 1.12
 
-replace github.com/abtasty/flagship-go-sdk/v2 => ../
+replace github.com/flagship-io/flagship-go-sdk/v2 => ../
 
 require (
-	github.com/abtasty/flagship-go-sdk/v2 v2.0.5
+	github.com/flagship-io/flagship-go-sdk/v2 v2.0.5
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.6.2
 	github.com/segmentio/backo-go v0.0.0-20200129164019-23eae7c10bd3 // indirect

@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 )
 
 var logger = logging.CreateLogger("Bucketing Engine")

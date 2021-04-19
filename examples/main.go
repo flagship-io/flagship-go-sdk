@@ -4,9 +4,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/abtasty/flagship-go-sdk/v2"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/bucketing"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/client"
+	"github.com/flagship-io/flagship-go-sdk/v2"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/client"
 )
 
 var testEnvId = "blvo2kijq6pg023l8edg"

@@ -40,5 +40,5 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: docker.pkg.github.com
-          repository: abtasty/flagship-go-sdk/qa
+          repository: flagship-io/flagship-go-sdk/qa
           tags: latest

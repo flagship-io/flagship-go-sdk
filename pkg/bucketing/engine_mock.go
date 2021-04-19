@@ -1,8 +1,8 @@
 package bucketing
 
 import (
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 )
 
 var engineMockConfig = &Configuration{

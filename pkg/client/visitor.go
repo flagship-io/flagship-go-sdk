@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/cache"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/decision"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/model"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/tracking"
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
 )
 
 var visitorLogger = logging.CreateLogger("FS Visitor")
