@@ -25,6 +25,11 @@ const (
 	Bucketing DecisionMode = "Bucketing"
 )
 
+const (
+	STATUS_INITIALIZING = "INITIALIZING"
+	STATUS_READY        = "READY"
+)
+
 // Client represent the Flagship SDK client object
 type Client struct {
 	envID             string
@@ -33,6 +38,7 @@ type Client struct {
 	decisionClient    decision.ClientInterface
 	trackingAPIClient tracking.APIClientInterface
 	cacheManager      cache.Manager
+	status            string
 }
 
 var clientLogger = logging.CreateLogger("FS Client")
@@ -56,6 +62,7 @@ func Create(f *Options) (*Client, error) {
 	client := &Client{
 		envID:  f.EnvID,
 		apiKey: f.APIKey,
+		status: STATUS_INITIALIZING,
 	}
 
 	if len(f.cacheManagerOptions) > 0 {
@@ -85,7 +92,13 @@ func Create(f *Options) (*Client, error) {
 		}
 	}
 
+	client.status = STATUS_READY
 	return client, err
+}
+
+// GetStatus returns the current client status
+func (c *Client) GetStatus() string {
+	return c.status
 }
 
 // NewVisitor returns a new Visitor from ID and context

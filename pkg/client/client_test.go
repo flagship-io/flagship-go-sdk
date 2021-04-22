@@ -48,6 +48,10 @@ func TestCreate(t *testing.T) {
 	assert.NotEqual(t, nil, client.trackingAPIClient)
 	assert.Equal(t, nil, client.cacheManager)
 	assert.Equal(t, testEnvID, client.GetEnvID())
+	assert.Equal(t, STATUS_READY, client.status)
+
+	status := client.GetStatus()
+	assert.Equal(t, STATUS_READY, status)
 }
 
 func TestCreateBucketing(t *testing.T) {
