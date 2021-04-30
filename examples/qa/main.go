@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/gob"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -43,16 +42,6 @@ type FsSession struct {
 	SegmentAPIKey   string
 }
 
-func (s *FsSession) getClient() *client.Client {
-	fsC, _ := fsClients[s.EnvID]
-	return fsC
-}
-
-func (s *FsSession) getVisitor() *client.Visitor {
-	fsV, _ := fsVisitors[s.EnvID]
-	return fsV
-}
-
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
 	EnvironmentID   string `json:"environment_id" binding:"required"`
@@ -60,13 +49,19 @@ type FSEnvInfo struct {
 	Bucketing       *bool  `json:"bucketing" binding:"required"`
 	Timeout         int    `json:"timeout"`
 	PollingInterval int    `json:"polling_interval"`
-	SegmentAPIKey   string `json:"segment_api_key" binding:"required"`
+	SegmentAPIKey   string `json:"segment_api_key"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
 type FSVisitorInfo struct {
 	VisitorID string                 `json:"visitor_id" binding:"required"`
 	Context   map[string]interface{} `json:"context"`
+}
+
+// FSVisitorInfo Binding visitor from JSON
+type FSUpdateContextInfo struct {
+	Type  string `json:"type" binding:"required"`
+	Value string `json:"value" binding:"required"`
 }
 
 // FSHitInfo Binding visitor from JSON
@@ -140,7 +135,7 @@ func main() {
 		c.Redirect(http.StatusMovedPermanently, "static/")
 	})
 
-	router.GET("/currentEnv", func(c *gin.Context) {
+	router.GET("/env", func(c *gin.Context) {
 		fsSession := getFsSession(c)
 		if fsSession != nil {
 			timeout := 2000
@@ -151,18 +146,18 @@ func main() {
 			if fsSession.PollingInterval > 0 {
 				pollingInterval = fsSession.PollingInterval
 			}
-			c.JSON(http.StatusOK, gin.H{
-				"env_id":          fsSession.EnvID,
-				"api_key":         fsSession.APIKey,
-				"bucketing":       fsSession.UseBucketing,
-				"timeout":         timeout,
-				"pollingInterval": pollingInterval,
-				"segment_api_key": fsSession.SegmentAPIKey,
+			c.JSON(http.StatusOK, FSEnvInfo{
+				EnvironmentID:   fsSession.EnvID,
+				APIKey:          fsSession.APIKey,
+				Bucketing:       &fsSession.UseBucketing,
+				Timeout:         timeout,
+				PollingInterval: pollingInterval,
+				SegmentAPIKey:   fsSession.SegmentAPIKey,
 			})
 		}
 	})
 
-	router.POST("/setEnv", func(c *gin.Context) {
+	router.PUT("/env", func(c *gin.Context) {
 		var json FSEnvInfo
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -198,7 +193,7 @@ func main() {
 
 		fsSession := getFsSession(c)
 		if fsSession != nil {
-			fsClientExisting, _ := fsClients[fsSession.EnvID]
+			fsClientExisting := fsClients[fsSession.EnvID]
 			if fsClientExisting != nil {
 				fsClientExisting.Dispose()
 				fsClientExisting = nil
@@ -217,8 +212,28 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
-	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
-	router.POST("/setVisitor", func(c *gin.Context) {
+	router.GET("/visitor", func(c *gin.Context) {
+		fsSession := getFsSession(c)
+		if fsSession == nil || fsSession.VisitorID == "" {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "visitor not initialized",
+			})
+			return
+		}
+		visitor, ok := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		if !ok {
+			c.JSON(http.StatusNotFound, gin.H{
+				"message": "visitor not initialized",
+			})
+			return
+		}
+		c.JSON(http.StatusOK, FSVisitorInfo{
+			VisitorID: visitor.ID,
+			Context:   visitor.Context,
+		})
+	})
+
+	router.PUT("/visitor", func(c *gin.Context) {
 		var json FSVisitorInfo
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -226,7 +241,7 @@ func main() {
 		}
 
 		fsSession := getFsSession(c)
-		fsClient, _ := fsClients[fsSession.EnvID]
+		fsClient := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
 			return
@@ -258,26 +273,92 @@ func main() {
 		c.JSON(http.StatusOK, resp)
 	})
 
+	router.PUT("/visitor/context/:key", func(c *gin.Context) {
+		var key = c.Param("key")
+		var json FSUpdateContextInfo
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		if key == "" || json.Type == "" || json.Value == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing context key, type or value"})
+			return
+		}
+
+		fsSession := getFsSession(c)
+		fsClient := fsClients[fsSession.EnvID]
+		if fsClient == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
+			return
+		}
+
+		fsVisitor := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		if fsVisitor == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Visitor not initialized"})
+			return
+		}
+
+		var err error
+		switch json.Type {
+		case "bool":
+			defVal, castErr := strconv.ParseBool(json.Value)
+			if castErr != nil {
+				err = castErr
+				break
+			}
+			err = fsVisitor.UpdateContextKey(key, defVal)
+		case "number":
+			defVal, castErr := strconv.ParseFloat(json.Value, 64)
+			if castErr != nil {
+				err = castErr
+				break
+			}
+			err = fsVisitor.UpdateContextKey(key, defVal)
+		case "string":
+			err = fsVisitor.UpdateContextKey(key, json.Value)
+
+		default:
+			err = fmt.Errorf("Context key type %v not handled", json.Type)
+		}
+
+		if err == nil {
+			err = fsVisitor.SynchronizeModifications()
+		}
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		} else {
+			flagInfos := fsVisitor.GetAllModifications()
+			c.JSON(http.StatusOK, gin.H{
+				"visitorId": fsVisitor.ID,
+				"context":   fsVisitor.Context,
+				"flags":     flagInfos,
+			})
+		}
+
+	})
+
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
-	router.GET("/getFlag/:name", func(c *gin.Context) {
+	router.GET("/flag/:name", func(c *gin.Context) {
 		var flag = c.Param("name")
 		var flagType = c.Query("type")
 		var activate = c.Query("activate")
 		var defaultValue = c.Query("defaultValue")
 
 		if flag == "" || flagType == "" || activate == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("Missing flag name, type, activate or defaultValue")})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing flag name, type, activate or defaultValue"})
 			return
 		}
 
 		fsSession := getFsSession(c)
-		fsClient, _ := fsClients[fsSession.EnvID]
+		fsClient := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
 			return
 		}
 
-		fsVisitor, _ := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		fsVisitor := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
 		if fsVisitor == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Visitor not initialized"})
 			return
@@ -297,7 +378,6 @@ func main() {
 				}
 
 				value, err = fsVisitor.GetModificationBool(flag, defVal, shouldActivate)
-				break
 			case "number":
 				defVal, castErr := strconv.ParseFloat(defaultValue, 64)
 				if castErr != nil {
@@ -306,10 +386,8 @@ func main() {
 				}
 
 				value, err = fsVisitor.GetModificationNumber(flag, defVal, shouldActivate)
-				break
 			case "string":
 				value, err = fsVisitor.GetModificationString(flag, defaultValue, shouldActivate)
-				break
 			case "object":
 				defVal := map[string]interface{}{}
 				if defaultValue != "" {
@@ -320,7 +398,6 @@ func main() {
 					}
 				}
 				value, err = fsVisitor.GetModificationObject(flag, defVal, shouldActivate)
-				break
 			case "array":
 				defVal := []interface{}{}
 				if defaultValue != "" {
@@ -331,10 +408,8 @@ func main() {
 					}
 				}
 				value, err = fsVisitor.GetModificationArray(flag, defVal, shouldActivate)
-				break
 			default:
 				err = fmt.Errorf("Flag type %v not handled", flagType)
-				break
 			}
 		}
 
@@ -348,22 +423,54 @@ func main() {
 		c.JSON(status, gin.H{"value": value, "err": errString})
 	})
 
-	router.GET("/getFlagInfo/:name", func(c *gin.Context) {
+	router.GET("/flag/:name/activate", func(c *gin.Context) {
 		var flag = c.Param("name")
 
 		if flag == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": errors.New("Missing flag key")})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing flag key"})
 			return
 		}
 
 		fsSession := getFsSession(c)
-		fsClient, _ := fsClients[fsSession.EnvID]
+		fsClient := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
 			return
 		}
 
-		fsVisitor, _ := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		fsVisitor := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		if fsVisitor == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Visitor not initialized"})
+			return
+		}
+
+		err := fsVisitor.ActivateModification(flag)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"status": "ok",
+		})
+	})
+
+	router.GET("/flag/:name/info", func(c *gin.Context) {
+		var flag = c.Param("name")
+
+		if flag == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Missing flag key"})
+			return
+		}
+
+		fsSession := getFsSession(c)
+		fsClient := fsClients[fsSession.EnvID]
+		if fsClient == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
+			return
+		}
+
+		fsVisitor := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
 		if fsVisitor == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Visitor not initialized"})
 			return
@@ -394,11 +501,11 @@ func main() {
 			segmentClient.Enqueue(data)
 		}
 
-		c.JSON(http.StatusOK, gin.H{"value": modifInfos})
+		c.JSON(http.StatusOK, modifInfos)
 	})
 
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")
-	router.POST("/sendHit", func(c *gin.Context) {
+	router.POST("/hit", func(c *gin.Context) {
 		var json FSHitInfo
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -411,13 +518,13 @@ func main() {
 			return
 		}
 
-		fsClient, _ := fsClients[fsSession.EnvID]
+		fsClient := fsClients[fsSession.EnvID]
 		if fsClient == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
 			return
 		}
 
-		fsVisitor, _ := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		fsVisitor := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
 		if fsVisitor == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Visitor not initialized"})
 			return

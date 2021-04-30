@@ -160,7 +160,7 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 	flagInfos, ok := v.flagInfos[key]
 
 	if !ok {
-		return nil, fmt.Errorf("Key %s not set in decision infos. Fallback to default value", key)
+		return nil, fmt.Errorf("key %s not set in decision infos", key)
 	}
 
 	if activate {
@@ -357,7 +357,7 @@ func (v *Visitor) GetModificationInfo(key string) (modifInfo *ModificationInfo, 
 	flagInfos, ok := v.flagInfos[key]
 
 	if !ok {
-		err = fmt.Errorf("Key %v is not in any campaign", key)
+		err = fmt.Errorf("key %v is not in any campaign", key)
 		visitorLogger.Debug(err.Error())
 		return nil, err
 	}
