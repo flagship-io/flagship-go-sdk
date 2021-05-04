@@ -1,3 +1,12 @@
+FROM node:16-alpine as build-front
+
+WORKDIR /usr/src/qa/front
+COPY . .
+WORKDIR /usr/src/qa/front/examples/qa/assets/flagship-qa-front
+
+RUN npm install
+RUN npm run build-bundle
+
 FROM golang:1-alpine as build-env
 
 WORKDIR /go/src/github.com/flagship-io/flagship-go-sdk
@@ -21,6 +30,7 @@ EXPOSE 8080
 WORKDIR /go/bin
 
 COPY --from=build-env /go/bin/example example
-COPY --from=build-env /go/src/github.com/flagship-io/flagship-go-sdk/examples/qa/assets qa/assets
+COPY --from=build-env /go/src/github.com/flagship-io/flagship-go-sdk/examples/qa/assets/index.html qa/assets/index.html
+COPY --from=build-front /usr/src/qa/front/examples/qa/assets/flagship-qa-front qa/assets/flagship-qa-front
 
 CMD ["./example"]
