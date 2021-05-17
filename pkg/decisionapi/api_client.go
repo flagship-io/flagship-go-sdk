@@ -86,7 +86,10 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 		retries: 1,
 	}
 
-	headers := map[string]string{}
+	headers := map[string]string{
+		"x-sdk-client":  "go",
+		"x-sdk-version": utils.PKG_VERSION,
+	}
 
 	for _, param := range params {
 		param(&res)
