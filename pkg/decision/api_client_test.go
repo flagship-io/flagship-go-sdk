@@ -23,7 +23,7 @@ func TestGetModifications(t *testing.T) {
 		t.Error("Api client tracking should not be nil")
 	}
 
-	_, err := client.GetModifications("testID", nil)
+	_, err := client.GetModifications("testID", nil, nil)
 
 	if err == nil {
 		t.Error("Error should be raised for empty context")

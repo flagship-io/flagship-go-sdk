@@ -8,6 +8,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"runtime"
 	"strconv"
 	"time"
@@ -49,7 +50,7 @@ func (s *FsSession) getClient() *client.Client {
 }
 
 func (s *FsSession) getVisitor() *client.Visitor {
-	fsV, _ := fsVisitors[s.EnvID]
+	fsV, _ := fsVisitors[s.VisitorID]
 	return fsV
 }
 
@@ -57,16 +58,26 @@ func (s *FsSession) getVisitor() *client.Visitor {
 type FSEnvInfo struct {
 	EnvironmentID   string `json:"environment_id" binding:"required"`
 	APIKey          string `json:"api_key" binding:"required"`
-	Bucketing       *bool  `json:"bucketing" binding:"required"`
+	Bucketing       bool   `json:"bucketing"`
 	Timeout         int    `json:"timeout"`
 	PollingInterval int    `json:"polling_interval"`
-	SegmentAPIKey   string `json:"segment_api_key" binding:"required"`
+	SegmentAPIKey   string `json:"segment_api_key"`
 }
 
 // FSVisitorInfo Binding visitor from JSON
 type FSVisitorInfo struct {
-	VisitorID string                 `json:"visitor_id" binding:"required"`
-	Context   map[string]interface{} `json:"context"`
+	VisitorID       string                 `json:"visitor_id" binding:"required"`
+	IsAuthenticated bool                   `json:"is_authenticated"`
+	Context         map[string]interface{} `json:"context"`
+}
+
+// FSVisitorAuthInfo Binding visitor auth from JSON
+type FSVisitorAuthInfo struct {
+	NewVisitorID string `json:"new_visitor_id" binding:"required"`
+}
+
+// FSVisitorUnauthInfo Binding visitor unauth from JSON
+type FSVisitorUnauthInfo struct {
 }
 
 // FSHitInfo Binding visitor from JSON
@@ -122,6 +133,21 @@ func setFsSession(c *gin.Context, fsS *FsSession) {
 	if err != nil {
 		log.Fatalf("Error on saved cookie : %v", err)
 	}
+}
+
+func returnVisitor(c *gin.Context, fsVisitor *client.Visitor, err error) {
+	flagInfos := fsVisitor.GetAllModifications()
+
+	resp := gin.H{
+		"flags":       flagInfos,
+		"visitorId":   fsVisitor.ID,
+		"anonymousId": fsVisitor.AnonymousID,
+	}
+	if err != nil {
+		resp["error"] = err.Error()
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func main() {
@@ -181,14 +207,14 @@ func main() {
 			pollingInterval = json.PollingInterval
 		}
 
-		if *json.Bucketing {
+		if json.Bucketing {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithBucketing(
 				bucketing.PollingInterval(
 					time.Duration(pollingInterval)*time.Millisecond)))
 		} else {
 			fsClient, err = flagship.Start(json.EnvironmentID, json.APIKey, client.WithDecisionAPI(
 				decisionapi.Timeout(
-					time.Duration(timeout)*time.Millisecond)))
+					time.Duration(timeout)*time.Millisecond), decisionapi.APIUrl(os.Getenv("DECISION_API_URL"))))
 		}
 
 		if err != nil {
@@ -208,7 +234,7 @@ func main() {
 		setFsSession(c, &FsSession{
 			EnvID:           json.EnvironmentID,
 			APIKey:          json.APIKey,
-			UseBucketing:    *json.Bucketing,
+			UseBucketing:    json.Bucketing,
 			Timeout:         timeout,
 			PollingInterval: pollingInterval,
 			SegmentAPIKey:   json.SegmentAPIKey,
@@ -232,7 +258,7 @@ func main() {
 			return
 		}
 
-		fsVisitor, err := fsClient.NewVisitor(json.VisitorID, json.Context)
+		fsVisitor, err := fsClient.NewVisitor(json.VisitorID, json.Context, client.WithAuthenticated(json.IsAuthenticated))
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
@@ -248,14 +274,77 @@ func main() {
 			SegmentAPIKey: fsSession.SegmentAPIKey,
 		})
 
-		flagInfos := fsVisitor.GetAllModifications()
+		returnVisitor(c, fsVisitor, err)
+	})
 
-		resp := gin.H{"flags": flagInfos}
-		if err != nil {
-			resp["error"] = err.Error()
+	router.POST("/authenticate", func(c *gin.Context) {
+		var json FSVisitorAuthInfo
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
 		}
 
-		c.JSON(http.StatusOK, resp)
+		fsSession := getFsSession(c)
+		fsClient, _ := fsClients[fsSession.EnvID]
+		if fsClient == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
+			return
+		}
+
+		fsVisitor, ok := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": fmt.Errorf("Visitor ID %v not found", fsSession.VisitorID),
+			})
+			return
+		}
+
+		err := fsVisitor.Authenticate(json.NewVisitorID, nil, true)
+
+		fsVisitors[fsSession.EnvID+"-"+fsVisitor.ID] = fsVisitor
+		setFsSession(c, &FsSession{
+			EnvID:        fsSession.EnvID,
+			APIKey:       fsSession.APIKey,
+			UseBucketing: fsSession.UseBucketing,
+			VisitorID:    fsVisitor.ID,
+		})
+
+		returnVisitor(c, fsVisitor, err)
+	})
+
+	router.POST("/unauthenticate", func(c *gin.Context) {
+		var json FSVisitorUnauthInfo
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		fsSession := getFsSession(c)
+		fsClient, _ := fsClients[fsSession.EnvID]
+		if fsClient == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "FS Client not initialized"})
+			return
+		}
+
+		fsVisitor, ok := fsVisitors[fsSession.EnvID+"-"+fsSession.VisitorID]
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error": fmt.Errorf("Visitor ID %v not found", fsSession.VisitorID),
+			})
+			return
+		}
+
+		err := fsVisitor.Unauthenticate(nil, true)
+
+		fsVisitors[fsSession.EnvID+"-"+fsVisitor.ID] = fsVisitor
+		setFsSession(c, &FsSession{
+			EnvID:        fsSession.EnvID,
+			APIKey:       fsSession.APIKey,
+			UseBucketing: fsSession.UseBucketing,
+			VisitorID:    fsVisitor.ID,
+		})
+
+		returnVisitor(c, fsVisitor, err)
 	})
 
 	//router.LoadHTMLFiles("templates/template1.html", "templates/template2.html")

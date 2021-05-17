@@ -26,11 +26,12 @@ func NewAPIClientMock(envID string, responseMock *model.APIClientResponse, statu
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClientMock) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClientMock) GetModifications(visitorID string, anonymousID *string, context map[string]interface{}) (*model.APIClientResponse, error) {
 	_, err := json.Marshal(model.APIClientRequest{
-		VisitorID:  visitorID,
-		Context:    context,
-		TriggerHit: false,
+		VisitorID:   visitorID,
+		AnonymousID: anonymousID,
+		Context:     context,
+		TriggerHit:  false,
 	})
 
 	if err != nil {

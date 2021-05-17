@@ -66,7 +66,7 @@ func TestLoad(t *testing.T) {
 func TestGetModifications(t *testing.T) {
 	engine, _ := NewEngine(testEnvID, nil)
 
-	modifs, err := engine.GetModifications(testVID, testContext)
+	modifs, err := engine.GetModifications(testVID, nil, testContext)
 
 	if err == nil {
 		t.Errorf("Expected error for test env ID")
@@ -78,7 +78,7 @@ func TestGetModifications(t *testing.T) {
 
 	engine, _ = NewEngine(realEnvID, nil)
 
-	_, err = engine.GetModifications(testVID, testContext)
+	_, err = engine.GetModifications(testVID, nil, testContext)
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
@@ -88,7 +88,7 @@ func TestGetModifications(t *testing.T) {
 func TestGetModificationsMock(t *testing.T) {
 	engine := GetBucketingEngineMock(testEnvID, nil)
 
-	modifs, err := engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err := engine.GetModifications(testVID, nil, map[string]interface{}{"test": true})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
@@ -114,7 +114,7 @@ func TestGetModificationsMock(t *testing.T) {
 	engine, _ = NewEngine(testEnvID, cache)
 	engine.apiClient = NewAPIClientMock(testEnvID, engineMockConfig, 200)
 
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err = engine.GetModifications(testVID, nil, map[string]interface{}{"test": true})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
@@ -131,7 +131,7 @@ func TestGetModificationsMock(t *testing.T) {
 	assert.Equal(t, "test", campaignCacheCheck.FlagKeys[0])
 
 	// Check new GetModifications return cache
-	modifs, _ = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, _ = engine.GetModifications(testVID, nil, map[string]interface{}{"test": true})
 	assert.Equal(t, 1, len(modifs.Campaigns))
 	assert.Equal(t, campaignCacheCheck.VariationID, modifs.Campaigns[0].Variation.ID)
 
@@ -139,7 +139,7 @@ func TestGetModificationsMock(t *testing.T) {
 	engineMockConfig.Panic = true
 	engine.apiClient = NewAPIClientMock(testEnvID, engineMockConfig, 200)
 
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err = engine.GetModifications(testVID, nil, map[string]interface{}{"test": true})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)

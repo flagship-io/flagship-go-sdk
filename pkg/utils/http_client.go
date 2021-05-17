@@ -14,6 +14,11 @@ const defaultTimeout = 10 * time.Second
 
 var httpLogger = logging.CreateLogger("HTTP Request")
 
+// HTTPClientInterface represents an interface for HTTP caller
+type HTTPClientInterface interface {
+	Call(path, method string, body []byte, headers map[string]string) (*HTTPResponse, error)
+}
+
 // HTTPClient represents the HTTPClient infos
 type HTTPClient struct {
 	baseURL     string

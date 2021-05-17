@@ -43,13 +43,13 @@ func Create(f *Options) (*Client, error) {
 
 	var err error
 
-	if f.APIKey == "" {
-		err = errors.New("APIKey is required")
+	if f.EnvID == "" {
+		err = errors.New("EnvID is required")
 		return nil, err
 	}
 
-	if f.EnvID == "" {
-		err = errors.New("EnvID is required")
+	if f.APIKey == "" {
+		err = errors.New("APIKey is required")
 		return nil, err
 	}
 
@@ -89,7 +89,7 @@ func Create(f *Options) (*Client, error) {
 }
 
 // NewVisitor returns a new Visitor from ID and context
-func (c *Client) NewVisitor(visitorID string, context model.Context) (visitor *Visitor, err error) {
+func (c *Client) NewVisitor(visitorID string, context model.Context, options ...VisitorOptionBuilder) (visitor *Visitor, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = utils.HandleRecovered(r, clientLogger)
@@ -108,8 +108,25 @@ func (c *Client) NewVisitor(visitorID string, context model.Context) (visitor *V
 		return nil, fmt.Errorf("Invalid context : %s", strings.Join(errorStrings, ", "))
 	}
 
+	id := visitorID
+	var anonymousID *string
+	if id == "" {
+		id = generateAnonymousID()
+	}
+
+	// Build visitor options
+	visitorOptions := &VisitorOptions{}
+	visitorOptions.BuildVisitorOptions(options...)
+
+	// Set anonymous ID is visitor is created already authenticated
+	if visitorOptions.IsAuthenticated {
+		newAnonID := generateAnonymousID()
+		anonymousID = &newAnonID
+	}
+
 	return &Visitor{
-		ID:                visitorID,
+		ID:                id,
+		AnonymousID:       anonymousID,
 		Context:           context,
 		decisionClient:    c.decisionClient,
 		decisionMode:      c.decisionMode,

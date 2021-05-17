@@ -8,11 +8,16 @@ var app = new Vue({
     segmentApiKey: "",
     bucketing: true,
     visitorId: "test-visitor",
+    anonymousId: false,
+    isAuthenticated: false,
+    newVisitorId: "",
     context: "{\n}",
     envOk: false,
     envError: null,
     visitorOk: false,
     visitorError: null,
+    visitorAuth: {},
+    visitorUnauth: {},
     eventOk: false,
     eventError: null,
     data: null,
@@ -74,13 +79,52 @@ var app = new Vue({
           (response) => {
             // get body data
             this.data = response.body;
+            this.visitorId = response.body.visitorId;
+            this.anonymousId = response.body.anonymousId;
             this.visitorOk = true;
+            console.log('youpi')
           },
           (response) => {
             this.visitorOk = false;
             this.visitorError = response.body;
           }
         );
+    },
+    authenticate() {
+      this.visitorAuth = { ok: false, error: null };
+
+      this.$http
+        .post("/authenticate", {
+          new_visitor_id: this.newVisitorId,
+        })
+        .then(
+          (response) => {
+            this.data = response.body;
+            this.visitorAuth.ok = true;
+            this.visitorId = response.body.visitorId;
+            this.anonymousId = response.body.anonymousId;
+          },
+          (response) => {
+            this.visitorAuth.ok = false;
+            this.visitorAuth.error = response.body;
+          }
+        );
+    },
+    unauthenticate() {
+      this.visitorUnauth = { ok: false, error: null };
+
+      this.$http.post("/unauthenticate", {}).then(
+        (response) => {
+          this.data = response.body;
+          this.visitorUnauth.ok = true;
+          this.visitorId = response.body.visitorId;
+          this.anonymousId = response.body.anonymousId;
+        },
+        (response) => {
+          this.visitorUnauth.ok = false;
+          this.visitorUnauth.error = response.body;
+        }
+      );
     },
     changeType(e) {
       this.hit = {
