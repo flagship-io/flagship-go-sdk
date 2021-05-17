@@ -2,11 +2,7 @@ package utils
 
 import (
 	"net/http"
-
-	"github.com/abtasty/flagship-go-sdk/v2/pkg/logging"
 )
-
-var httpLoggerMock = logging.CreateLogger("HTTP Request Mock")
 
 // HTTPClientMock represents the HTTPClientMock infos
 type HTTPClientMock struct {
