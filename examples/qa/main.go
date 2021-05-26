@@ -420,7 +420,7 @@ func main() {
 			errString = err.Error()
 		}
 
-		c.JSON(status, gin.H{"value": value, "err": errString})
+		c.JSON(status, gin.H{"value": value, "error": errString})
 	})
 
 	router.GET("/flag/:name/activate", func(c *gin.Context) {
