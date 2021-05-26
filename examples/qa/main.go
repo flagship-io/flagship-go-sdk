@@ -68,6 +68,7 @@ type FSUpdateContextInfo struct {
 type FSHitInfo struct {
 	HitType                string  `json:"t" binding:"required"`
 	Action                 string  `json:"ea"`
+	Category               string  `json:"ec"`
 	Value                  int64   `json:"ev"`
 	TransactionID          string  `json:"tid"`
 	TransactionAffiliation string  `json:"ta"`
@@ -536,7 +537,7 @@ func main() {
 
 		switch hitType {
 		case "EVENT":
-			hit = &model.EventHit{Action: json.Action, Value: json.Value}
+			hit = &model.EventHit{Action: json.Action, Value: json.Value, Category: json.Category}
 		case "PAGE":
 			hit = &model.PageHit{BaseHit: model.BaseHit{DocumentLocation: json.DocumentLocation}}
 		case "SCREEN":
