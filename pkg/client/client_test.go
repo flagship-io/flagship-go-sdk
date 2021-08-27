@@ -1,7 +1,6 @@
 package client
 
 import (
-	"errors"
 	"reflect"
 	"testing"
 	"time"
@@ -9,6 +8,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/stretchr/testify/assert"
 
@@ -166,12 +166,12 @@ func TestInit(t *testing.T) {
 func TestCreateVisitor(t *testing.T) {
 	client := createClient()
 
-	context := map[string]interface{}{}
-	context["test_string"] = "123"
-	context["test_number"] = 36.5
-	context["test_bool"] = true
-	context["test_int"] = 4
-	context["test_wrong"] = errors.New("wrong type")
+	context := map[string]*structpb.Value{}
+	context["test_string"] = structpb.NewStringValue("123")
+	context["test_number"] = structpb.NewNumberValue(36.5)
+	context["test_bool"] = structpb.NewBoolValue(true)
+	context["test_int"] = structpb.NewNumberValue(4)
+	// context["test_wrong"] = structpb.NewValue(errors.New("wrong type"))
 
 	_, err := client.NewVisitor("", nil)
 
@@ -185,7 +185,7 @@ func TestCreateVisitor(t *testing.T) {
 		t.Error("Visitor with wrong context variable should raise an error")
 	}
 
-	_, conv64Ok := context["test_int"].(float64)
+	_, conv64Ok := context["test_int"]
 	if !conv64Ok {
 		t.Errorf("Integer context key has not been converted. Got %v", context["test_int"])
 	}

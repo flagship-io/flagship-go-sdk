@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
+	"google.golang.org/protobuf/types/known/structpb"
 	"gopkg.in/segmentio/analytics-go.v3"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
@@ -54,8 +55,8 @@ type FSEnvInfo struct {
 
 // FSVisitorInfo Binding visitor from JSON
 type FSVisitorInfo struct {
-	VisitorID string                 `json:"visitor_id" binding:"required"`
-	Context   map[string]interface{} `json:"context"`
+	VisitorID string                     `json:"visitor_id" binding:"required"`
+	Context   map[string]*structpb.Value `json:"context"`
 }
 
 // FSVisitorInfo Binding visitor from JSON

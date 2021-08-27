@@ -4,6 +4,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var apiLogger = logging.CreateLogger("API Client")
@@ -27,7 +28,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*decisionapi.APICl
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context map[string]*structpb.Value) (*model.APIClientResponse, error) {
 	apiLogger.Info("Getting modifications from API")
 	return r.decisionAPIClient.GetModifications(visitorID, context)
 }

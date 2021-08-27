@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // APIOptions represents the options for the Decision API Client
@@ -14,9 +16,9 @@ type APIOptions struct {
 
 // APIClientRequest represents the API client informations
 type APIClientRequest struct {
-	VisitorID  string                 `json:"visitor_id"`
-	Context    map[string]interface{} `json:"context"`
-	TriggerHit bool                   `json:"trigger_hit"`
+	VisitorID  string                     `json:"visitor_id"`
+	Context    map[string]*structpb.Value `json:"context"`
+	TriggerHit bool                       `json:"trigger_hit"`
 }
 
 // APIClientResponse represents a decision response

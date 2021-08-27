@@ -11,6 +11,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var visitorLogger = logging.CreateLogger("FS Visitor")
@@ -18,7 +19,7 @@ var visitorLogger = logging.CreateLogger("FS Visitor")
 // Visitor represents a visitor instance of the Flagship SDK
 type Visitor struct {
 	ID                string
-	Context           map[string]interface{}
+	Context           map[string]*structpb.Value
 	decisionClient    decision.ClientInterface
 	decisionMode      DecisionMode
 	decisionResponse  *model.APIClientResponse
@@ -71,7 +72,10 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 		newContext[k] = v
 	}
 
-	newContext[key] = value
+	newContext[key], err = structpb.NewValue(value)
+	if err != nil {
+		return fmt.Errorf("Bad new context key")
+	}
 
 	errs := newContext.Validate()
 	if len(errs) > 0 {

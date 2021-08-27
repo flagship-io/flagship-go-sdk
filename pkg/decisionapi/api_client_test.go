@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var testEnvID = "env_id_test"
@@ -114,7 +115,7 @@ func TestSendEvent(t *testing.T) {
 		VisitorID: "test_vid",
 		Type:      "CONTEXT",
 		Data: model.Context{
-			"hello": "world",
+			"hello": structpb.NewStringValue("world"),
 		},
 	})
 
@@ -127,7 +128,7 @@ func TestSendEvent(t *testing.T) {
 		VisitorID: "test_vid",
 		Type:      "CONTEXT",
 		Data: model.Context{
-			"hello": "world",
+			"hello": structpb.NewStringValue("world"),
 		},
 	})
 

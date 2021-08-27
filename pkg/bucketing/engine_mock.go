@@ -3,6 +3,9 @@ package bucketing
 import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	targetingTypes "github.com/flagship-io/flagship-proto/targeting"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 var engineMockConfig = &Configuration{
@@ -10,12 +13,16 @@ var engineMockConfig = &Configuration{
 		ID: "test_cid",
 		VariationGroups: []*VariationGroup{{
 			ID: "test_vgid",
-			Targeting: TargetingWrapper{
-				TargetingGroups: []*TargetingGroup{{
-					Targetings: []*Targeting{{
-						Operator: EQUALS,
-						Key:      "test",
-						Value:    true,
+			Targeting: &targetingTypes.Targeting{
+				TargetingGroups: []*targetingTypes.Targeting_TargetingGroup{{
+					Targetings: []*targetingTypes.Targeting_InnerTargeting{{
+						Operator: targetingTypes.Targeting_EQUALS,
+						Key:      &wrapperspb.StringValue{Value: "test"},
+						Value: &structpb.Value{
+							Kind: &structpb.Value_NumberValue{
+								NumberValue: 30,
+							},
+						},
 					}},
 				}},
 			},
