@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // APIClientMock represents the API client mock informations
@@ -26,7 +27,7 @@ func NewAPIClientMock(envID string, responseMock *model.APIClientResponse, statu
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClientMock) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClientMock) GetModifications(visitorID string, context map[string]*structpb.Value) (*model.APIClientResponse, error) {
 	_, err := json.Marshal(model.APIClientRequest{
 		VisitorID:  visitorID,
 		Context:    context,

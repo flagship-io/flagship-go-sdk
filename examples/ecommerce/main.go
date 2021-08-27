@@ -10,6 +10,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/client"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var fsClients = make(map[string]*client.Client)
@@ -17,9 +18,9 @@ var fsVisitors = make(map[string]*client.Visitor)
 
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
-	EnvironmentID string                 `json:"environment_id" binding:"required"`
-	VisitorID     string                 `json:"visitor_id" binding:"required"`
-	Context       map[string]interface{} `json:"context" binding:"required"`
+	EnvironmentID string                     `json:"environment_id" binding:"required"`
+	VisitorID     string                     `json:"visitor_id" binding:"required"`
+	Context       map[string]*structpb.Value `json:"context" binding:"required"`
 }
 
 func main() {

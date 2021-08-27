@@ -10,6 +10,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 const defaultTimeout = 2 * time.Second
@@ -106,7 +107,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context map[string]*structpb.Value) (*model.APIClientResponse, error) {
 	b, err := json.Marshal(model.APIClientRequest{
 		VisitorID:  visitorID,
 		Context:    context,

@@ -10,13 +10,14 @@ import (
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var caID = "cid"
 var vgID = "vgid"
 var testVID = "vid"
 
-func createVisitor(vID string, context map[string]interface{}) *Visitor {
+func createVisitor(vID string, context map[string]*structpb.Value) *Visitor {
 	client := createClient()
 	client.decisionClient = createMockClient()
 
@@ -58,11 +59,11 @@ func createMockClient() decision.ClientInterface {
 func TestUpdateContext(t *testing.T) {
 	visitor := createVisitor("test", nil)
 
-	context := map[string]interface{}{}
-	context["test_string"] = "123"
-	context["test_number"] = 36.5
-	context["test_bool"] = true
-	context["test_wrong"] = errors.New("wrong type")
+	context := map[string]*structpb.Value{}
+	context["test_string"] = structpb.NewStringValue("123")
+	context["test_number"] = structpb.NewNumberValue(36.5)
+	context["test_bool"] = structpb.NewBoolValue(true)
+	// context["test_wrong"] = errors.New("wrong type")
 
 	err := visitor.UpdateContext(context)
 
@@ -79,22 +80,22 @@ func TestUpdateContext(t *testing.T) {
 		return
 	}
 
-	if visitor.Context["test_string"] != "123" {
+	if visitor.Context["test_string"].GetStringValue() != "123" {
 		t.Errorf("Visitor update context string failed. Expected %s, got %s", "123", visitor.Context["test_string"])
 	}
-	if visitor.Context["test_number"] != 36.5 {
+	if visitor.Context["test_number"].GetNumberValue() != 36.5 {
 		t.Errorf("Visitor update context string failed. Expected %f, got %v", 36.5, visitor.Context["test_number"])
 	}
-	if visitor.Context["test_bool"] != true {
+	if visitor.Context["test_bool"].GetBoolValue() != true {
 		t.Errorf("Visitor update context string failed. Expected %v, got %v", true, visitor.Context["test_bool"])
 	}
 }
 
 func TestUpdateContextKey(t *testing.T) {
-	context := map[string]interface{}{}
-	context["test_string"] = "123"
-	context["test_number"] = 36.5
-	context["test_bool"] = true
+	context := map[string]*structpb.Value{}
+	context["test_string"] = structpb.NewStringValue("123")
+	context["test_number"] = structpb.NewNumberValue(36.5)
+	context["test_bool"] = structpb.NewBoolValue(true)
 
 	visitor := createVisitor("test", context)
 
@@ -112,7 +113,7 @@ func TestUpdateContextKey(t *testing.T) {
 		t.Errorf("Visitor update context raised an error : %v", err)
 	}
 
-	if visitor.Context["test_ok"] != true {
+	if visitor.Context["test_ok"].GetBoolValue() != true {
 		t.Errorf("Visitor update context string failed. Expected %v, got %v", true, visitor.Context["test_ok"])
 	}
 }
@@ -391,8 +392,8 @@ func TestActivateModificationCache(t *testing.T) {
 	client.decisionClient = engine
 	client.decisionMode = Bucketing
 
-	visitor, _ := client.NewVisitor("test", map[string]interface{}{
-		"test": true,
+	visitor, _ := client.NewVisitor("test", map[string]*structpb.Value{
+		"test": structpb.NewBoolValue(true),
 	})
 
 	// Test before sync

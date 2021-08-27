@@ -7,10 +7,11 @@ import (
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 var testVID = "test_vid"
-var testContext = map[string]interface{}{}
+var testContext = map[string]*structpb.Value{}
 
 func TestNewEngine(t *testing.T) {
 	engine, err := NewEngine(testEnvID, nil)
@@ -88,7 +89,11 @@ func TestGetModifications(t *testing.T) {
 func TestGetModificationsMock(t *testing.T) {
 	engine := GetBucketingEngineMock(testEnvID, nil)
 
-	modifs, err := engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err := engine.GetModifications(testVID, map[string]*structpb.Value{"test": &structpb.Value{
+		Kind: &structpb.Value_NumberValue{
+			NumberValue: 30,
+		},
+	}})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
@@ -114,7 +119,11 @@ func TestGetModificationsMock(t *testing.T) {
 	engine, _ = NewEngine(testEnvID, cache)
 	engine.apiClient = NewAPIClientMock(testEnvID, engineMockConfig, 200)
 
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err = engine.GetModifications(testVID, map[string]*structpb.Value{"test": &structpb.Value{
+		Kind: &structpb.Value_NumberValue{
+			NumberValue: 30,
+		},
+	}})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
@@ -131,7 +140,11 @@ func TestGetModificationsMock(t *testing.T) {
 	assert.Equal(t, "test", campaignCacheCheck.FlagKeys[0])
 
 	// Check new GetModifications return cache
-	modifs, _ = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, _ = engine.GetModifications(testVID, map[string]*structpb.Value{"test": &structpb.Value{
+		Kind: &structpb.Value_NumberValue{
+			NumberValue: 30,
+		},
+	}})
 	assert.Equal(t, 1, len(modifs.Campaigns))
 	assert.Equal(t, campaignCacheCheck.VariationID, modifs.Campaigns[0].Variation.ID)
 
@@ -139,7 +152,11 @@ func TestGetModificationsMock(t *testing.T) {
 	engineMockConfig.Panic = true
 	engine.apiClient = NewAPIClientMock(testEnvID, engineMockConfig, 200)
 
-	modifs, err = engine.GetModifications(testVID, map[string]interface{}{"test": true})
+	modifs, err = engine.GetModifications(testVID, map[string]*structpb.Value{"test": &structpb.Value{
+		Kind: &structpb.Value_NumberValue{
+			NumberValue: 30,
+		},
+	}})
 
 	if err != nil {
 		t.Errorf("Unexpected error for correct env ID: %v", err)
