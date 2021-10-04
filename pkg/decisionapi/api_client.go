@@ -106,7 +106,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, context model.Context) (*model.APIClientResponse, error) {
 	b, err := json.Marshal(model.APIClientRequest{
 		VisitorID:  visitorID,
 		Context:    context,

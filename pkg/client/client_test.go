@@ -166,7 +166,7 @@ func TestInit(t *testing.T) {
 func TestCreateVisitor(t *testing.T) {
 	client := createClient()
 
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true

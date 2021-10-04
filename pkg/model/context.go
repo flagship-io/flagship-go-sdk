@@ -1,7 +1,10 @@
 package model
 
 import (
+	"errors"
 	"fmt"
+
+	"google.golang.org/protobuf/types/known/structpb"
 )
 
 // Context represents a visitor context object
@@ -26,4 +29,18 @@ func (c Context) Validate() []error {
 		}
 	}
 	return errorList
+}
+
+func (c Context) ToProtoMap() (map[string]*structpb.Value, error) {
+	ret := map[string]*structpb.Value{}
+	for key, value := range c {
+		newProto, err := structpb.NewValue(value)
+		if err != nil {
+			return nil, errors.New(fmt.Sprint("error in context proto", err))
+		}
+
+		ret[key] = newProto
+
+	}
+	return ret, nil
 }

@@ -18,7 +18,7 @@ var visitorLogger = logging.CreateLogger("FS Visitor")
 // Visitor represents a visitor instance of the Flagship SDK
 type Visitor struct {
 	ID                string
-	Context           map[string]interface{}
+	Context           model.Context
 	decisionClient    decision.ClientInterface
 	decisionMode      DecisionMode
 	decisionResponse  *model.APIClientResponse

@@ -16,7 +16,7 @@ var caID = "cid"
 var vgID = "vgid"
 var testVID = "vid"
 
-func createVisitor(vID string, context map[string]interface{}) *Visitor {
+func createVisitor(vID string, context model.Context) *Visitor {
 	client := createClient()
 	client.decisionClient = createMockClient()
 
@@ -58,7 +58,7 @@ func createMockClient() decision.ClientInterface {
 func TestUpdateContext(t *testing.T) {
 	visitor := createVisitor("test", nil)
 
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true
@@ -91,7 +91,7 @@ func TestUpdateContext(t *testing.T) {
 }
 
 func TestUpdateContextKey(t *testing.T) {
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true
