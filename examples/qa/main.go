@@ -176,7 +176,7 @@ func main() {
 			c.JSON(http.StatusOK, FSEnvInfo{
 				EnvironmentID:   fsSession.EnvID,
 				APIKey:          fsSession.APIKey,
-				Bucketing:       &fsSession.UseBucketing,
+				Bucketing:       fsSession.UseBucketing,
 				Timeout:         timeout,
 				PollingInterval: pollingInterval,
 				SegmentAPIKey:   fsSession.SegmentAPIKey,

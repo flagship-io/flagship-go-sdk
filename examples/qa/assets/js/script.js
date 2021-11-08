@@ -82,7 +82,7 @@ var app = new Vue({
             this.visitorId = response.body.visitorId;
             this.anonymousId = response.body.anonymousId;
             this.visitorOk = true;
-            console.log('youpi')
+            console.log("youpi")
           },
           (response) => {
             this.visitorOk = false;

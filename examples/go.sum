@@ -76,6 +76,8 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0 h1:EQciDnbrYxy13PgWoY8AqoxGiPrp
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/flagship-io/flagship-common v0.0.3 h1:wk+snjijeXmHA9ndxsZ7fmvio2RYyvBszK8ispjeYMw=
 github.com/flagship-io/flagship-common v0.0.3/go.mod h1:nfsSmwTJ65C+nXwsTir/HQ2bCG04YbD76VXXcDCTPdM=
+github.com/flagship-io/flagship-common v0.0.6 h1:4ZfoVDOuhSOjlSmum2uCfDveyTuc8lgkuWHglTMxB9c=
+github.com/flagship-io/flagship-common v0.0.6/go.mod h1:nfsSmwTJ65C+nXwsTir/HQ2bCG04YbD76VXXcDCTPdM=
 github.com/flagship-io/flagship-proto v0.0.2/go.mod h1:7DLqFLOTZQ9a707glLumZ6tItGuHckSLzSGMxMFwtCU=
 github.com/flagship-io/flagship-proto v0.0.4 h1:TSaeNt5ABh09eECwrfBni3oFN2EsUtSAZy84KdyTEZY=
 github.com/flagship-io/flagship-proto v0.0.4/go.mod h1:jhgEIOw+OTQaxBDF35e3xxwAql1G4PMeqrejtsaRV5Y=
