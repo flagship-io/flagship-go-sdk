@@ -138,7 +138,7 @@ func getMatchedVG(c *Campaign, visitorID string, context model.Context) *Variati
 }
 
 // GetModifications gets modifications from Decision API
-func (b *Engine) GetModifications(visitorID string, context model.Context) (*model.APIClientResponse, error) {
+func (b *Engine) GetModifications(visitorID string, anonymousID *string, context model.Context) (*model.APIClientResponse, error) {
 	if b.getConfig() == nil {
 		logger.Info("Configuration not loaded. Loading it now")
 		err := b.Load()

@@ -1,9 +1,12 @@
 package decisionapi
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 var testEnvID = "env_id_test"
@@ -18,14 +21,8 @@ func TestNewAPIClient(t *testing.T) {
 	}
 
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
-
-	if client == nil {
-		t.Error("Api client tracking should not be nil")
-	}
-
-	if client.url != defaultV2APIURL {
-		t.Error("Api url should be set to default")
-	}
+	assert.NotNil(t, client)
+	assert.Equal(t, defaultV2APIURL, client.url)
 }
 
 func TestNewAPIClientParams(t *testing.T) {
@@ -37,21 +34,10 @@ func TestNewAPIClientParams(t *testing.T) {
 		Timeout(10),
 		Retries(12))
 
-	if client == nil {
-		t.Error("Api client tracking should not be nil")
-	}
-
-	if client.url != defaultV1APIURL {
-		t.Error("Api url should be set to default")
-	}
-
-	if client.apiKey != testAPIKey {
-		t.Errorf("Wrong api key. Expected %v, got %v", testAPIKey, client.apiKey)
-	}
-
-	if client.retries != 12 {
-		t.Errorf("Wrong retries. Expected %v, got %v", 12, client.retries)
-	}
+	assert.NotNil(t, client)
+	assert.Equal(t, defaultV1APIURL, client.url)
+	assert.Equal(t, testAPIKey, client.apiKey)
+	assert.Equal(t, 12, client.retries)
 
 	client, _ = NewAPIClient(
 		testEnvID,
@@ -61,34 +47,37 @@ func TestNewAPIClientParams(t *testing.T) {
 		Timeout(10),
 		Retries(12))
 
-	if client.url != defaultV2APIURL {
-		t.Error("Api url should be set to V2")
-	}
+	assert.Equal(t, defaultV2APIURL, client.url)
 }
 
 func TestGetModifications(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
-	_, err := client.GetModifications("test_vid", nil)
+	_, err := client.GetModifications("test_vid", nil, nil)
 
-	if err == nil {
-		t.Error("Expected error for unknown env id")
-	}
+	assert.NotNil(t, err, "Expected error for unknown env id")
 
 	client, _ = NewAPIClient(realEnvID, testAPIKey)
-	_, err = client.GetModifications("test_vid", nil)
+	_, err = client.GetModifications("test_vid", nil, nil)
 
-	if err == nil {
-		t.Errorf("Expected error for wrong api key : %v", err)
+	assert.NotNil(t, err, "Expected error for wrong api key")
+
+	response := &model.APIClientResponse{
+		VisitorID: "vis_id",
+		Panic:     false,
+		Campaigns: []model.Campaign{},
 	}
+	responseJSON, _ := json.Marshal(response)
+	client.httpClient = utils.NewHTTPClientMock(200, responseJSON, nil)
+
+	_, err = client.GetModifications("test_vid", nil, nil)
+	assert.Nil(t, err)
 }
 
 func TestActivate(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
 	err := client.ActivateCampaign(model.ActivationHit{})
 
-	if err == nil {
-		t.Errorf("Expected error for empty request")
-	}
+	assert.NotNil(t, err, "Expected error for empty request")
 
 	err = client.ActivateCampaign(model.ActivationHit{
 		EnvironmentID:    testEnvID,
@@ -97,18 +86,14 @@ func TestActivate(t *testing.T) {
 		VariationID:      "vid",
 	})
 
-	if err != nil {
-		t.Errorf("Did not expect error for correct activation request. Got %v", err)
-	}
+	assert.Nil(t, err, "Did not expect error for correct activation request")
 }
 
 func TestSendEvent(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
 	err := client.SendEvent(model.Event{})
 
-	if err == nil {
-		t.Errorf("Expected error for empty request")
-	}
+	assert.NotNil(t, err, "Expected error for empty request")
 
 	err = client.SendEvent(model.Event{
 		VisitorID: "test_vid",
@@ -118,9 +103,7 @@ func TestSendEvent(t *testing.T) {
 		},
 	})
 
-	if err == nil {
-		t.Errorf("Expected error for not existing envID. Got nil")
-	}
+	assert.NotNil(t, err, "Expected error for not existing envID")
 
 	client, _ = NewAPIClient(realEnvID, testAPIKey)
 	err = client.SendEvent(model.Event{
@@ -131,7 +114,5 @@ func TestSendEvent(t *testing.T) {
 		},
 	})
 
-	if err != nil {
-		t.Errorf("Did not expect error for correct activation request. Got %v", err)
-	}
+	assert.Nil(t, err, "Did not expect error for correct activation request")
 }

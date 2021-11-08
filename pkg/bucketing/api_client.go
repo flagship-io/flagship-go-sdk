@@ -21,7 +21,7 @@ type APIClient struct {
 	apiKey      string
 	timeout     time.Duration
 	retries     int
-	httpRequest *utils.HTTPClient
+	httpRequest utils.HTTPClientInterface
 }
 
 // APIUrl sets http client base URL

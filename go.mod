@@ -12,5 +12,3 @@ require (
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/protobuf v1.27.1
 )
-
-replace github.com/flagship-io/flagship-go-sdk/v2 => /Users/kevin/Projects/go/src/github.com/flagship-io/flagship-go-sdk

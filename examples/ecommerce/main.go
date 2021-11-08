@@ -18,6 +18,7 @@ var fsVisitors = make(map[string]*client.Visitor)
 // FSEnvInfo Binding env from JSON
 type FSEnvInfo struct {
 	EnvironmentID string                 `json:"environment_id" binding:"required"`
+	APIKey        string                 `json:"api_key" binding:"required"`
 	VisitorID     string                 `json:"visitor_id" binding:"required"`
 	Context       map[string]interface{} `json:"context" binding:"required"`
 }
@@ -52,7 +53,7 @@ func main() {
 		if fsInfo.EnvironmentID != "" && fsInfo.VisitorID != "" {
 			fsClient, _ := fsClients[fsInfo.EnvironmentID]
 			if fsClient == nil {
-				fsClient, err = flagship.Start(fsInfo.EnvironmentID, client.WithBucketing())
+				fsClient, err = flagship.Start(fsInfo.EnvironmentID, fsInfo.APIKey, client.WithBucketing())
 			}
 			fsClients[fsInfo.EnvironmentID] = fsClient
 			fsVisitor, _ := fsVisitors[fsInfo.EnvironmentID+"-"+fsInfo.VisitorID]
