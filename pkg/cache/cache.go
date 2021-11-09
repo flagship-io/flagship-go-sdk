@@ -1,11 +1,16 @@
 package cache
 
 import (
+	"time"
+
+	commonDecision "github.com/flagship-io/flagship-common/decision"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 )
 
 // ManagerType represents infrastructure types of cache manager
 type ManagerType string
+
+type CampaignCacheMap map[string]*CampaignCache
 
 const (
 	// Local is a local database based cache manager
@@ -20,7 +25,22 @@ const (
 type CampaignCache struct {
 	VariationGroupID string
 	VariationID      string
+	Activated        bool
 	FlagKeys         []string
+}
+
+func (ccmap CampaignCacheMap) ToCommonStruct() *commonDecision.VisitorAssignments {
+	assigns := map[string]*commonDecision.VisitorVGCacheItem{}
+	for _, v := range ccmap {
+		assigns[v.VariationGroupID] = &commonDecision.VisitorVGCacheItem{
+			VariationID: v.VariationID,
+			Activated:   v.Activated,
+		}
+	}
+	return &commonDecision.VisitorAssignments{
+		Timestamp:   time.Now().Unix(),
+		Assignments: assigns,
+	}
 }
 
 // Options expresses all the possible options for cache manager

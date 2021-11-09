@@ -2,17 +2,18 @@ package bucketing
 
 import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-proto/bucketing"
+	"github.com/flagship-io/flagship-proto/decision_response"
 	targetingTypes "github.com/flagship-io/flagship-proto/targeting"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
-var engineMockConfig = &Configuration{
-	Campaigns: []*Campaign{{
-		ID: "test_cid",
-		VariationGroups: []*VariationGroup{{
-			ID: "test_vgid",
+var engineMockConfig = &bucketing.Bucketing_BucketingResponse{
+	Campaigns: []*bucketing.Bucketing_BucketingCampaign{{
+		Id: "test_cid",
+		VariationGroups: []*bucketing.Bucketing_BucketingVariationGroups{{
+			Id: "test_vgid",
 			Targeting: &targetingTypes.Targeting{
 				TargetingGroups: []*targetingTypes.Targeting_TargetingGroup{{
 					Targetings: []*targetingTypes.Targeting_InnerTargeting{{
@@ -22,19 +23,27 @@ var engineMockConfig = &Configuration{
 					}},
 				}},
 			},
-			Variations: []*Variation{{
-				ID:         "1",
+			Variations: []*decision_response.FullVariation{{
+				Id:         wrapperspb.String("1"),
 				Allocation: 50,
-				Modifications: model.Modification{
-					Type:  "FLAG",
-					Value: map[string]interface{}{"test": true},
+				Modifications: &decision_response.Modifications{
+					Type: decision_response.ModificationsType_FLAG,
+					Value: &structpb.Struct{
+						Fields: map[string]*structpb.Value{
+							"test": structpb.NewBoolValue(true),
+						},
+					},
 				},
 			}, {
-				ID:         "2",
+				Id:         wrapperspb.String("1"),
 				Allocation: 50,
-				Modifications: model.Modification{
-					Type:  "FLAG",
-					Value: map[string]interface{}{"test": false},
+				Modifications: &decision_response.Modifications{
+					Type: decision_response.ModificationsType_FLAG,
+					Value: &structpb.Struct{
+						Fields: map[string]*structpb.Value{
+							"test": structpb.NewBoolValue(false),
+						},
+					},
 				},
 			}},
 		}},

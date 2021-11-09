@@ -1,11 +1,13 @@
 package bucketing
 
 import (
+	"log"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-proto/bucketing"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -125,6 +127,8 @@ func TestGetModificationsMock(t *testing.T) {
 	cacheCheck, _ := cache.Get(testVID)
 	assert.Equal(t, 1, len(cacheCheck))
 
+	log.Println(cacheCheck)
+
 	campaignCacheCheck := cacheCheck["test_cid"]
 	assert.Equal(t, "1", campaignCacheCheck.VariationID)
 	assert.Equal(t, 1, len(campaignCacheCheck.FlagKeys))
@@ -151,9 +155,9 @@ func TestGetModificationsMock(t *testing.T) {
 func TestPollingPanic(t *testing.T) {
 	engine, _ := NewEngine(testEnvID, nil, PollingInterval(1*time.Second))
 
-	config := &Configuration{
-		Campaigns: []*Campaign{{
-			ID: "test_cid",
+	config := &bucketing.Bucketing_BucketingResponse{
+		Campaigns: []*bucketing.Bucketing_BucketingCampaign{{
+			Id: "test_cid",
 		}},
 	}
 
