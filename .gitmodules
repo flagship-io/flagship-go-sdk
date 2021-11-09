@@ -1,1 +1,4 @@
 
+[submodule "examples/qa/assets/flagship-qa-front"]
+	path = examples/qa/assets/flagship-qa-front
+	url = git@github.com:flagship-io/flagship-qa-front.git
