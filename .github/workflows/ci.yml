@@ -34,11 +34,15 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: "recursive"
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
         with:
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
           repository: flagship-io/flagship-go-sdk/qa
           tags: latest
