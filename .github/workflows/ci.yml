@@ -48,4 +48,3 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/qa:latest
           context: .
-          file: ./deno-qa/Dockerfile
