@@ -96,10 +96,6 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 
 // Authenticate set the authenticated ID for the visitor, along with optional new context and re-synchronize flag
 func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, sync bool) (err error) {
-	if v.decisionMode != API {
-		err = errors.New("authenticate() is ignored in BUCKETING mode")
-		return err
-	}
 	if v.AnonymousID == nil {
 		anonID := v.ID
 		v.AnonymousID = &anonID
@@ -119,10 +115,6 @@ func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, 
 
 // Unauthenticate unset the authenticated ID for the visitor
 func (v *Visitor) Unauthenticate(newContext map[string]interface{}, sync bool) (err error) {
-	if v.decisionMode != API {
-		err = errors.New("unauthenticate() is ignored in BUCKETING mode")
-		return err
-	}
 	if v.AnonymousID != nil {
 		v.ID = *v.AnonymousID
 		v.AnonymousID = nil
