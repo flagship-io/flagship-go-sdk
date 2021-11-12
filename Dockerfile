@@ -30,6 +30,6 @@ EXPOSE 8080
 WORKDIR /go/bin
 
 COPY --from=build-env /go/bin/example example
-COPY --from=build-front /usr/src/qa/front/examples/qa/assets/flagship-qa-front qa/assets/flagship-qa-front
+COPY --from=build-front /usr/src/qa/front/examples/qa/assets/ qa/assets/
 
 CMD ["./example"]
