@@ -47,6 +47,8 @@ github.com/flagship-io/flagship-common v0.0.7/go.mod h1:nfsSmwTJ65C+nXwsTir/HQ2b
 github.com/flagship-io/flagship-proto v0.0.2/go.mod h1:7DLqFLOTZQ9a707glLumZ6tItGuHckSLzSGMxMFwtCU=
 github.com/flagship-io/flagship-proto v0.0.6 h1:aWX9cDrzhbJmK1hXBuZmFvFkRpN4T+oveAGv46tWLgc=
 github.com/flagship-io/flagship-proto v0.0.6/go.mod h1:jhgEIOw+OTQaxBDF35e3xxwAql1G4PMeqrejtsaRV5Y=
+github.com/flagship-io/flagship-proto v0.0.7-0.20211125142452-e9e76c3cfcb1 h1:FiHLSkJj9fyOryzgJ+wKpr0Krehr4pD/IeAHwiN1bgU=
+github.com/flagship-io/flagship-proto v0.0.7-0.20211125142452-e9e76c3cfcb1/go.mod h1:jhgEIOw+OTQaxBDF35e3xxwAql1G4PMeqrejtsaRV5Y=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
