@@ -1,4 +1,5 @@
 #!/bin/bash
+#!/bin/bash
 
 go test ./pkg/... -coverprofile cover.out.tmp
 cat cover.out.tmp | grep -v "_mock.go" > cover.out

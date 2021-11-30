@@ -14,9 +14,10 @@ type APIOptions struct {
 
 // APIClientRequest represents the API client informations
 type APIClientRequest struct {
-	VisitorID  string                 `json:"visitor_id"`
-	Context    map[string]interface{} `json:"context"`
-	TriggerHit bool                   `json:"trigger_hit"`
+	VisitorID   string  `json:"visitor_id"`
+	AnonymousID *string `json:"anonymous_id"`
+	Context     Context `json:"context"`
+	TriggerHit  bool    `json:"trigger_hit"`
 }
 
 // APIClientResponse represents a decision response

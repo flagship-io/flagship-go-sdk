@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
@@ -18,7 +19,8 @@ var visitorLogger = logging.CreateLogger("FS Visitor")
 // Visitor represents a visitor instance of the Flagship SDK
 type Visitor struct {
 	ID                string
-	Context           map[string]interface{}
+	AnonymousID       *string
+	Context           model.Context
 	decisionClient    decision.ClientInterface
 	decisionMode      DecisionMode
 	decisionResponse  *model.APIClientResponse
@@ -34,6 +36,11 @@ type ModificationInfo struct {
 	VariationID      string
 	IsReference      bool
 	Value            interface{}
+}
+
+func generateAnonymousID() string {
+	newID := time.Now().Format("20060102030405.000000")
+	return newID[:len(newID)-1]
 }
 
 // UpdateContext updates the Visitor context with new value
@@ -87,6 +94,52 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 	return nil
 }
 
+// Authenticate set the authenticated ID for the visitor, along with optional new context and re-synchronize flag
+func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, sync bool) (err error) {
+	if v.decisionMode != API {
+		err = errors.New("authenticate() is ignored in BUCKETING mode")
+		return err
+	}
+	if v.AnonymousID == nil {
+		anonID := v.ID
+		v.AnonymousID = &anonID
+	}
+	v.ID = newID
+	if newContext != nil {
+		err = v.UpdateContext(newContext)
+		if err != nil {
+			return err
+		}
+	}
+	if sync {
+		err = v.SynchronizeModifications()
+	}
+	return err
+}
+
+// Unauthenticate unset the authenticated ID for the visitor
+func (v *Visitor) Unauthenticate(newContext map[string]interface{}, sync bool) (err error) {
+	if v.decisionMode != API {
+		err = errors.New("unauthenticate() is ignored in BUCKETING mode")
+		return err
+	}
+	if v.AnonymousID != nil {
+		v.ID = *v.AnonymousID
+		v.AnonymousID = nil
+	}
+
+	if newContext != nil {
+		err = v.UpdateContext(newContext)
+		if err != nil {
+			return err
+		}
+	}
+	if sync {
+		err = v.SynchronizeModifications()
+	}
+	return err
+}
+
 // SynchronizeModifications updates the latest campaigns and modifications for the visitor
 func (v *Visitor) SynchronizeModifications() (err error) {
 	defer func() {
@@ -102,7 +155,7 @@ func (v *Visitor) SynchronizeModifications() (err error) {
 	}
 
 	visitorLogger.Info(fmt.Sprintf("Getting modifications for visitor with id : %s", v.ID))
-	resp, err := v.decisionClient.GetModifications(v.ID, v.Context)
+	resp, err := v.decisionClient.GetModifications(v.ID, v.AnonymousID, v.Context)
 
 	if err != nil {
 		visitorLogger.Error("Error when calling Decision engine: ", err)
@@ -169,6 +222,7 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 			VariationGroupID: flagInfos.Campaign.VariationGroupID,
 			VariationID:      flagInfos.Campaign.Variation.ID,
 			VisitorID:        v.ID,
+			AnonymousID:      v.AnonymousID,
 		})
 
 		if err != nil {
@@ -400,6 +454,7 @@ func (v *Visitor) ActivateCacheModification(key string) (err error) {
 						VariationGroupID: c.VariationGroupID,
 						VariationID:      c.VariationID,
 						VisitorID:        v.ID,
+						AnonymousID:      v.AnonymousID,
 					})
 					return err
 				}

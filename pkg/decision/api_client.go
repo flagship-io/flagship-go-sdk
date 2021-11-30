@@ -27,7 +27,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*decisionapi.APICl
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, anonymousID *string, context model.Context) (*model.APIClientResponse, error) {
 	apiLogger.Info("Getting modifications from API")
-	return r.decisionAPIClient.GetModifications(visitorID, context)
+	return r.decisionAPIClient.GetModifications(visitorID, anonymousID, context)
 }

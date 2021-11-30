@@ -30,19 +30,24 @@ func createClient() *Client {
 }
 
 func TestCreate(t *testing.T) {
-	options := &Options{
+	options := &Options{}
+
+	client, err := Create(options)
+	assert.NotNil(t, err)
+
+	options = &Options{
 		EnvID: testEnvID,
 	}
 
-	client, err := Create(options)
+	client, err = Create(options)
 
-	assert.NotEqual(t, nil, err)
+	assert.NotNil(t, err)
 
 	options.APIKey = testAPIKey
 
 	client, err = Create(options)
 
-	assert.Equal(t, nil, err)
+	assert.Nil(t, err)
 	assert.Equal(t, testEnvID, client.envID)
 	assert.NotEqual(t, nil, client.decisionClient)
 	assert.NotEqual(t, nil, client.trackingAPIClient)
@@ -166,7 +171,7 @@ func TestInit(t *testing.T) {
 func TestCreateVisitor(t *testing.T) {
 	client := createClient()
 
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true

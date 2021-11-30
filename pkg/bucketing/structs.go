@@ -3,25 +3,9 @@ package bucketing
 import (
 	"time"
 
+	commonDecision "github.com/flagship-io/flagship-common/decision"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
-)
-
-// TargetingOperator express a targeting operator
-type TargetingOperator string
-
-// The different targeting operators
-const (
-	NULL                   TargetingOperator = "NULL"
-	LOWER_THAN             TargetingOperator = "LOWER_THAN"
-	GREATER_THAN_OR_EQUALS TargetingOperator = "GREATER_THAN_OR_EQUALS"
-	LOWER_THAN_OR_EQUALS   TargetingOperator = "LOWER_THAN_OR_EQUALS"
-	EQUALS                 TargetingOperator = "EQUALS"
-	NOT_EQUALS             TargetingOperator = "NOT_EQUALS"
-	STARTS_WITH            TargetingOperator = "STARTS_WITH"
-	ENDS_WITH              TargetingOperator = "ENDS_WITH"
-	CONTAINS               TargetingOperator = "CONTAINS"
-	NOT_CONTAINS           TargetingOperator = "NOT_CONTAINS"
-	GREATER_THAN           TargetingOperator = "GREATER_THAN"
+	targetingTypes "github.com/flagship-io/flagship-proto/targeting"
 )
 
 // EngineOptions represents the options for the Bucketing decision mode
@@ -46,32 +30,34 @@ type Campaign struct {
 
 // VariationGroup represents a bucketing variation group
 type VariationGroup struct {
-	ID         string           `json:"id"`
-	Targeting  TargetingWrapper `json:"targeting"`
-	Variations []*Variation     `json:"variations"`
+	ID         string                    `json:"id"`
+	Targeting  *targetingTypes.Targeting `json:"targeting"`
+	Variations []*Variation              `json:"variations"`
+}
+
+func (vgi *VariationGroup) ToCommonStruct() *commonDecision.VariationsGroup {
+	var variationsArray []*commonDecision.Variation
+	for _, v := range vgi.Variations {
+		variationsArray = append(variationsArray, v.ToCommonStruct())
+	}
+	return &commonDecision.VariationsGroup{
+		ID:         vgi.ID,
+		Targetings: vgi.Targeting,
+		Variations: variationsArray,
+	}
 }
 
 // Variation represents a bucketing variation
 type Variation struct {
 	ID            string             `json:"id"`
 	Modifications model.Modification `json:"modifications"`
-	Allocation    int                `json:"allocation"`
+	Allocation    float32            `json:"allocation"`
 	Reference     bool               `json:"reference"`
 }
 
-// TargetingWrapper represents a bucketing targeting wrapper
-type TargetingWrapper struct {
-	TargetingGroups []*TargetingGroup `json:"targetingGroups"`
-}
-
-// TargetingGroup represents a bucketing targeting group ('or' linked targetings)
-type TargetingGroup struct {
-	Targetings []*Targeting `json:"targetings"`
-}
-
-// Targeting represents a bucketing targeting group ('or' linked targetings)
-type Targeting struct {
-	Operator TargetingOperator `json:"operator"`
-	Key      string            `json:"key"`
-	Value    interface{}       `json:"value"`
+func (vi *Variation) ToCommonStruct() *commonDecision.Variation {
+	return &commonDecision.Variation{
+		ID:         vi.ID,
+		Allocation: vi.Allocation,
+	}
 }

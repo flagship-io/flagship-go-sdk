@@ -25,7 +25,7 @@ type APIClient struct {
 	apiKey     string
 	timeout    time.Duration
 	retries    int
-	httpClient *utils.HTTPClient
+	httpClient utils.HTTPClientInterface
 }
 
 // APIVersionNumber specifies the version of the Decision API to use
@@ -57,6 +57,13 @@ func APIKey(apiKey string) func(r *APIClient) {
 	}
 }
 
+// APIUrl sets http client URL
+func APIUrl(apiURL string) func(r *APIClient) {
+	return func(r *APIClient) {
+		r.url = apiURL
+	}
+}
+
 // Timeout sets http client timeout
 func Timeout(timeout time.Duration) func(r *APIClient) {
 	return func(r *APIClient) {
@@ -79,7 +86,10 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 		retries: 1,
 	}
 
-	headers := map[string]string{}
+	headers := map[string]string{
+		"x-sdk-client":  "go",
+		"x-sdk-version": utils.PKG_VERSION,
+	}
 
 	for _, param := range params {
 		param(&res)
@@ -106,11 +116,12 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 }
 
 // GetModifications gets modifications from Decision API
-func (r *APIClient) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (r *APIClient) GetModifications(visitorID string, anonymousID *string, context model.Context) (*model.APIClientResponse, error) {
 	b, err := json.Marshal(model.APIClientRequest{
-		VisitorID:  visitorID,
-		Context:    context,
-		TriggerHit: false,
+		VisitorID:   visitorID,
+		AnonymousID: anonymousID,
+		Context:     context,
+		TriggerHit:  false,
 	})
 
 	if err != nil {

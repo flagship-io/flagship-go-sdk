@@ -16,11 +16,11 @@ var caID = "cid"
 var vgID = "vgid"
 var testVID = "vid"
 
-func createVisitor(vID string, context map[string]interface{}) *Visitor {
+func createVisitor(vID string, context model.Context, options ...VisitorOptionBuilder) *Visitor {
 	client := createClient()
 	client.decisionClient = createMockClient()
 
-	visitor, _ := client.NewVisitor(vID, context)
+	visitor, _ := client.NewVisitor(vID, context, options...)
 	return visitor
 }
 
@@ -55,10 +55,15 @@ func createMockClient() decision.ClientInterface {
 	}, 200)
 }
 
+func TestGenerateID(t *testing.T) {
+	visitor := createVisitor("", nil)
+	assert.NotEqual(t, "", visitor.ID)
+}
+
 func TestUpdateContext(t *testing.T) {
 	visitor := createVisitor("test", nil)
 
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true
@@ -91,7 +96,7 @@ func TestUpdateContext(t *testing.T) {
 }
 
 func TestUpdateContextKey(t *testing.T) {
-	context := map[string]interface{}{}
+	context := model.Context{}
 	context["test_string"] = "123"
 	context["test_number"] = 36.5
 	context["test_bool"] = true
@@ -115,6 +120,47 @@ func TestUpdateContextKey(t *testing.T) {
 	if visitor.Context["test_ok"] != true {
 		t.Errorf("Visitor update context string failed. Expected %v, got %v", true, visitor.Context["test_ok"])
 	}
+}
+
+func TestAuthenticate(t *testing.T) {
+	context := map[string]interface{}{}
+	visitor := createVisitor("firstID", context)
+	err := visitor.Authenticate("newID", nil, false)
+	assert.NotNil(t, err)
+
+	visitor.decisionMode = API
+	err = visitor.Authenticate("newID", nil, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "newID", visitor.ID)
+	assert.Equal(t, "firstID", *visitor.AnonymousID)
+
+	newContext := model.Context{
+		"test": "string",
+	}
+	visitor.Authenticate("newerID", newContext, false)
+	assert.Equal(t, "newerID", visitor.ID)
+	assert.Equal(t, newContext, visitor.Context)
+	assert.Equal(t, "firstID", *visitor.AnonymousID)
+
+	visitor.decisionMode = Bucketing
+	err = visitor.Unauthenticate(newContext, false)
+	assert.NotNil(t, err)
+
+	visitor.decisionMode = API
+	newContext = model.Context{
+		"test2": "string",
+	}
+	err = visitor.Unauthenticate(newContext, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "firstID", visitor.ID)
+	assert.Equal(t, newContext, visitor.Context)
+	assert.Nil(t, visitor.AnonymousID)
+
+	visitor = createVisitor("firstID", context, WithAuthenticated(false))
+	assert.Nil(t, visitor.AnonymousID)
+
+	visitor = createVisitor("firstID", context, WithAuthenticated(true))
+	assert.NotNil(t, visitor.AnonymousID)
 }
 
 func TestSynchronizeModifications(t *testing.T) {

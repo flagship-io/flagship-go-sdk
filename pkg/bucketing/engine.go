@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	commonDecision "github.com/flagship-io/flagship-common/decision"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
@@ -115,9 +116,15 @@ func (b *Engine) getCampaignCache(visitorID string) map[string]*cache.CampaignCa
 	return campaignsCache
 }
 
-func getMatchedVG(c *Campaign, visitorID string, context map[string]interface{}) *VariationGroup {
+func getMatchedVG(c *Campaign, visitorID string, context model.Context) *VariationGroup {
 	for _, vg := range c.VariationGroups {
-		matched, err := TargetingMatch(vg, visitorID, context)
+		contextProto, err := context.ToProtoMap()
+		if err != nil {
+			logger.Warning(fmt.Sprintf("Error occurred when converting context to proto : %v", err))
+			continue
+		}
+
+		matched, err := commonDecision.TargetingMatch(vg.ToCommonStruct(), visitorID, contextProto)
 		if err != nil {
 			logger.Warning(fmt.Sprintf("Error occurred when checking targeting : %v", err))
 			continue
@@ -131,7 +138,7 @@ func getMatchedVG(c *Campaign, visitorID string, context map[string]interface{})
 }
 
 // GetModifications gets modifications from Decision API
-func (b *Engine) GetModifications(visitorID string, context map[string]interface{}) (*model.APIClientResponse, error) {
+func (b *Engine) GetModifications(visitorID string, anonymousID *string, context model.Context) (*model.APIClientResponse, error) {
 	if b.getConfig() == nil {
 		logger.Info("Configuration not loaded. Loading it now")
 		err := b.Load()
@@ -159,6 +166,7 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 
 		if matchedVg != nil {
 			var variation *Variation
+			var variationCommon *commonDecision.Variation
 			var err error
 
 			// Handle cache campaigns
@@ -172,13 +180,19 @@ func (b *Engine) GetModifications(visitorID string, context map[string]interface
 			}
 
 			if variation == nil {
-				variation, err = GetRandomAllocation(visitorID, matchedVg)
+				variationCommon, err = commonDecision.GetRandomAllocation(visitorID, matchedVg.ToCommonStruct(), false)
+				if err != nil {
+					logger.Warning(fmt.Sprintf("Error occurred when allocating variation : %v", err))
+					continue
+				}
+
+				for _, v := range matchedVg.Variations {
+					if v.ID == variationCommon.ID {
+						variation = v
+					}
+				}
 			}
 
-			if err != nil {
-				logger.Warning(fmt.Sprintf("Error occurred when allocating variation : %v", err))
-				continue
-			}
 			campaign := model.Campaign{
 				ID:               c.ID,
 				CustomID:         c.CustomID,
