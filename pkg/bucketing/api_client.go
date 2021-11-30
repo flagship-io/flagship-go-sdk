@@ -7,7 +7,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
 	bucketingProto "github.com/flagship-io/flagship-proto/bucketing"
-	"github.com/golang/protobuf/jsonpb"
+	"google.golang.org/protobuf/encoding/protojson"
 )
 
 const defaultTimeout = 10 * time.Second
@@ -102,7 +102,7 @@ func (r *APIClient) GetConfiguration() (*bucketingProto.Bucketing_BucketingRespo
 	}
 
 	conf := &bucketingProto.Bucketing_BucketingResponse{}
-	err = jsonpb.UnmarshalString(string(resp.Body), conf)
+	err = protojson.Unmarshal(resp.Body, conf)
 
 	if err != nil {
 		return nil, err
