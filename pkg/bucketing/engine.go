@@ -1,7 +1,6 @@
 package bucketing
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -9,14 +8,21 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	bucketingProto "github.com/flagship-io/flagship-proto/bucketing"
 )
 
 var logger = logging.CreateLogger("Bucketing Engine")
 
+// EngineOptions represents the options for the Bucketing decision mode
+type EngineOptions struct {
+	// PollingInterval is the number of milliseconds between each poll. If -1, then no polling will be done
+	PollingInterval time.Duration
+}
+
 // Engine represents a bucketing engine
 type Engine struct {
 	pollingInterval  time.Duration
-	config           *Configuration
+	config           *bucketingProto.Bucketing_BucketingResponse
 	apiClient        ConfigAPIInterface
 	apiClientOptions []func(*APIClient)
 	cacheManager     cache.Manager
@@ -81,7 +87,7 @@ func (b *Engine) startTicker() {
 	}
 }
 
-func (b *Engine) getConfig() *Configuration {
+func (b *Engine) getConfig() *bucketingProto.Bucketing_BucketingResponse {
 	b.configMux.Lock()
 	defer b.configMux.Unlock()
 	return b.config
@@ -105,7 +111,7 @@ func (b *Engine) Load() error {
 	return nil
 }
 
-func (b *Engine) getCampaignCache(visitorID string) map[string]*cache.CampaignCache {
+func (b *Engine) getCampaignCache(visitorID string) cache.CampaignCacheMap {
 	var campaignsCache = make(map[string]*cache.CampaignCache)
 	if b.cacheManager != nil {
 		campaignsCache, _ = b.cacheManager.Get(visitorID)
@@ -116,29 +122,9 @@ func (b *Engine) getCampaignCache(visitorID string) map[string]*cache.CampaignCa
 	return campaignsCache
 }
 
-func getMatchedVG(c *Campaign, visitorID string, context model.Context) *VariationGroup {
-	for _, vg := range c.VariationGroups {
-		contextProto, err := context.ToProtoMap()
-		if err != nil {
-			logger.Warning(fmt.Sprintf("Error occurred when converting context to proto : %v", err))
-			continue
-		}
-
-		matched, err := commonDecision.TargetingMatch(vg.ToCommonStruct(), visitorID, contextProto)
-		if err != nil {
-			logger.Warning(fmt.Sprintf("Error occurred when checking targeting : %v", err))
-			continue
-		}
-
-		if matched {
-			return vg
-		}
-	}
-	return nil
-}
-
 // GetModifications gets modifications from Decision API
 func (b *Engine) GetModifications(visitorID string, anonymousID *string, context model.Context) (*model.APIClientResponse, error) {
+
 	if b.getConfig() == nil {
 		logger.Info("Configuration not loaded. Loading it now")
 		err := b.Load()
@@ -161,64 +147,81 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 	campaignsCache := b.getCampaignCache(visitorID)
 
 	config := b.getConfig()
-	for _, c := range config.Campaigns {
-		matchedVg := getMatchedVG(c, visitorID, context)
 
-		if matchedVg != nil {
-			var variation *Variation
-			var variationCommon *commonDecision.Variation
-			var err error
+	commonCampaigns := map[string]*commonDecision.CampaignInfo{}
+	for _, v := range config.Campaigns {
+		commonCampaigns[v.Id] = model.CampaignToCommonStruct(v)
+	}
+	anonymousIDString := ""
+	if anonymousID != nil {
+		anonymousIDString = *anonymousID
+	}
 
-			// Handle cache campaigns
-			cacheCampaign, ok := campaignsCache[c.ID]
-			if ok && cacheCampaign.VariationGroupID == matchedVg.ID {
-				for _, v := range matchedVg.Variations {
-					if v.ID == cacheCampaign.VariationID {
-						variation = v
-					}
-				}
-			}
+	contextProto, err := context.ToProtoMap()
+	if err != nil {
+		logger.Errorf("error converting context to proto map: %v", err)
+		return resp, nil
+	}
 
-			if variation == nil {
-				variationCommon, err = commonDecision.GetRandomAllocation(visitorID, matchedVg.ToCommonStruct(), false)
-				if err != nil {
-					logger.Warning(fmt.Sprintf("Error occurred when allocating variation : %v", err))
-					continue
-				}
+	decisionResponse, err := commonDecision.GetDecision(commonDecision.VisitorInfo{
+		ID:            visitorID,
+		AnonymousID:   anonymousIDString,
+		DecisionGroup: "",
+		Context:       contextProto,
+	}, commonDecision.EnvironmentInfo{
+		ID:                b.envID,
+		Campaigns:         commonCampaigns,
+		IsPanic:           config.Panic,
+		SingleAssignment:  config.GetAccountSettings().GetEnabled1V1T(),
+		UseReconciliation: config.GetAccountSettings().GetEnabledXPX(),
+		CacheEnabled:      b.cacheManager != nil,
+	}, commonDecision.DecisionOptions{
+		TriggerHit:        false,
+		CampaignID:        "",
+		Tracker:           nil,
+		IsCumulativeAlloc: false,
+	}, commonDecision.DecisionHandlers{
+		GetCache: func(environmentID, id string) (*commonDecision.VisitorAssignments, error) {
+			return campaignsCache.ToCommonStruct(), nil
+		},
+		SaveCache:         nil,
+		ActivateCampaigns: nil,
+	})
 
-				for _, v := range matchedVg.Variations {
-					if v.ID == variationCommon.ID {
-						variation = v
-					}
-				}
-			}
+	if err != nil {
+		logger.Errorf("error computing decision response: %v", err)
+		return nil, err
+	}
 
-			campaign := model.Campaign{
-				ID:               c.ID,
-				CustomID:         c.CustomID,
-				VariationGroupID: matchedVg.ID,
-				Variation: model.ClientVariation{
-					ID:        variation.ID,
-					Reference: variation.Reference,
-					Modifications: model.Modification{
-						Type:  variation.Modifications.Type,
-						Value: variation.Modifications.Value,
-					},
+	for _, c := range decisionResponse.Campaigns {
+		campaign := model.Campaign{
+			ID:               c.Id.Value,
+			VariationGroupID: c.VariationGroupId.Value,
+			Variation: model.ClientVariation{
+				ID:        c.Variation.Id.Value,
+				Reference: c.Variation.Reference,
+				Modifications: model.Modification{
+					Type:  c.Variation.Modifications.Type.String(),
+					Value: c.Variation.Modifications.Value.AsMap(),
 				},
-			}
-			resp.Campaigns = append(resp.Campaigns, campaign)
+			},
+		}
+		resp.Campaigns = append(resp.Campaigns, campaign)
 
-			keys := make([]string, 0, len(variation.Modifications.Value))
+		keys := make([]string, 0, len(c.Variation.Modifications.Value.AsMap()))
+		for k := range c.Variation.Modifications.Value.AsMap() {
+			keys = append(keys, k)
+		}
 
-			for k := range variation.Modifications.Value {
-				keys = append(keys, k)
-			}
-
-			campaignsCache[c.ID] = &cache.CampaignCache{
-				VariationGroupID: matchedVg.ID,
-				VariationID:      variation.ID,
-				FlagKeys:         keys,
-			}
+		alreadyActivated := false
+		if campaignsCache[c.Id.Value] != nil {
+			alreadyActivated = campaignsCache[c.Id.Value].Activated
+		}
+		campaignsCache[c.Id.Value] = &cache.CampaignCache{
+			VariationGroupID: c.VariationGroupId.Value,
+			VariationID:      c.Variation.Id.Value,
+			Activated:        alreadyActivated,
+			FlagKeys:         keys,
 		}
 	}
 

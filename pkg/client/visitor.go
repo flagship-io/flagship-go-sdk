@@ -96,10 +96,6 @@ func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 
 // Authenticate set the authenticated ID for the visitor, along with optional new context and re-synchronize flag
 func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, sync bool) (err error) {
-	if v.decisionMode != API {
-		err = errors.New("authenticate() is ignored in BUCKETING mode")
-		return err
-	}
 	if v.AnonymousID == nil {
 		anonID := v.ID
 		v.AnonymousID = &anonID
@@ -119,10 +115,6 @@ func (v *Visitor) Authenticate(newID string, newContext map[string]interface{}, 
 
 // Unauthenticate unset the authenticated ID for the visitor
 func (v *Visitor) Unauthenticate(newContext map[string]interface{}, sync bool) (err error) {
-	if v.decisionMode != API {
-		err = errors.New("unauthenticate() is ignored in BUCKETING mode")
-		return err
-	}
 	if v.AnonymousID != nil {
 		v.ID = *v.AnonymousID
 		v.AnonymousID = nil
@@ -217,14 +209,7 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 	}
 
 	if activate {
-		visitorLogger.Info(fmt.Sprintf("Activating campaign for flag %s for visitor with id : %s", key, v.ID))
-		err := v.trackingAPIClient.ActivateCampaign(model.ActivationHit{
-			VariationGroupID: flagInfos.Campaign.VariationGroupID,
-			VariationID:      flagInfos.Campaign.Variation.ID,
-			VisitorID:        v.ID,
-			AnonymousID:      v.AnonymousID,
-		})
-
+		err := v.activateModification(key)
 		if err != nil {
 			visitorLogger.Debug(fmt.Sprintf("Error occurred when activating campaign : %v.", err))
 		}
@@ -425,6 +410,40 @@ func (v *Visitor) GetModificationInfo(key string) (modifInfo *ModificationInfo, 
 	}, nil
 }
 
+func (v *Visitor) activateModification(key string) error {
+	if v.flagInfos == nil {
+		err := errors.New("Visitor modifications have not been synchronized")
+		return err
+	}
+
+	flagInfos, ok := v.flagInfos[key]
+	if !ok {
+		return fmt.Errorf("key %s not set in decision infos", key)
+	}
+
+	visitorLogger.Info(fmt.Sprintf("Activating campaign for flag %s for visitor with id : %s", key, v.ID))
+	err := v.trackingAPIClient.ActivateCampaign(model.ActivationHit{
+		VariationGroupID: flagInfos.Campaign.VariationGroupID,
+		VariationID:      flagInfos.Campaign.Variation.ID,
+		VisitorID:        v.ID,
+		AnonymousID:      v.AnonymousID,
+	})
+	if err != nil && v.cacheManager != nil {
+		campaignsCache, err := v.cacheManager.Get(v.ID)
+		if err == nil {
+			existingCampaign, ok := campaignsCache[flagInfos.Campaign.ID]
+			if ok && !existingCampaign.Activated {
+				existingCampaign.Activated = true
+				err = v.cacheManager.Set(v.ID, campaignsCache)
+			}
+		}
+		if err != nil {
+			visitorLogger.Warnf("error when activating campaign cache for visitor ID: %v", err)
+		}
+	}
+	return err
+}
+
 // ActivateModification notifies Flagship that the visitor has seen to modification
 func (v *Visitor) ActivateModification(key string) (err error) {
 	defer func() {
@@ -433,8 +452,7 @@ func (v *Visitor) ActivateModification(key string) (err error) {
 		}
 	}()
 
-	_, err = v.getModification(key, true)
-
+	err = v.activateModification(key)
 	return err
 }
 

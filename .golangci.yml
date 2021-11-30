@@ -1,0 +1,4 @@
+linters-settings:
+  staticcheck:
+    # https://staticcheck.io/docs/options#checks
+    checks: ["all", "-SA1019"]

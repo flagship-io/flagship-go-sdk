@@ -1,12 +1,13 @@
 package bucketing
 
 import (
-	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	bucketingProto "github.com/flagship-io/flagship-proto/bucketing"
+	"github.com/golang/protobuf/jsonpb"
 )
 
 const defaultTimeout = 10 * time.Second
@@ -87,7 +88,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) *APIClient {
 }
 
 // GetConfiguration gets an environment configuration from bucketing file
-func (r *APIClient) GetConfiguration() (*Configuration, error) {
+func (r *APIClient) GetConfiguration() (*bucketingProto.Bucketing_BucketingResponse, error) {
 	path := fmt.Sprintf("/%s/bucketing.json", r.envID)
 
 	apiLogger.Info("Calling bucketing file to get configuration")
@@ -100,8 +101,8 @@ func (r *APIClient) GetConfiguration() (*Configuration, error) {
 		return nil, fmt.Errorf("Error when calling Bucketing API : %v", err)
 	}
 
-	conf := &Configuration{}
-	err = json.Unmarshal(resp.Body, &conf)
+	conf := &bucketingProto.Bucketing_BucketingResponse{}
+	err = jsonpb.UnmarshalString(string(resp.Body), conf)
 
 	if err != nil {
 		return nil, err

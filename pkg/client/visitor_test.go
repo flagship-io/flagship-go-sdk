@@ -126,10 +126,6 @@ func TestAuthenticate(t *testing.T) {
 	context := map[string]interface{}{}
 	visitor := createVisitor("firstID", context)
 	err := visitor.Authenticate("newID", nil, false)
-	assert.NotNil(t, err)
-
-	visitor.decisionMode = API
-	err = visitor.Authenticate("newID", nil, false)
 	assert.Nil(t, err)
 	assert.Equal(t, "newID", visitor.ID)
 	assert.Equal(t, "firstID", *visitor.AnonymousID)
@@ -141,10 +137,6 @@ func TestAuthenticate(t *testing.T) {
 	assert.Equal(t, "newerID", visitor.ID)
 	assert.Equal(t, newContext, visitor.Context)
 	assert.Equal(t, "firstID", *visitor.AnonymousID)
-
-	visitor.decisionMode = Bucketing
-	err = visitor.Unauthenticate(newContext, false)
-	assert.NotNil(t, err)
 
 	visitor.decisionMode = API
 	newContext = model.Context{
