@@ -149,7 +149,7 @@ func (c *Client) NewVisitor(visitorID string, context model.Context, options ...
 }
 
 // SendHit sends a tracking hit to the Data Collect API
-func (c *Client) SendHit(visitorID string, hit model.HitInterface) (err error) {
+func (c *Client) SendHit(visitorID string, anonymousID *string, hit model.HitInterface) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			err = utils.HandleRecovered(r, clientLogger)
@@ -157,7 +157,7 @@ func (c *Client) SendHit(visitorID string, hit model.HitInterface) (err error) {
 	}()
 
 	clientLogger.Info(fmt.Sprintf("Sending hit for visitor with id : %s", visitorID))
-	err = c.trackingAPIClient.SendHit(visitorID, hit)
+	err = c.trackingAPIClient.SendHit(visitorID, anonymousID, hit)
 
 	if err != nil {
 		err = fmt.Errorf("Error when sending hit: %s", err.Error())

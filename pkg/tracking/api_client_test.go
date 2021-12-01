@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/stretchr/testify/assert"
 )
 
 var testVisitorID = "test_visitor_id"
@@ -31,23 +32,23 @@ func TestNewAPIClient(t *testing.T) {
 
 func TestSendInternalHit(t *testing.T) {
 	client, _ := NewAPIClient(testEnvID, testAPIKey)
-	err := client.SendHit(testVisitorID, nil)
+	err := client.SendHit(testVisitorID, nil, nil)
 
 	if err == nil {
 		t.Error("Empty hit should return and err")
 	}
 
 	event := &model.EventHit{}
-	event.SetBaseInfos(testEnvID, testVisitorID)
+	event.SetBaseInfos(testEnvID, testVisitorID, nil)
 
-	err = client.SendHit(testVisitorID, event)
+	err = client.SendHit(testVisitorID, nil, event)
 
 	if err == nil {
 		t.Error("Invalid event hit should return error")
 	}
 
 	event.Action = "test_action"
-	err = client.SendHit(testVisitorID, event)
+	err = client.SendHit(testVisitorID, nil, event)
 
 	if err != nil {
 		t.Errorf("Right hit should not return and err : %v", err)
@@ -91,4 +92,22 @@ func TestSendEvent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Did not expect error for correct event request. Got %v", err)
 	}
+}
+
+func TestAnonymousID(t *testing.T) {
+	client := NewMockAPIClient(realEnvID, false)
+
+	_ = client.SendHit("vis_id", nil, &model.EventHit{
+		Action: "action",
+		Value:  1,
+	})
+
+	assert.Equal(t, `{"vid":"vis_id","cuid":"vis_id","cid":"blvo2kijq6pg023l8edg","t":"EVENT","ds":"APP","ea":"action","ev":1}`, client.requestString)
+
+	anonymousID := "anon_id"
+	_ = client.SendHit("vis_id", &anonymousID, &model.EventHit{
+		Action: "action",
+		Value:  1,
+	})
+	assert.Equal(t, `{"vid":"anon_id","cuid":"vis_id","cid":"blvo2kijq6pg023l8edg","t":"EVENT","ds":"APP","ea":"action","ev":1}`, client.requestString)
 }

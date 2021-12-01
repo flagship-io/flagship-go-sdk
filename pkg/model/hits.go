@@ -33,6 +33,7 @@ const (
 // BaseHit represents the API client informations
 type BaseHit struct {
 	VisitorID               string    `json:"vid,omitempty"`
+	CustomerID              string    `json:"cuid,omitempty"`
 	EnvironmentID           string    `json:"cid,omitempty"`
 	Type                    HitType   `json:"t,omitempty"`
 	DataSource              string    `json:"ds,omitempty"`
@@ -55,9 +56,13 @@ type BaseHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *BaseHit) SetBaseInfos(envID string, visitorID string) {
+func (b *BaseHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
 	b.EnvironmentID = envID
 	b.VisitorID = visitorID
+	if anonymousID != nil {
+		b.VisitorID = *anonymousID
+	}
+	b.CustomerID = visitorID
 	b.DataSource = "APP"
 	b.CreatedAt = time.Now()
 }
@@ -109,8 +114,8 @@ type PageHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *PageHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *PageHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = PAGE
 }
 
@@ -133,8 +138,8 @@ type ScreenHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *ScreenHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *ScreenHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = SCREEN
 }
 
@@ -153,8 +158,8 @@ type EventHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *EventHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *EventHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = EVENT
 }
 
@@ -183,8 +188,8 @@ type TransactionHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *TransactionHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *TransactionHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = TRANSACTION
 }
 
@@ -212,8 +217,8 @@ type ItemHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *ItemHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *ItemHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = ITEM
 }
 
@@ -313,8 +318,8 @@ type BatchHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *BatchHit) SetBaseInfos(envID string, visitorID string) {
-	b.BaseHit.SetBaseInfos(envID, visitorID)
+func (b *BatchHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
+	b.BaseHit.SetBaseInfos(envID, visitorID, anonymousID)
 	b.Type = BATCH
 }
 
@@ -333,6 +338,6 @@ func createBatchHit(baseHit BaseHit) BatchHit {
 		BaseHit: baseHit,
 		Hits:    []HitInterface{},
 	}
-	bHit.SetBaseInfos(bHit.EnvironmentID, bHit.VisitorID)
+	bHit.SetBaseInfos(bHit.EnvironmentID, bHit.CustomerID, &bHit.VisitorID)
 	return bHit
 }
