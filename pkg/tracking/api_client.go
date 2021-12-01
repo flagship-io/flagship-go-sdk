@@ -50,14 +50,14 @@ func NewAPIClient(envID string, apiKey string, params ...func(r *decisionapi.API
 }
 
 // SendHit sends a tracking hit to the Data Collect API
-func (r *APIClient) SendHit(visitorID string, hit model.HitInterface) error {
+func (r *APIClient) SendHit(visitorID string, anonymousID *string, hit model.HitInterface) error {
 	if hit == nil {
 		err := errors.New("Hit should not be empty")
 		apiLogger.Error(err.Error(), err)
 		return err
 	}
 
-	hit.SetBaseInfos(r.envID, visitorID)
+	hit.SetBaseInfos(r.envID, visitorID, anonymousID)
 
 	errs := hit.Validate()
 	if len(errs) > 0 {

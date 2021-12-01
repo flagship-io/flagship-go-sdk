@@ -8,6 +8,7 @@ import (
 )
 
 var testVisitorID = "test_visitor_id"
+var testAnonymousID = "test_anon_id"
 var testEnvID = "test_env_id"
 
 func TestValidateBase(t *testing.T) {
@@ -50,11 +51,26 @@ func TestValidateBase(t *testing.T) {
 	}
 }
 
+func TestSetBaseInfos(t *testing.T) {
+	b := PageHit{
+		BaseHit: BaseHit{},
+	}
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
+	assert.Equal(t, testEnvID, b.EnvironmentID)
+	assert.Equal(t, testVisitorID, b.VisitorID)
+	assert.Equal(t, testVisitorID, b.CustomerID)
+
+	b.SetBaseInfos(testEnvID, testVisitorID, &testAnonymousID)
+	assert.Equal(t, testEnvID, b.EnvironmentID)
+	assert.Equal(t, testAnonymousID, b.VisitorID)
+	assert.Equal(t, testVisitorID, b.CustomerID)
+}
+
 func TestValidatePage(t *testing.T) {
 	b := PageHit{
 		BaseHit: BaseHit{},
 	}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	assert.Equal(t, 2, len(errs))
@@ -74,7 +90,7 @@ func TestValidateScreen(t *testing.T) {
 	b := ScreenHit{
 		BaseHit: BaseHit{},
 	}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	assert.Equal(t, 1, len(errs))
@@ -89,7 +105,7 @@ func TestValidateEvent(t *testing.T) {
 	b := EventHit{
 		BaseHit: BaseHit{},
 	}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	if len(errs) != 1 {
@@ -107,7 +123,7 @@ func TestValidateTransaction(t *testing.T) {
 	b := TransactionHit{
 		BaseHit: BaseHit{},
 	}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	if len(errs) != 2 {
@@ -131,7 +147,7 @@ func TestValidateItem(t *testing.T) {
 	b := ItemHit{
 		BaseHit: BaseHit{},
 	}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	if len(errs) != 3 {
@@ -204,7 +220,7 @@ func TestEvent(t *testing.T) {
 
 func TestBatch(t *testing.T) {
 	b := createBatchHit(BaseHit{})
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 	b.AddHit(&EventHit{Action: "event Action"})
 
 	errs := b.Validate()

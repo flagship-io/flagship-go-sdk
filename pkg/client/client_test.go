@@ -224,13 +224,13 @@ func TestCreateVisitor(t *testing.T) {
 func TestSendHitClient(t *testing.T) {
 	client := createClient()
 
-	err := client.SendHit(vID, &model.EventHit{})
+	err := client.SendHit(vID, nil, &model.EventHit{})
 
 	if err == nil {
 		t.Errorf("Expected error as hit is malformed.")
 	}
 
-	err = client.SendHit(vID, &model.EventHit{
+	err = client.SendHit(vID, nil, &model.EventHit{
 		Action: "test_action",
 	})
 	if err != nil {

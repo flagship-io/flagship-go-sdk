@@ -3,43 +3,55 @@ package tracking
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
-	"strings"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 )
 
 // MockAPIClient represents a fake API client informations
 type MockAPIClient struct {
-	shouldFail bool
+	envID         string
+	shouldFail    bool
+	requestString string
 }
 
 // NewMockAPIClient creates a mock API client that returns success or fail status
 func NewMockAPIClient(envID string, shouldFail bool) *MockAPIClient {
 	res := MockAPIClient{
 		shouldFail: shouldFail,
+		envID:      envID,
 	}
 
 	return &res
 }
 
 // SendHit sends a tracking hit to the Data Collect API
-func (r MockAPIClient) SendHit(hit model.HitInterface) error {
+func (r *MockAPIClient) SendHit(visitorID string, anonymousID *string, hit model.HitInterface) error {
+	if hit == nil {
+		err := errors.New("Hit should not be empty")
+		apiLogger.Error(err.Error(), err)
+		return err
+	}
+
+	hit.SetBaseInfos(r.envID, visitorID, anonymousID)
+
 	errs := hit.Validate()
 	if len(errs) > 0 {
-		errorStrings := []string{}
 		for _, e := range errs {
-			apiLogger.Error("Hit validation error", e)
-			errorStrings = append(errorStrings, e.Error())
+			apiLogger.Errorf("Hit validation error : %v", e)
 		}
-		return fmt.Errorf("Invalid hit : %s", strings.Join(errorStrings, ", "))
+		return errors.New("Hit validation failed")
 	}
 	hit.ComputeQueueTime()
 
-	json, err := json.Marshal(hit)
+	b, err := json.Marshal(hit)
 
-	log.Printf("Sending hit : %v", string(json))
+	if err != nil {
+		return err
+	}
+
+	r.requestString = string(b)
+	log.Printf("Sending hit : %v", string(b))
 
 	if r.shouldFail {
 		return errors.New("Mock fail send hit error")

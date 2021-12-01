@@ -493,7 +493,7 @@ func (v *Visitor) SendHit(hit model.HitInterface) (err error) {
 	}()
 
 	visitorLogger.Info(fmt.Sprintf("Sending hit for visitor with id : %s", v.ID))
-	err = v.trackingAPIClient.SendHit(v.ID, hit)
+	err = v.trackingAPIClient.SendHit(v.ID, v.AnonymousID, hit)
 
 	if err != nil {
 		err = fmt.Errorf("Error when registering hit: %s", err.Error())
