@@ -293,7 +293,7 @@ func main() {
 		returnVisitor(c, fsVisitor, err)
 	})
 
-	router.POST("/authenticate", func(c *gin.Context) {
+	router.PUT("/authenticate", func(c *gin.Context) {
 		var json FSVisitorAuthInfo
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -328,7 +328,7 @@ func main() {
 		returnVisitor(c, fsVisitor, err)
 	})
 
-	router.POST("/unauthenticate", func(c *gin.Context) {
+	router.PUT("/unauthenticate", func(c *gin.Context) {
 		var json FSVisitorUnauthInfo
 		if err := c.ShouldBindJSON(&json); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
