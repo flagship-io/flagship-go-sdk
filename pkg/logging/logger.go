@@ -19,6 +19,14 @@ func SetLevel(newLevel logrus.Level) {
 	}
 }
 
+// SetOutput sets the log level to the given level
+func SetOuput(newOutput io.Writer) {
+	output = newOutput
+	for _, l := range loggers {
+		l.SetOutput(newOutput)
+	}
+}
+
 // LogNameHook is a logrus hook to a
 type LogNameHook struct {
 	name string

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/gob"
 	"encoding/json"
 	"fmt"
@@ -31,6 +32,7 @@ import (
 var fsClients = make(map[string]*client.Client)
 var fsVisitors = make(map[string]*client.Visitor)
 var segmentClient analytics.Client
+var memLog = &bytes.Buffer{}
 
 // FsSession express infos saved in session
 type FsSession struct {
@@ -149,6 +151,7 @@ func returnVisitor(c *gin.Context, fsVisitor *client.Visitor, err error) {
 func main() {
 	log.Println("Setting log level")
 	logging.SetLevel(logrus.DebugLevel)
+	logging.SetOuput(memLog)
 	router := gin.Default()
 	store := cookie.NewStore([]byte("fs-go-sdk-demo-secret"))
 	router.Use(sessions.Sessions("fs-go-sdk-demo", store))
@@ -645,6 +648,10 @@ func main() {
 		}
 
 		c.JSON(http.StatusOK, gin.H{"status": "ok", "hitType": hitType})
+	})
+
+	router.GET("/logs", func(c *gin.Context) {
+		c.String(http.StatusOK, string(memLog.String()))
 	})
 
 	router.Run(":8080")
