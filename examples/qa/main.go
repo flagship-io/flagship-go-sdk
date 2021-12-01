@@ -654,5 +654,10 @@ func main() {
 		c.String(http.StatusOK, string(memLog.String()))
 	})
 
+	router.POST("/logs/clear", func(c *gin.Context) {
+		memLog.Reset()
+		c.String(http.StatusOK, "")
+	})
+
 	router.Run(":8080")
 }
