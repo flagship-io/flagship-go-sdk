@@ -101,8 +101,18 @@ func (r *HTTPClient) Call(path, method string, body []byte, headers map[string]s
 			req.Header.Add(k, v)
 		}
 
-		resp, err = r.client.Do(req)
+		newResp, newErr := r.client.Do(req)
+		defer func(r *http.Response, err error) {
+			if err != nil {
+				return
+			}
+			if e := r.Body.Close(); e != nil {
+				httpLogger.Warning("Error when closing response body: ", e)
+			}
+		}(newResp, newErr)
 
+		resp = newResp
+		err = newErr
 		if resp != nil && resp.StatusCode < http.StatusBadRequest {
 			break
 		}
@@ -112,12 +122,6 @@ func (r *HTTPClient) Call(path, method string, body []byte, headers map[string]s
 		httpLogger.Error("Error on HTTP request: ", err)
 		return nil, err
 	}
-
-	defer func() {
-		if e := resp.Body.Close(); e != nil {
-			httpLogger.Warning("Error when closing response body: ", e)
-		}
-	}()
 
 	code := resp.StatusCode
 	var response []byte
