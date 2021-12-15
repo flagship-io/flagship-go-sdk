@@ -67,10 +67,10 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, STATUS_READY, status)
 
 	options = &Options{
-		EnvID:             testEnvID,
-		APIKey:            testAPIKey,
-		trackingAPIClient: &FakeTrackingAPIClient{},
+		EnvID:  testEnvID,
+		APIKey: testAPIKey,
 	}
+	options.BuildOptions(WithTrackingAPIClient(&FakeTrackingAPIClient{}))
 
 	client, err = Create(options)
 	assert.Nil(t, err)
