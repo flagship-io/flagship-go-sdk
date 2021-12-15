@@ -53,7 +53,7 @@ func WithVisitorCache(options ...cache.OptionBuilder) OptionBuilder {
 	}
 }
 
-// WithDecisionAPI changes the decision API options
+// WithTrackingAPIClient changes the tracking api client used by the SDK
 func WithTrackingAPIClient(trackingAPIClient tracking.APIClientInterface) OptionBuilder {
 	return func(f *Options) {
 		f.trackingAPIClient = trackingAPIClient
