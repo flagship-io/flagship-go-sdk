@@ -29,6 +29,14 @@ func createClient() *Client {
 	return client
 }
 
+type FakeTrackingAPIClient struct{}
+
+func (*FakeTrackingAPIClient) SendHit(visitorID string, anonymousID *string, hit model.HitInterface) error {
+	return nil
+}
+func (*FakeTrackingAPIClient) ActivateCampaign(request model.ActivationHit) error { return nil }
+func (*FakeTrackingAPIClient) SendEvent(request model.Event) error                { return nil }
+
 func TestCreate(t *testing.T) {
 	options := &Options{}
 
@@ -57,6 +65,16 @@ func TestCreate(t *testing.T) {
 
 	status := client.GetStatus()
 	assert.Equal(t, STATUS_READY, status)
+
+	options = &Options{
+		EnvID:             testEnvID,
+		APIKey:            testAPIKey,
+		trackingAPIClient: &FakeTrackingAPIClient{},
+	}
+
+	client, err = Create(options)
+	assert.Nil(t, err)
+	assert.IsType(t, &FakeTrackingAPIClient{}, client.trackingAPIClient)
 }
 
 func TestCreateBucketing(t *testing.T) {

@@ -4,6 +4,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
 )
 
 // Options represent the options passed to the Flagship SDK client
@@ -14,6 +15,7 @@ type Options struct {
 	bucketingOptions    []func(*bucketing.Engine)
 	decisionAPIOptions  []func(*decisionapi.APIClient)
 	cacheManagerOptions []cache.OptionBuilder
+	trackingAPIClient   tracking.APIClientInterface
 }
 
 // OptionBuilder is a func type to set options to the FlagshipOption.
@@ -48,5 +50,12 @@ func WithDecisionAPI(options ...func(*decisionapi.APIClient)) OptionBuilder {
 func WithVisitorCache(options ...cache.OptionBuilder) OptionBuilder {
 	return func(f *Options) {
 		f.cacheManagerOptions = options
+	}
+}
+
+// WithDecisionAPI changes the decision API options
+func WithTrackingAPIClient(trackingAPIClient tracking.APIClientInterface) OptionBuilder {
+	return func(f *Options) {
+		f.trackingAPIClient = trackingAPIClient
 	}
 }

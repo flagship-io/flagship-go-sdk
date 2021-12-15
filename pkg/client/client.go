@@ -60,9 +60,10 @@ func Create(f *Options) (*Client, error) {
 	}
 
 	client := &Client{
-		envID:  f.EnvID,
-		apiKey: f.APIKey,
-		status: STATUS_INITIALIZING,
+		envID:             f.EnvID,
+		apiKey:            f.APIKey,
+		status:            STATUS_INITIALIZING,
+		trackingAPIClient: f.trackingAPIClient,
 	}
 
 	if len(f.cacheManagerOptions) > 0 {
