@@ -173,7 +173,7 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 		Campaigns:         commonCampaigns,
 		IsPanic:           config.Panic,
 		SingleAssignment:  config.GetAccountSettings().GetEnabled1V1T(),
-		UseReconciliation: config.GetAccountSettings().GetEnabledXPX(),
+		UseReconciliation: config.GetAccountSettings().GetEnabledXPC(),
 		CacheEnabled:      b.cacheManager != nil,
 	}, commonDecision.DecisionOptions{
 		TriggerHit:        false,

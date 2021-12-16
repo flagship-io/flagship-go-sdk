@@ -47,6 +47,11 @@ var engineMockConfig = &bucketing.Bucketing_BucketingResponse{
 				},
 			}},
 		}},
+		BucketRanges: []*bucketing.Bucketing_BucketingCampaign_BucketRange{
+			{
+				R: []float64{0, 100},
+			},
+		},
 	}},
 }
 

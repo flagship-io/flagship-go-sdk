@@ -102,7 +102,7 @@ func (r *APIClient) GetConfiguration() (*bucketingProto.Bucketing_BucketingRespo
 	}
 
 	conf := &bucketingProto.Bucketing_BucketingResponse{}
-	err = protojson.Unmarshal(resp.Body, conf)
+	err = (protojson.UnmarshalOptions{DiscardUnknown: true}).Unmarshal(resp.Body, conf)
 
 	if err != nil {
 		return nil, err
