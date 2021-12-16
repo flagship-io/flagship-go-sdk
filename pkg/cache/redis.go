@@ -5,6 +5,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"strings"
+	"time"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/go-redis/redis/v8"
@@ -12,11 +14,12 @@ import (
 
 // RedisManager represents a redis db manager object
 type RedisManager struct {
-	client *redis.Client
+	client RedisClient
 }
 
 // RedisOptions are the options necessary to make redis cache manager work
 type RedisOptions struct {
+	// Host can be a string separated list of host to connect to a redis Cluster
 	Host      string
 	Username  string
 	Password  string
@@ -24,8 +27,14 @@ type RedisOptions struct {
 	Db        int
 }
 
+type RedisClient interface {
+	Set(ctx context.Context, key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	Get(ctx context.Context, key string) *redis.StringCmd
+	Ping(ctx context.Context) *redis.StatusCmd
+}
+
 var redisLogger = logging.CreateLogger("redis")
-var rdb *redis.Client
+var rdb RedisClient
 var ctx = context.Background()
 
 // WithRedisOptions configures redis options for manager
@@ -38,13 +47,24 @@ func WithRedisOptions(redisOptions RedisOptions) func(options *Options) {
 
 func initRedisManager(options RedisOptions) (Manager, error) {
 	redisLogger.Info("Connecting to server...")
-	rdb = redis.NewClient(&redis.Options{
-		Addr:      options.Host,
-		Username:  options.Username,
-		TLSConfig: options.TLSConfig,
-		Password:  options.Password,
-		DB:        options.Db,
-	})
+	hosts := strings.Split(options.Host, ",")
+	if len(hosts) > 0 {
+		rdb = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:     hosts,
+			Username:  options.Username,
+			Password:  options.Password,
+			TLSConfig: options.TLSConfig,
+		})
+	} else {
+		rdb = redis.NewClient(&redis.Options{
+			Addr:      options.Host,
+			Username:  options.Username,
+			Password:  options.Password,
+			TLSConfig: options.TLSConfig,
+			DB:        options.Db,
+		})
+
+	}
 	_, err := rdb.Ping(ctx).Result()
 
 	if err != nil {
