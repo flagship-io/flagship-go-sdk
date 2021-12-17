@@ -175,7 +175,7 @@ func TestValidateItem(t *testing.T) {
 
 func TestValidateActivation(t *testing.T) {
 	b := ActivationHit{}
-	b.SetBaseInfos(testEnvID, testVisitorID)
+	b.SetBaseInfos(testEnvID, testVisitorID, nil)
 
 	errs := b.Validate()
 	if len(errs) != 2 {

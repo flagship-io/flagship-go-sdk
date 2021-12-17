@@ -249,8 +249,9 @@ type ActivationHit struct {
 }
 
 // SetBaseInfos sets the mandatory information for the hit
-func (b *ActivationHit) SetBaseInfos(envID string, visitorID string) {
+func (b *ActivationHit) SetBaseInfos(envID string, visitorID string, anonymousID *string) {
 	b.EnvironmentID = envID
+	b.AnonymousID = anonymousID
 	b.VisitorID = visitorID
 }
 
