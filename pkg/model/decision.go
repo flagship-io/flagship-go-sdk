@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	"github.com/flagship-io/flagship-common/decision"
+	commonDecision "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-proto/bucketing"
 	"github.com/flagship-io/flagship-proto/decision_response"
 )
@@ -58,8 +58,8 @@ type FlagInfos struct {
 	Campaign Campaign
 }
 
-func VariationToCommonStruct(v *decision_response.FullVariation) *decision.Variation {
-	return &decision.Variation{
+func VariationToCommonStruct(v *decision_response.FullVariation) *commonDecision.Variation {
+	return &commonDecision.Variation{
 		ID:            v.Id.Value,
 		Reference:     v.Reference,
 		Allocation:    float32(v.Allocation),
@@ -67,8 +67,8 @@ func VariationToCommonStruct(v *decision_response.FullVariation) *decision.Varia
 	}
 }
 
-func VariationGroupToCommonStruct(vg *bucketing.Bucketing_BucketingVariationGroups, campaign *bucketing.Bucketing_BucketingCampaign) *decision.VariationsGroup {
-	variations := []*decision.Variation{}
+func VariationGroupToCommonStruct(vg *bucketing.Bucketing_BucketingVariationGroups, campaign *bucketing.Bucketing_BucketingCampaign) *commonDecision.VariationGroup {
+	variations := []*commonDecision.Variation{}
 	for _, v := range vg.Variations {
 		variations = append(variations, VariationToCommonStruct(v))
 	}
@@ -76,9 +76,9 @@ func VariationGroupToCommonStruct(vg *bucketing.Bucketing_BucketingVariationGrou
 	for _, r := range campaign.BucketRanges {
 		bucketRange = append(bucketRange, r.R)
 	}
-	return &decision.VariationsGroup{
+	return &commonDecision.VariationGroup{
 		ID: vg.Id,
-		Campaign: &decision.CampaignInfo{
+		Campaign: &commonDecision.Campaign{
 			ID:           campaign.Id,
 			Type:         campaign.Type,
 			BucketRanges: bucketRange,
@@ -88,8 +88,8 @@ func VariationGroupToCommonStruct(vg *bucketing.Bucketing_BucketingVariationGrou
 	}
 }
 
-func CampaignToCommonStruct(c *bucketing.Bucketing_BucketingCampaign) *decision.CampaignInfo {
-	variationGroups := map[string]*decision.VariationsGroup{}
+func CampaignToCommonStruct(c *bucketing.Bucketing_BucketingCampaign) *commonDecision.Campaign {
+	variationGroups := map[string]*commonDecision.VariationGroup{}
 	for _, vg := range c.VariationGroups {
 		variationGroups[vg.Id] = VariationGroupToCommonStruct(vg, c)
 	}
@@ -97,11 +97,11 @@ func CampaignToCommonStruct(c *bucketing.Bucketing_BucketingCampaign) *decision.
 	for _, r := range c.BucketRanges {
 		bucketRange = append(bucketRange, r.R)
 	}
-	return &decision.CampaignInfo{
-		ID:               c.Id,
-		CustomID:         &c.CustomId,
-		Type:             c.Type,
-		VariationsGroups: variationGroups,
-		BucketRanges:     bucketRange,
+	return &commonDecision.Campaign{
+		ID:              c.Id,
+		Slug:            &c.CustomId,
+		Type:            c.Type,
+		VariationGroups: variationGroups,
+		BucketRanges:    bucketRange,
 	}
 }

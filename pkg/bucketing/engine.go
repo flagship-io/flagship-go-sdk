@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	commonDecision "github.com/flagship-io/flagship-common/decision"
+	commonDecision "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
@@ -148,7 +148,7 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 
 	config := b.getConfig()
 
-	commonCampaigns := map[string]*commonDecision.CampaignInfo{}
+	commonCampaigns := map[string]*commonDecision.Campaign{}
 	for _, v := range config.Campaigns {
 		commonCampaigns[v.Id] = model.CampaignToCommonStruct(v)
 	}
@@ -164,12 +164,12 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 	}
 
 	enableBucketAllocation := false
-	decisionResponse, err := commonDecision.GetDecision(commonDecision.VisitorInfo{
+	decisionResponse, err := commonDecision.GetDecision(commonDecision.Visitor{
 		ID:            visitorID,
 		AnonymousID:   anonymousIDString,
 		DecisionGroup: "",
 		Context:       contextProto,
-	}, commonDecision.EnvironmentInfo{
+	}, commonDecision.Environment{
 		ID:                b.envID,
 		Campaigns:         commonCampaigns,
 		IsPanic:           config.Panic,

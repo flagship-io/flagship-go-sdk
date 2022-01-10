@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	commonDecision "github.com/flagship-io/flagship-common/decision"
+	commonDecision "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 )
 
@@ -30,9 +30,9 @@ type CampaignCache struct {
 }
 
 func (ccmap CampaignCacheMap) ToCommonStruct() *commonDecision.VisitorAssignments {
-	assigns := map[string]*commonDecision.VisitorVGCacheItem{}
+	assigns := map[string]*commonDecision.VisitorCache{}
 	for _, v := range ccmap {
-		assigns[v.VariationGroupID] = &commonDecision.VisitorVGCacheItem{
+		assigns[v.VariationGroupID] = &commonDecision.VisitorCache{
 			VariationID: v.VariationID,
 			Activated:   v.Activated,
 		}
