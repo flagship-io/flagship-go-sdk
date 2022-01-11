@@ -20,12 +20,13 @@ var apiLogger = logging.CreateLogger("Decision API")
 
 // APIClient represents the Decision API client informations
 type APIClient struct {
-	url        string
-	envID      string
-	apiKey     string
-	timeout    time.Duration
-	retries    int
-	httpClient utils.HTTPClientInterface
+	url               string
+	envID             string
+	apiKey            string
+	timeout           time.Duration
+	retries           int
+	additionalHeaders map[string]string
+	httpClient        utils.HTTPClientInterface
 }
 
 // APIVersionNumber specifies the version of the Decision API to use
@@ -78,6 +79,13 @@ func Retries(retries int) func(r *APIClient) {
 	}
 }
 
+// Retries sets max number of retries for failed calls
+func AdditionalHeaders(headers map[string]string) func(r *APIClient) {
+	return func(r *APIClient) {
+		r.additionalHeaders = headers
+	}
+}
+
 // NewAPIClient creates a Decision API client from the environment ID and option builders
 func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*APIClient, error) {
 	res := APIClient{
@@ -93,6 +101,10 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 
 	for _, param := range params {
 		param(&res)
+	}
+
+	for k, v := range res.additionalHeaders {
+		headers[k] = v
 	}
 
 	if res.url == "" {
