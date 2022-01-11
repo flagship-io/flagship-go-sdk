@@ -165,10 +165,9 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 
 	enableBucketAllocation := false
 	decisionResponse, err := commonDecision.GetDecision(commonDecision.Visitor{
-		ID:            visitorID,
-		AnonymousID:   anonymousIDString,
-		DecisionGroup: "",
-		Context:       contextProto,
+		ID:          visitorID,
+		AnonymousID: anonymousIDString,
+		Context:     contextProto,
 	}, commonDecision.Environment{
 		ID:                b.envID,
 		Campaigns:         commonCampaigns,
@@ -177,17 +176,11 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 		UseReconciliation: config.GetAccountSettings().GetEnabledXPC(),
 		CacheEnabled:      b.cacheManager != nil,
 	}, commonDecision.DecisionOptions{
-		TriggerHit:             false,
-		CampaignID:             "",
-		Tracker:                nil,
-		IsCumulativeAlloc:      false,
 		EnableBucketAllocation: &enableBucketAllocation,
 	}, commonDecision.DecisionHandlers{
 		GetCache: func(environmentID, id string) (*commonDecision.VisitorAssignments, error) {
 			return campaignsCache.ToCommonStruct(), nil
 		},
-		SaveCache:         nil,
-		ActivateCampaigns: nil,
 	})
 
 	if err != nil {
