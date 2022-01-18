@@ -199,7 +199,7 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 		err := errors.New("Visitor modifications have not been synchronized")
 		visitorLogger.Error("Visitor modifications are not set", err)
 
-		return false, err
+		return nil, err
 	}
 
 	flagInfos, ok := v.flagInfos[key]
