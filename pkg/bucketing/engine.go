@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	commonDecision "github.com/flagship-io/flagship-common/decision"
+	common "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
@@ -148,7 +148,7 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 
 	config := b.getConfig()
 
-	commonCampaigns := map[string]*commonDecision.CampaignInfo{}
+	commonCampaigns := map[string]*common.Campaign{}
 	for _, v := range config.Campaigns {
 		commonCampaigns[v.Id] = model.CampaignToCommonStruct(v)
 	}
@@ -164,26 +164,26 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 	}
 
 	enableBucketAllocation := false
-	decisionResponse, err := commonDecision.GetDecision(commonDecision.VisitorInfo{
+	decisionResponse, err := common.GetDecision(common.Visitor{
 		ID:            visitorID,
 		AnonymousID:   anonymousIDString,
 		DecisionGroup: "",
 		Context:       contextProto,
-	}, commonDecision.EnvironmentInfo{
+	}, common.Environment{
 		ID:                b.envID,
 		Campaigns:         commonCampaigns,
 		IsPanic:           config.Panic,
 		SingleAssignment:  config.GetAccountSettings().GetEnabled1V1T(),
 		UseReconciliation: config.GetAccountSettings().GetEnabledXPC(),
 		CacheEnabled:      b.cacheManager != nil,
-	}, commonDecision.DecisionOptions{
+	}, common.DecisionOptions{
 		TriggerHit:             false,
 		CampaignID:             "",
 		Tracker:                nil,
 		IsCumulativeAlloc:      false,
 		EnableBucketAllocation: &enableBucketAllocation,
-	}, commonDecision.DecisionHandlers{
-		GetCache: func(environmentID, id string) (*commonDecision.VisitorAssignments, error) {
+	}, common.DecisionHandlers{
+		GetCache: func(environmentID, id string) (*common.VisitorAssignments, error) {
 			return campaignsCache.ToCommonStruct(), nil
 		},
 		SaveCache:         nil,

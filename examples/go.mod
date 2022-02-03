@@ -6,6 +6,7 @@ replace github.com/flagship-io/flagship-go-sdk/v2 => ../
 
 require (
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
+	github.com/flagship-io/flagship-common v0.0.16 // indirect
 	github.com/flagship-io/flagship-go-sdk/v2 v2.0.5
 	github.com/gin-contrib/sessions v0.0.3
 	github.com/gin-gonic/gin v1.7.7
