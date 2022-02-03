@@ -9,7 +9,7 @@
 <a  href='https://github.com/jpoles1/gopherbadger'  target='_blank'><a href='https://github.com/jpoles1/gopherbadger' target='_blank'>[![codecov](https://codecov.io/gh/flagship-io/flagship-go-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/flagship-io/flagship-go-sdk)
 </a>
 [![goreport](https://goreportcard.com/badge/github.com/flagship-io/flagship-go-sdk)](https://goreportcard.com/report/github.com/flagship-io/flagship-go-sdk)
-[![GoDoc](https://godoc.org/github.com/flagship-io/flagship-go-sdk?status.svg)](https://godoc.org/github.com/flagship-io/flagship-go-sdk)
+[![Go Reference](https://pkg.go.dev/badge/github.com/flagship-io/flagship-go-sdk/v2.svg)](https://pkg.go.dev/github.com/flagship-io/flagship-go-sdk/v2)
 [![license](https://badgen.now.sh/badge/license/Apache)](./LICENSE)
 
 **Visit [https://developers.flagship.io/](https://developers.flagship.io/) to get started with Flagship.**
