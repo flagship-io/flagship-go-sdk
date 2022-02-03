@@ -97,9 +97,13 @@ func CampaignToCommonStruct(c *bucketing.Bucketing_BucketingCampaign) *common.Ca
 	for _, r := range c.BucketRanges {
 		bucketRange = append(bucketRange, r.R)
 	}
+	var slug *string = nil
+	if c.Slug != nil {
+		slug = &(c.Slug.Value)
+	}
 	return &common.Campaign{
 		ID:              c.Id,
-		Slug:            &c.CustomId,
+		Slug:            slug,
 		Type:            c.Type,
 		VariationGroups: variationGroups,
 		BucketRanges:    bucketRange,
