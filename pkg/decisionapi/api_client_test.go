@@ -85,13 +85,13 @@ func TestGetModifications(t *testing.T) {
 }
 
 func TestActivate(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID, testAPIKey)
+	client, _ := NewAPIClient(realEnvID, testAPIKey)
 	err := client.ActivateCampaign(model.ActivationHit{})
 
 	assert.NotNil(t, err, "Expected error for empty request")
 
 	err = client.ActivateCampaign(model.ActivationHit{
-		EnvironmentID:    testEnvID,
+		EnvironmentID:    realEnvID,
 		VisitorID:        "test_vid",
 		VariationGroupID: "vgid",
 		VariationID:      "vid",

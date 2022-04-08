@@ -58,9 +58,7 @@ func NewEngine(envID string, cacheManager cache.Manager, params ...func(*Engine)
 		param(engine)
 	}
 
-	engine.configMux.Lock()
 	engine.apiClient = NewAPIClient(envID, engine.apiClientOptions...)
-	engine.configMux.Unlock()
 
 	err := engine.Load()
 

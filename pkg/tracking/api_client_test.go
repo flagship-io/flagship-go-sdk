@@ -56,7 +56,7 @@ func TestSendInternalHit(t *testing.T) {
 }
 
 func TestActivate(t *testing.T) {
-	client, _ := NewAPIClient(testEnvID, testAPIKey)
+	client, _ := NewAPIClient(realEnvID, testAPIKey)
 	err := client.ActivateCampaign(model.ActivationHit{})
 
 	if err == nil {
