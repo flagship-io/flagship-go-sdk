@@ -20,11 +20,11 @@ jobs:
         uses: golangci/golangci-lint-action@v2
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.31
+          version: v1.45.2
           args: --skip-files .*_test.go
-      - uses: codecov/codecov-action@v1
+      - uses: codecov/codecov-action@v2
         with:
-          file: ./cover.out
+          files: ./cover.out
 
   push_to_registry:
     name: Push Docker image to Docker Hub
