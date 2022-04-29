@@ -58,9 +58,7 @@ func NewEngine(envID string, cacheManager cache.Manager, params ...func(*Engine)
 		param(engine)
 	}
 
-	engine.configMux.Lock()
 	engine.apiClient = NewAPIClient(envID, engine.apiClientOptions...)
-	engine.configMux.Unlock()
 
 	err := engine.Load()
 
@@ -88,25 +86,23 @@ func (b *Engine) startTicker() {
 }
 
 func (b *Engine) getConfig() *bucketingProto.Bucketing_BucketingResponse {
-	b.configMux.Lock()
-	defer b.configMux.Unlock()
+	b.configMux.RLock()
+	defer b.configMux.RUnlock()
 	return b.config
 }
 
 // Load loads the env configuration in cache
 func (b *Engine) Load() error {
 	b.configMux.Lock()
+	defer b.configMux.Unlock()
 	newConfig, err := b.apiClient.GetConfiguration()
-	b.configMux.Unlock()
 
 	if err != nil {
 		logger.Error("Error when loading environment configuration", err)
 		return err
 	}
 
-	b.configMux.Lock()
 	b.config = newConfig
-	b.configMux.Unlock()
 
 	return nil
 }
