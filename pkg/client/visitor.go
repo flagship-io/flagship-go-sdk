@@ -200,13 +200,14 @@ func (v *Visitor) getModification(key string, activate bool) (flagValue interfac
 		err := errors.New("Visitor modifications have not been synchronized")
 		visitorLogger.Error("Visitor modifications are not set", err)
 
-		return false, err
+		return nil, err
 	}
 
 	flagInfos, ok := v.flagInfos[key]
 
 	if !ok {
-		return nil, fmt.Errorf("key %s not set in decision infos", key)
+		visitorLogger.Infof("key %s not set in decision infos.", key)
+		return nil, nil
 	}
 
 	if activate {
@@ -397,9 +398,8 @@ func (v *Visitor) GetModificationInfo(key string) (modifInfo *ModificationInfo, 
 	flagInfos, ok := v.flagInfos[key]
 
 	if !ok {
-		err = fmt.Errorf("key %v is not in any campaign", key)
-		visitorLogger.Debug(err.Error())
-		return nil, err
+		visitorLogger.Infof("key %s not set in decision infos.", key)
+		return nil, nil
 	}
 
 	return &ModificationInfo{
@@ -419,7 +419,8 @@ func (v *Visitor) activateModification(key string) error {
 
 	flagInfos, ok := v.flagInfos[key]
 	if !ok {
-		return fmt.Errorf("key %s not set in decision infos", key)
+		visitorLogger.Infof("key %s not set in decision infos. Skipping", key)
+		return nil
 	}
 
 	visitorLogger.Info(fmt.Sprintf("Activating campaign for flag %s for visitor with id : %s", key, v.ID))

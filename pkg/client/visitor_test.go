@@ -208,12 +208,12 @@ func TestGetModification(t *testing.T) {
 
 	// Test default value
 	val, err := visitor.getModification("not_exists", true)
-	assert.NotEqual(t, nil, err, "Should have an error as key does not exist")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, nil, val, "Expected nil value")
 
 	// Test infos of missing key
 	_, err = visitor.GetModificationInfo("not_exists")
-	assert.NotEqual(t, nil, err, "Should raise an error as modification key does not exist")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 
 	// Test response value
 	val, err = visitor.getModification("test_string", true)
@@ -242,7 +242,7 @@ func TestGetModificationBool(t *testing.T) {
 
 	// Test default value
 	val, err := visitor.GetModificationBool("not_exists", false, true)
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, false, val, "Expected default value getting nil flag")
 
 	// Test wrong type value
@@ -272,7 +272,7 @@ func TestGetModificationNumber(t *testing.T) {
 
 	// Test default value
 	val, err := visitor.GetModificationNumber("not_exists", 10, true)
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, 10., val, "Expected default value getting nil flag")
 
 	// Test wrong type value
@@ -302,7 +302,7 @@ func TestGetModificationString(t *testing.T) {
 
 	// Test default value
 	val, err := visitor.GetModificationString("not_exists", "default", true)
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, "default", val, "Expected default value getting nil flag")
 
 	// Test wrong type value
@@ -335,7 +335,7 @@ func TestGetModificationObject(t *testing.T) {
 	}
 	// Test default value
 	val, err := visitor.GetModificationObject("not_exists", defaultValue, true)
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, defaultValue["default_key"], val["default_key"])
 
 	// Test wrong type value
@@ -366,7 +366,7 @@ func TestGetModificationArray(t *testing.T) {
 	defaultValue := []interface{}{true}
 	// Test default value
 	val, err := visitor.GetModificationArray("not_exists", defaultValue, true)
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 	assert.Equal(t, defaultValue[0], val[0])
 
 	// Test wrong type value
@@ -396,7 +396,7 @@ func TestActivateModification(t *testing.T) {
 
 	// Test default value
 	err = visitor.ActivateModification("not_exists")
-	assert.NotEqual(t, nil, err, "Should have an error as flag does not exists")
+	assert.Nil(t, err, "Should not have an error when flag does not exists")
 
 	// Test response value
 	err = visitor.ActivateModification("test_string")
