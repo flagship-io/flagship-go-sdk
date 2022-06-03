@@ -172,17 +172,18 @@ func (v *Visitor) SynchronizeModifications() (err error) {
 
 	v.decisionResponse = resp
 
-	v.flagInfos = map[string]model.FlagInfos{}
+	flagInfos := map[string]model.FlagInfos{}
 
 	visitorLogger.Info(fmt.Sprintf("Got %d campaign(s) for visitor with id : %s", len(resp.Campaigns), v.ID))
 	for _, c := range resp.Campaigns {
 		for k, val := range c.Variation.Modifications.Value {
-			v.flagInfos[k] = model.FlagInfos{
+			flagInfos[k] = model.FlagInfos{
 				Value:    val,
 				Campaign: c,
 			}
 		}
 	}
+	v.flagInfos = flagInfos
 
 	return nil
 }

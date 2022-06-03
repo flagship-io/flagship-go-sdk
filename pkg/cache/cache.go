@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	commonDecision "github.com/flagship-io/flagship-common"
+	common "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 )
 
@@ -29,15 +29,15 @@ type CampaignCache struct {
 	FlagKeys         []string
 }
 
-func (ccmap CampaignCacheMap) ToCommonStruct() *commonDecision.VisitorAssignments {
-	assigns := map[string]*commonDecision.VisitorCache{}
+func (ccmap CampaignCacheMap) ToCommonStruct() *common.VisitorAssignments {
+	assigns := map[string]*common.VisitorCache{}
 	for _, v := range ccmap {
-		assigns[v.VariationGroupID] = &commonDecision.VisitorCache{
+		assigns[v.VariationGroupID] = &common.VisitorCache{
 			VariationID: v.VariationID,
 			Activated:   v.Activated,
 		}
 	}
-	return &commonDecision.VisitorAssignments{
+	return &common.VisitorAssignments{
 		Timestamp:   time.Now().Unix(),
 		Assignments: assigns,
 	}

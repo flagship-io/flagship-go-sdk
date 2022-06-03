@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	commonDecision "github.com/flagship-io/flagship-common"
+	common "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
@@ -58,9 +58,7 @@ func NewEngine(envID string, cacheManager cache.Manager, params ...func(*Engine)
 		param(engine)
 	}
 
-	engine.configMux.Lock()
 	engine.apiClient = NewAPIClient(envID, engine.apiClientOptions...)
-	engine.configMux.Unlock()
 
 	err := engine.Load()
 
@@ -88,25 +86,23 @@ func (b *Engine) startTicker() {
 }
 
 func (b *Engine) getConfig() *bucketingProto.Bucketing_BucketingResponse {
-	b.configMux.Lock()
-	defer b.configMux.Unlock()
+	b.configMux.RLock()
+	defer b.configMux.RUnlock()
 	return b.config
 }
 
 // Load loads the env configuration in cache
 func (b *Engine) Load() error {
 	b.configMux.Lock()
+	defer b.configMux.Unlock()
 	newConfig, err := b.apiClient.GetConfiguration()
-	b.configMux.Unlock()
 
 	if err != nil {
 		logger.Error("Error when loading environment configuration", err)
 		return err
 	}
 
-	b.configMux.Lock()
 	b.config = newConfig
-	b.configMux.Unlock()
 
 	return nil
 }
@@ -148,7 +144,7 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 
 	config := b.getConfig()
 
-	commonCampaigns := map[string]*commonDecision.Campaign{}
+	commonCampaigns := map[string]*common.Campaign{}
 	for _, v := range config.Campaigns {
 		commonCampaigns[v.Id] = model.CampaignToCommonStruct(v)
 	}
@@ -164,21 +160,21 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 	}
 
 	enableBucketAllocation := false
-	decisionResponse, err := commonDecision.GetDecision(commonDecision.Visitor{
+	decisionResponse, err := common.GetDecision(common.Visitor{
 		ID:          visitorID,
 		AnonymousID: anonymousIDString,
 		Context:     contextProto,
-	}, commonDecision.Environment{
+	}, common.Environment{
 		ID:                b.envID,
 		Campaigns:         commonCampaigns,
 		IsPanic:           config.Panic,
 		SingleAssignment:  config.GetAccountSettings().GetEnabled1V1T(),
 		UseReconciliation: config.GetAccountSettings().GetEnabledXPC(),
 		CacheEnabled:      b.cacheManager != nil,
-	}, commonDecision.DecisionOptions{
+	}, common.DecisionOptions{
 		EnableBucketAllocation: &enableBucketAllocation,
-	}, commonDecision.DecisionHandlers{
-		GetCache: func(environmentID, id string) (*commonDecision.VisitorAssignments, error) {
+	}, common.DecisionHandlers{
+		GetCache: func(environmentID, id string) (*common.VisitorAssignments, error) {
 			return campaignsCache.ToCommonStruct(), nil
 		},
 	})

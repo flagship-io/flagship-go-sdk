@@ -49,8 +49,8 @@ github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1m
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/flagship-io/flagship-common v0.0.14-alpha.1 h1:stmnU8v5pQquiXhjCV/aCMFFbSack+PifUD9ry4aMdc=
 github.com/flagship-io/flagship-common v0.0.14-alpha.1/go.mod h1:9DZEHnbGQMLgFXPXESAiWAKQPQtcPxdq0YJVbp82yfE=
-github.com/flagship-io/flagship-common v0.0.16-alpha.2 h1:Z//PUFCgeLQSj2K0YvmzzuBk/FYI9MYafrw1I8x7bvY=
-github.com/flagship-io/flagship-common v0.0.16-alpha.2/go.mod h1:7frKklB2k6Cy2sigBeF8lP/B8dNRmxtYVpapqtdu1QM=
+github.com/flagship-io/flagship-common v0.0.16 h1:5/B0gTSG4gVS/AaoiOwumBTVClWHBZE82j8d2u/OdIg=
+github.com/flagship-io/flagship-common v0.0.16/go.mod h1:7frKklB2k6Cy2sigBeF8lP/B8dNRmxtYVpapqtdu1QM=
 github.com/flagship-io/flagship-proto v0.0.10 h1:zwUiNoybuHjszr93CdvA7A4cAMTl2nOZhI78bGKZwtE=
 github.com/flagship-io/flagship-proto v0.0.10/go.mod h1:Nv5epf8wbbAEx6sAnjPumFy+YQOClXyXlxZzUMUqidw=
 github.com/flagship-io/flagship-proto v0.0.11 h1:8aDmjH57SC228l+33vB35bdQiC+5iHYP2EaYEP/snZM=

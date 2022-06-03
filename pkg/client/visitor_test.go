@@ -7,6 +7,7 @@ import (
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
 
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
 	"github.com/stretchr/testify/assert"
@@ -19,6 +20,7 @@ var testVID = "vid"
 func createVisitor(vID string, context model.Context, options ...VisitorOptionBuilder) *Visitor {
 	client := createClient()
 	client.decisionClient = createMockClient()
+	client.trackingAPIClient = &FakeTrackingAPIClient{}
 
 	visitor, _ := client.NewVisitor(vID, context, options...)
 	return visitor
@@ -428,6 +430,7 @@ func TestActivateModificationCache(t *testing.T) {
 	engine := bucketing.GetBucketingEngineMock(testEnvID, cache)
 	client.decisionClient = engine
 	client.decisionMode = Bucketing
+	client.trackingAPIClient = &FakeTrackingAPIClient{}
 
 	visitor, _ := client.NewVisitor("test", map[string]interface{}{
 		"test": true,
@@ -459,6 +462,8 @@ func TestActivateModificationCache(t *testing.T) {
 
 func TestSendHitVisitor(t *testing.T) {
 	visitor := createVisitor("test", nil)
+	trackingAPIClient, _ := tracking.NewAPIClient(testEnvID, testAPIKey)
+	visitor.trackingAPIClient = trackingAPIClient
 	err := visitor.SendHit(&model.EventHit{})
 
 	if err == nil {
