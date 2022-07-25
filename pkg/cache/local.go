@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/prologic/bitcask"
+	"git.mills.io/prologic/bitcask"
 )
 
 // LocalDBManager represents the local db manager object
