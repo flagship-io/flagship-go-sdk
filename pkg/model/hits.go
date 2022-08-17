@@ -169,8 +169,8 @@ func (b *EventHit) Validate() []error {
 	if b.Action == "" {
 		errorsList = append(errorsList, errors.New("Event Action should not by empty"))
 	}
-	if b.Value <= 0 {
-		errorsList = append(errorsList, errors.New("Event value should not be less than or equal to 0"))
+	if b.Value == 0 {
+		errorsList = append(errorsList, errors.New("Event value should be greater than 0"))
 	}
 	return errorsList
 }
