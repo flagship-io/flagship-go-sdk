@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"reflect"
 	"time"
 )
 
@@ -169,9 +168,6 @@ func (b *EventHit) Validate() []error {
 	errorsList := b.validateBase()
 	if b.Action == "" {
 		errorsList = append(errorsList, errors.New("Event Action should not by empty"))
-	}
-	if reflect.TypeOf(b.Value).String() != "uint64" {
-		errorsList = append(errorsList, errors.New("Event value type should be an uint64"))
 	}
 	if b.Value <= 0 {
 		errorsList = append(errorsList, errors.New("Event value should not be less than or equal to 0"))
