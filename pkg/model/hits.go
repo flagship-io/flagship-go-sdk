@@ -174,7 +174,7 @@ func (b *EventHit) Validate() []error {
 		errorsList = append(errorsList, errors.New("Event value type should be an uint64"))
 	}
 	if b.Value <= 0 {
-		errorsList = append(errorsList, errors.New("Event value should not less or equal to 0"))
+		errorsList = append(errorsList, errors.New("Event value should not be less than or equal to 0"))
 	}
 	return errorsList
 }
