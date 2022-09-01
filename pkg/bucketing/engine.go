@@ -5,6 +5,7 @@ import (
 	"time"
 
 	common "github.com/flagship-io/flagship-common"
+	"github.com/flagship-io/flagship-common/targeting"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
 	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
@@ -144,9 +145,9 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 
 	config := b.getConfig()
 
-	commonCampaigns := map[string]*common.Campaign{}
+	commonCampaigns := []*common.Campaign{}
 	for _, v := range config.Campaigns {
-		commonCampaigns[v.Id] = model.CampaignToCommonStruct(v)
+		commonCampaigns = append(commonCampaigns, model.CampaignToCommonStruct(v))
 	}
 	anonymousIDString := ""
 	if anonymousID != nil {
@@ -163,7 +164,9 @@ func (b *Engine) GetModifications(visitorID string, anonymousID *string, context
 	decisionResponse, err := common.GetDecision(common.Visitor{
 		ID:          visitorID,
 		AnonymousID: anonymousIDString,
-		Context:     contextProto,
+		Context: &targeting.Context{
+			Standard: contextProto,
+		},
 	}, common.Environment{
 		ID:                b.envID,
 		Campaigns:         commonCampaigns,

@@ -89,9 +89,9 @@ func VariationGroupToCommonStruct(vg *bucketing.Bucketing_BucketingVariationGrou
 }
 
 func CampaignToCommonStruct(c *bucketing.Bucketing_BucketingCampaign) *common.Campaign {
-	variationGroups := map[string]*common.VariationGroup{}
+	variationGroups := []*common.VariationGroup{}
 	for _, vg := range c.VariationGroups {
-		variationGroups[vg.Id] = VariationGroupToCommonStruct(vg, c)
+		variationGroups = append(variationGroups, VariationGroupToCommonStruct(vg, c))
 	}
 	bucketRange := [][]float64{}
 	for _, r := range c.BucketRanges {
