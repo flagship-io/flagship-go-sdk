@@ -16,12 +16,11 @@
 
 ## Docs
 
-- [Installation](https://developers.flagship.io/docs/sdk/go/v2.0#installation)
-- [Initialize and start](https://developers.flagship.io/docs/sdk/go/v2.0#initialization)
-- [Create a visitor](https://developers.flagship.io/go/v2.x.x/#create-a-visitor)
-- [Campaign integration](https://developers.flagship.io/docs/sdk/go/v2.0#campaign-synchronization)
-- [Hit tracking](https://developers.flagship.io/docs/sdk/go/v2.0#hit-tracking)
-- [Release Notes](https://developers.flagship.io/docs/sdk/go/v2.0#release-notes)
+- [Installation](https://docs.developers.flagship.io/docs/go-v2-1#installation)
+- [Initialize and start](https://docs.developers.flagship.io/docs/go-v2-1#initialization)
+- [Create a visitor](https://docs.developers.flagship.io/docs/go-v2-1#create-a-visitor)
+- [Campaign integration](https://docs.developers.flagship.io/docs/go-v2-1#campaign-synchronization)
+- [Hit tracking](https://docs.developers.flagship.io/docs/go-v2-1#hit-tracking)
 
 ## Examples
 
