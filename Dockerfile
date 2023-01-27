@@ -1,7 +1,6 @@
 FROM node:16-alpine as build-front
 
-WORKDIR /usr/src/qa/front
-COPY . .
+COPY . /usr/src/qa/front/
 WORKDIR /usr/src/qa/front/examples/qa/assets/flagship-qa-front
 
 RUN npm install
@@ -9,18 +8,14 @@ RUN npm run build-bundle
 
 FROM golang:1-alpine as build-env
 
-WORKDIR /go/src/github.com/flagship-io/flagship-go-sdk
-
-# COPY the source code as the last step
-COPY . .
-
-WORKDIR /go/src/github.com/flagship-io/flagship-go-sdk/examples
+COPY . /go/src/github.com/flagship-io/flagship-go-sdk
+WORKDIR /go/src/github.com/flagship-io/flagship-go-sdk/examples/qa
 
 # Get dependancies - will also be cached if we won't change mod/sum
 RUN go mod download
 
 # Build the binary
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /go/bin/example qa/*.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -installsuffix cgo -o /go/bin/example *.go
 
 # Run the binary
 FROM alpine

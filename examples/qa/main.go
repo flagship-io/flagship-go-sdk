@@ -82,7 +82,7 @@ type FSHitInfo struct {
 	HitType                string  `json:"t" binding:"required"`
 	Action                 string  `json:"ea"`
 	Category               string  `json:"ec"`
-	Value                  int64   `json:"ev"`
+	Value                  uint64  `json:"ev"`
 	TransactionID          string  `json:"tid"`
 	TransactionAffiliation string  `json:"ta"`
 	TransactionRevenue     float64 `json:"tr"`
@@ -159,7 +159,7 @@ func main() {
 
 	router.Use(initSession())
 
-	router.Static("/static", "qa/assets")
+	router.Static("/static", "assets")
 
 	router.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "static/")

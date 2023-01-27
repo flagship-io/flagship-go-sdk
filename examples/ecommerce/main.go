@@ -1,91 +1,81 @@
 package main
 
 import (
-	"encoding/base64"
-	"encoding/json"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/flagship-io/flagship-go-sdk/v2"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/client"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
 	"github.com/gin-gonic/gin"
 )
 
-var fsClients = make(map[string]*client.Client)
-var fsVisitors = make(map[string]*client.Visitor)
+var defaultValueBtnColor = "rgb(249, 167, 67)"
+var defaultValueTxtColor = "#fff"
+var defaultValueBtnText = "Buy for 15% off"
 
-// FSEnvInfo Binding env from JSON
-type FSEnvInfo struct {
-	EnvironmentID string                 `json:"environment_id" binding:"required"`
-	APIKey        string                 `json:"api_key" binding:"required"`
-	VisitorID     string                 `json:"visitor_id" binding:"required"`
-	Context       map[string]interface{} `json:"context" binding:"required"`
-}
+// TODO: Those variables are mandatory for Flagship to run without errors
+var flagshipEnvID = os.Getenv("FLAGSHIP_ENV_ID")
+var flagshipAPIKey = os.Getenv("FLAGSHIP_API_KEY")
 
 func main() {
+	// Start the Flagship SDK with the environment ID and API key
+	fsClient, err := flagship.Start(flagshipEnvID, flagshipAPIKey)
+	if err != nil {
+		log.Fatalf("error when starting Flagship: %v", err)
+	}
+
 	router := gin.Default()
 
-	router.Static("/static", "ecommerce/public")
-	router.LoadHTMLGlob("ecommerce/public/*.html")
+	router.Static("/static", "public")
+
+	router.SetFuncMap(template.FuncMap{
+		"safe": func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s)
+		},
+	})
+	router.LoadHTMLGlob("public/*.html")
 
 	router.GET("/", func(c *gin.Context) {
-		fsCookie, err := c.Cookie("fscookie")
 
-		var fsInfo FSEnvInfo = FSEnvInfo{}
-		if fsCookie != "" {
-			data, err := base64.StdEncoding.DecodeString(fsCookie)
-			if err == nil {
-				err = json.Unmarshal(data, &fsInfo)
-				log.Println(err)
-				log.Println(fsInfo)
-			}
-			if err != nil {
-				log.Println(err)
-			}
+		// TODO: use your own visitor ID from cookie, session, database, uuid, ...
+		flagshipVisitorID := "visitorid_1"
+
+		// TODO: use your own visitor context (data that you want to target your visitor with) from cookie, session, database, ...
+		flagshipVisitorContext := map[string]interface{}{
+			"device": "firefox",
 		}
 
-		valueBtnColor := "rgb(249, 167, 67)"
-		valueTxtColor := "#fff"
-		valueBtnText := "Buy for 15% off"
-
-		var variables = make(map[string]model.FlagInfos)
-		if fsInfo.EnvironmentID != "" && fsInfo.VisitorID != "" {
-			fsClient, _ := fsClients[fsInfo.EnvironmentID]
-			if fsClient == nil {
-				fsClient, err = flagship.Start(fsInfo.EnvironmentID, fsInfo.APIKey, client.WithBucketing())
-			}
-			fsClients[fsInfo.EnvironmentID] = fsClient
-			fsVisitor, _ := fsVisitors[fsInfo.EnvironmentID+"-"+fsInfo.VisitorID]
-			if fsVisitor == nil {
-				fsVisitor, err = fsClient.NewVisitor(fsInfo.VisitorID, fsInfo.Context)
-			}
-			fsClients[fsInfo.EnvironmentID] = fsClient
-
-			if fsClient != nil && fsVisitor != nil {
-				fsVisitor.SynchronizeModifications()
-				valueBtnColor, _ = fsVisitor.GetModificationString("btn-color", "rgb(249, 167, 67)", true)
-				valueTxtColor, _ = fsVisitor.GetModificationString("txt-color", "#fff", true)
-				valueBtnText, _ = fsVisitor.GetModificationString("btn-text", "Buy for 15% off", true)
-			}
-			variables = fsVisitor.GetAllModifications()
+		// Create a Flagship visitor with an ID and a context
+		fsVisitor, err := fsClient.NewVisitor(flagshipVisitorID, flagshipVisitorContext)
+		if err != nil {
+			log.Fatalf("error when creating Flagship visitor: %v", err)
 		}
 
+		// Fetch flags and metadata from Flagship
+		err = fsVisitor.SynchronizeModifications()
+		if err != nil {
+			log.Fatalf("error when creating synchronizing Flagship flags: %v", err)
+		}
+
+		// Get flags from Flagship to customize the banner (banner.html)
+		valueBtnColor, _ := fsVisitor.GetModificationString("btn-color", defaultValueBtnColor, true)
+		valueTxtColor, _ := fsVisitor.GetModificationString("txt-color", defaultValueTxtColor, true)
+		valueBtnText, _ := fsVisitor.GetModificationString("btn-text", defaultValueBtnText, true)
+
+		// Get all loaded flags from Flagship for debugging purposes
 		variablesObj := gin.H{}
-
-		for k, v := range variables {
-			variablesObj[k] = v.Value
+		for k, v := range fsVisitor.GetAllModifications() {
+			variablesObj[k] = v
 		}
-
-		variablesJSON, _ := json.Marshal(variablesObj)
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"flagship": gin.H{
-				"btnColor":  valueBtnColor,
-				"txtColor":  valueTxtColor,
+				"btnStyle":  fmt.Sprintf("style=\"color:%s;background-color:%s\"", valueTxtColor, valueBtnColor),
 				"btnText":   valueBtnText,
 				"error":     err,
-				"variables": string(variablesJSON),
+				"variables": variablesObj,
 			},
 		})
 	})

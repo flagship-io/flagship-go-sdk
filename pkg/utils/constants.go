@@ -1,3 +1,3 @@
 package utils
 
-const PKG_VERSION = "v2.1.0"
+const PKG_VERSION = "v2.1.2"
