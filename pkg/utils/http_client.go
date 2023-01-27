@@ -3,7 +3,7 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -131,7 +131,7 @@ func (r *HTTPClient) Call(path, method string, body []byte, headers map[string]s
 		return &HTTPResponse{response, resp.Header, resp.StatusCode}, fmt.Errorf("Request error message: %v", resp.Status)
 	}
 
-	if response, err = ioutil.ReadAll(resp.Body); err != nil {
+	if response, err = io.ReadAll(resp.Body); err != nil {
 		httpLogger.Error("Error when reading body: ", err)
 		return &HTTPResponse{nil, resp.Header, resp.StatusCode}, err
 	}
