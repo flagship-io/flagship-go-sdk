@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{ template "head.html" }}
+  <body id="body">
+    <!-- preloader start -->
+    <div class="preloader"></div>
+    <!-- preloader end -->
+
+    {{ template "header.html" . }}
+
+    {{ template "banner.html" . }}
+    
+    {{ template "features.html" }}
+
+    {{ template "footer.html"}}
+
+    <div
+      hidden
+      id="snipcart"
+      data-api-key="ZDgxY2ZiM2EtMWRmMi00M2ZkLWI1MDAtNzA2MDc0Y2Q1MzJlNjM3MTAzNDIwOTQ1NDA4NjM4"
+    ></div>
+
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.min.js"></script>
+    <script src="https://cdn.snipcart.com/themes/v3.0.3/default/snipcart.js"></script>
+    <script src="/static/script.js"></script>
+
+    <script>
+      window.flagshipVariables = "{{ .flagship.variables }}";
+      var parser = new DOMParser();
+      var dom = parser.parseFromString(
+        "<!doctype html><body>" + window.flagshipVariables,
+        "text/html"
+      );
+      window.flagshipVariables = JSON.parse(dom.body.textContent);
+    </script>
+  </body>
+</html>
