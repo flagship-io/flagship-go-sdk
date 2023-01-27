@@ -27,9 +27,13 @@
 
 - [Ecommerce App](./examples/ecommerce)
 
+To run the example, clone the whole repository, go the the `./examples/ecommerce` folder, and run the instructions from the local README.md file.
+
 ## Contributors
 
 - Guillaume Jacquart [@guillaumejacquart](https://github.com/guillaumejacquart)
+- Kevin Jose [@kjose](https://github.com/kjose)
+- Chadi Laoulaou [@Chadiii](https://github.com/Chadiii)
 
 ## Licence
 
