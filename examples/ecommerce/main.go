@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -27,6 +29,12 @@ func main() {
 	router := gin.Default()
 
 	router.Static("/static", "public")
+
+	router.SetFuncMap(template.FuncMap{
+		"safe": func(s string) template.HTMLAttr {
+			return template.HTMLAttr(s)
+		},
+	})
 	router.LoadHTMLGlob("public/*.html")
 
 	router.GET("/", func(c *gin.Context) {
@@ -36,7 +44,7 @@ func main() {
 
 		// TODO: use your own visitor context (data that you want to target your visitor with) from cookie, session, database, ...
 		flagshipVisitorContext := map[string]interface{}{
-			"key": "value",
+			"device": "firefox",
 		}
 
 		// Create a Flagship visitor with an ID and a context
@@ -64,8 +72,7 @@ func main() {
 
 		c.HTML(http.StatusOK, "index.html", gin.H{
 			"flagship": gin.H{
-				"btnColor":  valueBtnColor,
-				"txtColor":  valueTxtColor,
+				"btnStyle":  fmt.Sprintf("style=\"color:%s;background-color:%s\"", valueTxtColor, valueBtnColor),
 				"btnText":   valueBtnText,
 				"error":     err,
 				"variables": variablesObj,

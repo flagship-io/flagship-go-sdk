@@ -17,7 +17,6 @@
           </p>
           <button
             class="snipcart-add-item btn btn-main"
-            style="color:{{.flagship.txtColor}};background-color:{{.flagship.btnColor }};"
             data-item-id="smart-watch__199"
             data-item-name="Smart watch"
             data-item-image="/static/images/watch.png"
@@ -27,6 +26,7 @@
             data-item-custom1-options="Black|White|Gray"
             data-item-custom2-name="Choose Size"
             data-item-custom2-options="Small|Medium|Large"
+            {{.flagship.btnStyle | safe}}
           >
             {{.flagship.btnText}}
           </button>
