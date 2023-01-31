@@ -13,17 +13,17 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decisionapi"
 	analytics "gopkg.in/segmentio/analytics-go.v3"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/bucketing"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/flagship-io/flagship-go-sdk/v2"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/client"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/client"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"

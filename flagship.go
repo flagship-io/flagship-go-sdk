@@ -1,17 +1,13 @@
 package flagship
 
-import (
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/client"
-)
-
 // Start creates and returns a Client with the given environment ID and functional options
-func Start(envID string, APIKey string, clientOptions ...client.OptionBuilder) (*client.Client, error) {
-	flagshipOptions := &client.Options{
+func Start(envID string, APIKey string, clientOptions ...OptionBuilder) (*Client, error) {
+	options := &FlagshipOptions{
 		EnvID:  envID,
 		APIKey: APIKey,
 	}
 
-	flagshipOptions.BuildOptions(clientOptions...)
+	options.BuildOptions(clientOptions...)
 
-	return client.Create(flagshipOptions)
+	return NewInstance(options)
 }

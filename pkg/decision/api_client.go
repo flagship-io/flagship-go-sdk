@@ -1,9 +1,9 @@
 package decision
 
 import (
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 )
 
 var apiLogger = logging.CreateLogger("API Client")

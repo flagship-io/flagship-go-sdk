@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 )
 
 // MockAPIClient represents a fake API client informations

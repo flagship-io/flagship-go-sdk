@@ -1,0 +1,4 @@
+- removed package utils
+- moved packages to main (flagship) package : 
+    - client (+ visitor + options)
+- rename package client as instance

@@ -3,7 +3,7 @@ package tracking
 import (
 	"testing"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -1,7 +1,7 @@
 package bucketing
 
 import (
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
 	"github.com/flagship-io/flagship-proto/bucketing"
 	"github.com/flagship-io/flagship-proto/decision_response"
 	targetingTypes "github.com/flagship-io/flagship-proto/targeting"

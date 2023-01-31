@@ -1,19 +1,19 @@
-package client
+package flagship
 
 import (
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/errorhandler"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/bucketing"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decision"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/tracking"
 )
 
 // DecisionMode represents the decision mode of the Client engine
@@ -21,8 +21,8 @@ type DecisionMode string
 
 // The different decision modes
 const (
-	API       DecisionMode = "API"
-	Bucketing DecisionMode = "Bucketing"
+	MODE_API       DecisionMode = "API"
+	MODE_BUCKETING DecisionMode = "Bucketing"
 )
 
 const (
@@ -44,7 +44,7 @@ type Client struct {
 var clientLogger = logging.CreateLogger("FS Client")
 
 // Create creates a Client from options
-func Create(f *Options) (*Client, error) {
+func NewInstance(f *FlagshipOptions) (*Client, error) {
 	clientLogger.Info(fmt.Sprintf("Creating FS Client with Decision Mode : %s", f.decisionMode))
 
 	var err error
@@ -80,7 +80,7 @@ func Create(f *Options) (*Client, error) {
 
 	if client.decisionClient == nil {
 		client.decisionMode = f.decisionMode
-		if f.decisionMode == Bucketing {
+		if f.decisionMode == MODE_BUCKETING {
 			client.decisionClient, err = bucketing.NewEngine(client.envID, client.cacheManager, f.bucketingOptions...)
 			if err != nil {
 				clientLogger.Error("Got error when creating bucketing engine", err)
@@ -106,7 +106,7 @@ func (c *Client) GetStatus() string {
 func (c *Client) NewVisitor(visitorID string, context model.Context, options ...VisitorOptionBuilder) (visitor *Visitor, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, clientLogger)
+			err = errorhandler.HandleRecovered(r, clientLogger)
 		}
 	}()
 
@@ -153,7 +153,7 @@ func (c *Client) NewVisitor(visitorID string, context model.Context, options ...
 func (c *Client) SendHit(visitorID string, anonymousID *string, hit model.HitInterface) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, clientLogger)
+			err = errorhandler.HandleRecovered(r, clientLogger)
 		}
 	}()
 

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/httpclient"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
 	bucketingProto "github.com/flagship-io/flagship-proto/bucketing"
 	"google.golang.org/protobuf/encoding/protojson"
 )
@@ -22,7 +22,7 @@ type APIClient struct {
 	apiKey      string
 	timeout     time.Duration
 	retries     int
-	httpRequest utils.HTTPClientInterface
+	httpRequest httpclient.HTTPClientInterface
 }
 
 // APIUrl sets http client base URL
@@ -78,7 +78,7 @@ func NewAPIClient(envID string, params ...func(*APIClient)) *APIClient {
 		res.timeout = defaultTimeout
 	}
 
-	res.httpRequest = utils.NewHTTPClient(res.url, utils.HTTPOptions{
+	res.httpRequest = httpclient.NewHTTPClient(res.url, httpclient.HTTPOptions{
 		Timeout: res.timeout,
 		Headers: headers,
 		Retries: res.retries,
