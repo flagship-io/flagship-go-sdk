@@ -1,6 +1,6 @@
 package tracking
 
-import "github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+import "github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 
 // APIClientInterface sends a hit to the data collect
 type APIClientInterface interface {

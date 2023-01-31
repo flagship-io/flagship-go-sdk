@@ -1,4 +1,4 @@
-package client
+package flagship
 
 import (
 	"errors"
@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decision"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/errorhandler"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/tracking"
 )
 
 var visitorLogger = logging.CreateLogger("FS Visitor")
@@ -47,7 +47,7 @@ func generateAnonymousID() string {
 func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -69,7 +69,7 @@ func (v *Visitor) UpdateContext(newContext model.Context) (err error) {
 func (v *Visitor) UpdateContextKey(key string, value interface{}) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -136,7 +136,7 @@ func (v *Visitor) Unauthenticate(newContext map[string]interface{}, sync bool) (
 func (v *Visitor) SynchronizeModifications() (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -154,7 +154,7 @@ func (v *Visitor) SynchronizeModifications() (err error) {
 		return err
 	}
 
-	if v.trackingAPIClient != nil && v.decisionMode != API {
+	if v.trackingAPIClient != nil && v.decisionMode != MODE_API {
 		go func() {
 			visitorLogger.Info("Sending context info to event collect in the background")
 			err := v.trackingAPIClient.SendEvent(model.Event{
@@ -192,7 +192,7 @@ func (v *Visitor) SynchronizeModifications() (err error) {
 func (v *Visitor) getModification(key string, activate bool) (flagValue interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -234,7 +234,7 @@ func (v *Visitor) GetDecisionResponse() *model.APIClientResponse {
 func (v *Visitor) GetModificationBool(key string, defaultValue bool, activate bool) (castVal bool, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -264,7 +264,7 @@ func (v *Visitor) GetModificationBool(key string, defaultValue bool, activate bo
 func (v *Visitor) GetModificationString(key string, defaultValue string, activate bool) (castVal string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -294,7 +294,7 @@ func (v *Visitor) GetModificationString(key string, defaultValue string, activat
 func (v *Visitor) GetModificationNumber(key string, defaultValue float64, activate bool) (castVal float64, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -324,7 +324,7 @@ func (v *Visitor) GetModificationNumber(key string, defaultValue float64, activa
 func (v *Visitor) GetModificationObject(key string, defaultValue map[string]interface{}, activate bool) (castVal map[string]interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -354,7 +354,7 @@ func (v *Visitor) GetModificationObject(key string, defaultValue map[string]inte
 func (v *Visitor) GetModificationArray(key string, defaultValue []interface{}, activate bool) (castVal []interface{}, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -384,7 +384,7 @@ func (v *Visitor) GetModificationArray(key string, defaultValue []interface{}, a
 func (v *Visitor) GetModificationInfo(key string) (modifInfo *ModificationInfo, err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -450,7 +450,7 @@ func (v *Visitor) activateModification(key string) error {
 func (v *Visitor) ActivateModification(key string) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 
@@ -490,7 +490,7 @@ func (v *Visitor) ActivateCacheModification(key string) (err error) {
 func (v *Visitor) SendHit(hit model.HitInterface) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			err = utils.HandleRecovered(r, visitorLogger)
+			err = errorhandler.HandleRecovered(r, visitorLogger)
 		}
 	}()
 

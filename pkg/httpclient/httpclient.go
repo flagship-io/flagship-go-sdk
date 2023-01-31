@@ -1,4 +1,4 @@
-package utils
+package httpclient
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
 )
 
 const defaultTimeout = 10 * time.Second

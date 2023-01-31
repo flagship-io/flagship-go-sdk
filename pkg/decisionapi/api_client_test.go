@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/httpclient"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -45,7 +45,7 @@ func TestNewAPIClientParams(t *testing.T) {
 	assert.Equal(t, 12, client.retries)
 	assert.Equal(t, client.additionalHeaders, customHeaders)
 
-	httpClient := client.httpClient.(*utils.HTTPClient)
+	httpClient := client.httpClient.(*httpclient.HTTPClient)
 	headers := reflect.ValueOf(httpClient).Elem().FieldByName("baseHeaders")
 	customValue := headers.MapIndex(reflect.ValueOf("custom"))
 	assert.Equal(t, customValue.String(), "value")
@@ -78,7 +78,7 @@ func TestGetModifications(t *testing.T) {
 		Campaigns: []model.Campaign{},
 	}
 	responseJSON, _ := json.Marshal(response)
-	client.httpClient = utils.NewHTTPClientMock(200, responseJSON, nil)
+	client.httpClient = httpclient.NewHTTPClientMock(200, responseJSON, nil)
 
 	_, err = client.GetModifications("test_vid", nil, nil)
 	assert.Nil(t, err)

@@ -1,4 +1,4 @@
-module github.com/flagship-io/flagship-go-sdk/v2
+module github.com/flagship-io/flagship-go-sdk/v3
 
 go 1.12
 

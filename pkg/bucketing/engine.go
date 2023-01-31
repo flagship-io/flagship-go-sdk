@@ -6,9 +6,9 @@ import (
 
 	common "github.com/flagship-io/flagship-common"
 	"github.com/flagship-io/flagship-common/targeting"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 	bucketingProto "github.com/flagship-io/flagship-proto/bucketing"
 )
 

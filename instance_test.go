@@ -1,4 +1,4 @@
-package client
+package flagship
 
 import (
 	"errors"
@@ -6,14 +6,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/bucketing"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decision"
 )
 
 var testEnvID = "test_env_id"
@@ -22,7 +22,7 @@ var realEnvID = "blvo2kijq6pg023l8edg"
 var testAPIKey = "test_api_key"
 
 func createClient() *Client {
-	client, _ := Create(&Options{
+	client, _ := NewInstance(&FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	})
@@ -37,23 +37,23 @@ func (*FakeTrackingAPIClient) SendHit(visitorID string, anonymousID *string, hit
 func (*FakeTrackingAPIClient) ActivateCampaign(request model.ActivationHit) error { return nil }
 func (*FakeTrackingAPIClient) SendEvent(request model.Event) error                { return nil }
 
-func TestCreate(t *testing.T) {
-	options := &Options{}
+func TestNewInstance(t *testing.T) {
+	options := &FlagshipOptions{}
 
-	client, err := Create(options)
+	client, err := NewInstance(options)
 	assert.NotNil(t, err)
 
-	options = &Options{
+	options = &FlagshipOptions{
 		EnvID: testEnvID,
 	}
 
-	client, err = Create(options)
+	client, err = NewInstance(options)
 
 	assert.NotNil(t, err)
 
 	options.APIKey = testAPIKey
 
-	client, err = Create(options)
+	client, err = NewInstance(options)
 
 	assert.Nil(t, err)
 	assert.Equal(t, testEnvID, client.envID)
@@ -66,24 +66,24 @@ func TestCreate(t *testing.T) {
 	status := client.GetStatus()
 	assert.Equal(t, STATUS_READY, status)
 
-	options = &Options{
+	options = &FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	}
 	options.BuildOptions(WithTrackingAPIClient(&FakeTrackingAPIClient{}))
 
-	client, err = Create(options)
+	client, err = NewInstance(options)
 	assert.Nil(t, err)
 	assert.IsType(t, &FakeTrackingAPIClient{}, client.trackingAPIClient)
 }
 
 func TestCreateBucketing(t *testing.T) {
-	options := &Options{
+	options := &FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	}
 	options.BuildOptions(WithBucketing())
-	_, err := Create(options)
+	_, err := NewInstance(options)
 
 	assert.NotNil(t, err)
 
@@ -97,7 +97,7 @@ func TestCreateBucketing(t *testing.T) {
 	options.EnvID = realEnvID
 	options.BuildOptions(WithBucketing(bucketing.PollingInterval(2 * time.Second)))
 
-	client, err := Create(options)
+	client, err := NewInstance(options)
 	assert.Nil(t, err)
 	assert.Equal(t, realEnvID, client.envID)
 
@@ -125,14 +125,14 @@ func TestCreateBucketing(t *testing.T) {
 }
 
 func TestCreateAPIVersion(t *testing.T) {
-	options := &Options{
+	options := &FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	}
 
 	options.BuildOptions(WithDecisionAPI(decisionapi.APIVersion(2), decisionapi.APIKey("testapi")))
 
-	client, err := Create(options)
+	client, err := NewInstance(options)
 
 	if err != nil {
 		t.Errorf("Error when creating flagship client : %v", err)
@@ -145,7 +145,7 @@ func TestCreateAPIVersion(t *testing.T) {
 }
 
 func TestCreateCache(t *testing.T) {
-	options := &Options{
+	options := &FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	}
@@ -163,7 +163,7 @@ func TestCreateCache(t *testing.T) {
 		Setter: set,
 	})))
 
-	client, err := Create(options)
+	client, err := NewInstance(options)
 
 	if err != nil {
 		t.Errorf("Error when creating flagship client : %v", err)

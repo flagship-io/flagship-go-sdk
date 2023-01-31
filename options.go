@@ -1,14 +1,14 @@
-package client
+package flagship
 
 import (
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/bucketing"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/tracking"
 )
 
 // Options represent the options passed to the Flagship SDK client
-type Options struct {
+type FlagshipOptions struct {
 	EnvID               string
 	APIKey              string
 	decisionMode        DecisionMode
@@ -19,11 +19,11 @@ type Options struct {
 }
 
 // OptionBuilder is a func type to set options to the FlagshipOption.
-type OptionBuilder func(*Options)
+type OptionBuilder func(*FlagshipOptions)
 
 // BuildOptions fill out the FlagshipOption struct from option builders
-func (f *Options) BuildOptions(clientOptions ...OptionBuilder) {
-	f.decisionMode = API
+func (f *FlagshipOptions) BuildOptions(clientOptions ...OptionBuilder) {
+	f.decisionMode = MODE_API
 
 	// extract options
 	for _, opt := range clientOptions {
@@ -33,29 +33,29 @@ func (f *Options) BuildOptions(clientOptions ...OptionBuilder) {
 
 // WithBucketing enables the bucketing decision mode for the SDK
 func WithBucketing(options ...func(*bucketing.Engine)) OptionBuilder {
-	return func(f *Options) {
-		f.decisionMode = Bucketing
+	return func(f *FlagshipOptions) {
+		f.decisionMode = MODE_BUCKETING
 		f.bucketingOptions = options
 	}
 }
 
 // WithDecisionAPI changes the decision API options
 func WithDecisionAPI(options ...func(*decisionapi.APIClient)) OptionBuilder {
-	return func(f *Options) {
+	return func(f *FlagshipOptions) {
 		f.decisionAPIOptions = options
 	}
 }
 
 // WithVisitorCache enables visitor assignment caching with options
 func WithVisitorCache(options ...cache.OptionBuilder) OptionBuilder {
-	return func(f *Options) {
+	return func(f *FlagshipOptions) {
 		f.cacheManagerOptions = options
 	}
 }
 
 // WithTrackingAPIClient changes the tracking api client used by the SDK
 func WithTrackingAPIClient(trackingAPIClient tracking.APIClientInterface) OptionBuilder {
-	return func(f *Options) {
+	return func(f *FlagshipOptions) {
 		f.trackingAPIClient = trackingAPIClient
 	}
 }

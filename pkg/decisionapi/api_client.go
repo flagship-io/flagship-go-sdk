@@ -7,9 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/httpclient"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/info"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 )
 
 const defaultTimeout = 2 * time.Second
@@ -26,7 +27,7 @@ type APIClient struct {
 	timeout           time.Duration
 	retries           int
 	additionalHeaders map[string]string
-	httpClient        utils.HTTPClientInterface
+	httpClient        httpclient.HTTPClientInterface
 }
 
 // APIVersionNumber specifies the version of the Decision API to use
@@ -96,7 +97,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 
 	headers := map[string]string{
 		"x-sdk-client":  "go",
-		"x-sdk-version": utils.PKG_VERSION,
+		"x-sdk-version": info.VERSION,
 	}
 
 	for _, param := range params {
@@ -119,7 +120,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(*APIClient)) (*API
 		res.timeout = defaultTimeout
 	}
 
-	res.httpClient = utils.NewHTTPClient(res.url, utils.HTTPOptions{
+	res.httpClient = httpclient.NewHTTPClient(res.url, httpclient.HTTPOptions{
 		Timeout: res.timeout,
 		Headers: headers,
 	})

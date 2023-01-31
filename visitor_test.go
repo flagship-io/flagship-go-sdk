@@ -1,15 +1,15 @@
-package client
+package flagship
 
 import (
 	"errors"
 	"testing"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/bucketing"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/tracking"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/bucketing"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/tracking"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decision"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decision"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -140,7 +140,7 @@ func TestAuthenticate(t *testing.T) {
 	assert.Equal(t, newContext, visitor.Context)
 	assert.Equal(t, "firstID", *visitor.AnonymousID)
 
-	visitor.decisionMode = API
+	visitor.decisionMode = MODE_API
 	newContext = model.Context{
 		"test2": "string",
 	}
@@ -421,7 +421,7 @@ func TestActivateModificationCache(t *testing.T) {
 		Setter: set,
 	}))
 
-	client, _ := Create(&Options{
+	client, _ := NewInstance(&FlagshipOptions{
 		EnvID:  testEnvID,
 		APIKey: testAPIKey,
 	})
@@ -429,7 +429,7 @@ func TestActivateModificationCache(t *testing.T) {
 
 	engine := bucketing.GetBucketingEngineMock(testEnvID, cache)
 	client.decisionClient = engine
-	client.decisionMode = Bucketing
+	client.decisionMode = MODE_BUCKETING
 	client.trackingAPIClient = &FakeTrackingAPIClient{}
 
 	visitor, _ := client.NewVisitor("test", map[string]interface{}{

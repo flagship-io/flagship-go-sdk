@@ -1,4 +1,4 @@
-package client
+package flagship
 
 // VisitorOptions represents the visitor options of the Flagship SDK
 type VisitorOptions struct {

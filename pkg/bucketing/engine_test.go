@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/cache"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/cache"
 	"github.com/flagship-io/flagship-proto/bucketing"
 	"github.com/stretchr/testify/assert"
 )

@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/decisionapi"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/httpclient"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/model"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/model"
 
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/logging"
-	"github.com/flagship-io/flagship-go-sdk/v2/pkg/utils"
+	"github.com/flagship-io/flagship-go-sdk/v3/pkg/logging"
 )
 
 const defaultAPIURLTracking = "https://ariane.abtasty.com"
@@ -21,7 +21,7 @@ var apiLogger = logging.CreateLogger("DataCollect API")
 type APIClient struct {
 	urlTracking        string
 	envID              string
-	httpClientTracking utils.HTTPClientInterface
+	httpClientTracking httpclient.HTTPClientInterface
 	decisionAPIClient  *decisionapi.APIClient
 }
 
@@ -43,7 +43,7 @@ func NewAPIClient(envID string, apiKey string, params ...func(r *decisionapi.API
 		res.urlTracking = defaultAPIURLTracking
 	}
 
-	httpClientTracking := utils.NewHTTPClient(res.urlTracking, utils.HTTPOptions{})
+	httpClientTracking := httpclient.NewHTTPClient(res.urlTracking, httpclient.HTTPOptions{})
 	res.httpClientTracking = httpClientTracking
 
 	return &res, nil
