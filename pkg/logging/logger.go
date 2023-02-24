@@ -11,6 +11,14 @@ var output io.Writer
 var level logrus.Level = logrus.WarnLevel
 var loggers map[string]*logrus.Logger = make(map[string]*logrus.Logger)
 
+// SetFormatter sets the log formatter
+func SetFormatter(newFormatter logrus.Formatter) {
+	formatter = newFormatter
+	for _, l := range loggers {
+		l.Formatter = newFormatter
+	}
+}
+
 // SetLevel sets the log level to the given level
 func SetLevel(newLevel logrus.Level) {
 	level = newLevel
